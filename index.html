@@ -1,0 +1,1450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MB Softwash Miami — Free Quote in 4h | Roof, Paver & Exterior Cleaning</title>
+  <meta name="description" content="Paint-safe softwash for Miami-Dade luxury homes. Roof softwash, paver sealing, exterior cleaning. Licensed, insured, free quote in under 4 hours." />
+
+  <!-- Tailwind via Play CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            body: ['Inter', 'sans-serif'],
+            display: ['"Instrument Serif"', 'serif'],
+          },
+        },
+      },
+    };
+  </script>
+
+  <!-- Babel standalone for JSX in browser -->
+  <script src="https://unpkg.com/@babel/standalone@7.25.6/babel.min.js"></script>
+
+  <!-- ESM import map: lets us use bare specifiers like 'react' and 'framer-motion' -->
+  <script type="importmap">
+  {
+    "imports": {
+      "react": "https://esm.sh/react@18.3.1",
+      "react-dom": "https://esm.sh/react-dom@18.3.1",
+      "react-dom/client": "https://esm.sh/react-dom@18.3.1/client",
+      "framer-motion": "https://esm.sh/framer-motion@11.18.2?deps=react@18.3.1"
+    }
+  }
+  </script>
+
+  <style>
+    html, body { background: #0a0a0a; margin: 0; padding: 0; }
+    #loading-fallback {
+      position: fixed; inset: 0; background: #0a0a0a; color: #888;
+      display: flex; align-items: center; justify-content: center;
+      font-family: system-ui, sans-serif; font-size: 11px;
+      letter-spacing: 0.3em; text-transform: uppercase; z-index: 1;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <div id="loading-fallback">Compiling…</div>
+
+  <!-- Bootstrap: import ESM modules then compile + mount JSX -->
+  <script type="module">
+    import React from 'react';
+    import { createRoot } from 'react-dom/client';
+    import * as FramerMotion from 'framer-motion';
+
+    // Expose globals so compiled JSX can find them
+    window.React = React;
+    window.FramerMotion = FramerMotion;
+
+    // Get JSX source
+    const jsxSource = document.getElementById('app-source').textContent;
+
+    // Preamble destructures globals into local scope for the compiled code
+    const preamble = `
+      const { useState, useEffect, useRef, useCallback } = React;
+      const { motion, AnimatePresence, useScroll, useTransform } = FramerMotion;
+    `;
+
+    try {
+      const compiled = Babel.transform(preamble + jsxSource, {
+        presets: ['react'],
+      }).code;
+
+      // Execute in function scope; return App
+      const fn = new Function('React', `${compiled}\nreturn App;`);
+      const App = fn(React);
+
+      const fallback = document.getElementById('loading-fallback');
+      if (fallback) fallback.remove();
+
+      createRoot(document.getElementById('root')).render(React.createElement(App));
+    } catch (err) {
+      console.error('Compile/render error:', err);
+      const fallback = document.getElementById('loading-fallback');
+      if (fallback) fallback.textContent = 'Error — open browser console';
+    }
+  </script>
+
+  <!-- JSX source — Babel compiles this at runtime -->
+  <script type="text/plain" id="app-source">
+/* =====================================================================
+   MB SOFTWASH MIAMI — v2
+   Miami sunny aesthetic. Light mode. Multi-CTA throughout.
+   Sky blue (#A8D5F0) + Brand corporate (#0E2A47) + Pink (#C75A9F)
+   + Orange CTA (#FF6B1F) + White (#FFFFFF) + Sun yellow (#FFD24A).
+   ===================================================================== */
+
+const IMG = "./images";
+const PHONE_DISPLAY = "(305) 834-2218";
+const PHONE_TEL = "tel:+13058342218";
+const PHONE_SMS = "sms:+13058342218";
+const QUOTE_HASH = "#quote";
+
+// ============ DESIGN TOKENS ============
+const StyleInjector = () => (
+  <style>{`
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap');
+
+    :root {
+      --sky-100: #EAF6FD;
+      --sky-200: #C8E5F5;
+      --sky-300: #A8D5F0;
+      --sky-500: #5BB5E5;
+      --brand: #0E2A47;
+      --brand-soft: #1F3F65;
+      --pink: #C75A9F;
+      --pink-soft: #E089BD;
+      --orange: #FF6B1F;
+      --orange-soft: #FF8A47;
+      --sun: #FFD24A;
+      --bg: #FAFBFD;
+      --white: #FFFFFF;
+    }
+
+    body, html {
+      background: var(--bg);
+      color: var(--brand);
+      font-family: 'Inter', sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    .font-display { font-family: 'Instrument Serif', serif; }
+
+    /* ---------- Animations ---------- */
+    @keyframes fab-pulse {
+      0%   { box-shadow: 0 8px 24px rgba(255, 107, 31, 0.4), 0 0 0 0 rgba(255, 107, 31, 0.6); }
+      70%  { box-shadow: 0 8px 24px rgba(255, 107, 31, 0.4), 0 0 0 18px rgba(255, 107, 31, 0); }
+      100% { box-shadow: 0 8px 24px rgba(255, 107, 31, 0.4), 0 0 0 0 rgba(255, 107, 31, 0); }
+    }
+    .fab-pulse { animation: fab-pulse 2.2s cubic-bezier(0.66, 0, 0, 1) infinite; }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%      { opacity: 0.55; transform: scale(1.18); }
+    }
+    .animate-pulse-dot { animation: pulse-dot 2s ease-in-out infinite; }
+
+    @keyframes shine {
+      0%   { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+    .shine-on-hover {
+      position: relative; overflow: hidden;
+    }
+    .shine-on-hover::after {
+      content: ""; position: absolute; inset: 0;
+      background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,0.4) 50%, transparent 70%);
+      background-size: 200% 100%;
+      transform: translateX(-100%);
+      transition: transform 0.6s ease;
+    }
+    .shine-on-hover:hover::after { transform: translateX(100%); }
+
+    @keyframes slow-zoom {
+      0%, 100% { transform: scale(1); }
+      50%      { transform: scale(1.06); }
+    }
+    .slow-zoom { animation: slow-zoom 24s ease-in-out infinite; }
+
+    /* ---------- Hero sky gradient ---------- */
+    .miami-sky {
+      background:
+        radial-gradient(ellipse at 50% 0%, rgba(168,213,240,0.85) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 100%, rgba(255, 210, 74, 0.18) 0%, transparent 50%),
+        radial-gradient(ellipse at 20% 100%, rgba(199, 90, 159, 0.12) 0%, transparent 50%),
+        linear-gradient(180deg, #EAF6FD 0%, #FAFBFD 100%);
+    }
+    .ocean-band {
+      background: linear-gradient(180deg, transparent 0%, rgba(168,213,240,0.25) 50%, transparent 100%);
+    }
+
+    /* ---------- Halftone overlay for service cards ---------- */
+    .halftone {
+      background-image: radial-gradient(circle, rgba(14,42,71,0.6) 1px, transparent 1px);
+      background-size: 4px 4px;
+      mix-blend-mode: multiply;
+    }
+
+    /* ---------- Marquee for trust strip ---------- */
+    @keyframes marquee {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    .marquee-track {
+      animation: marquee 30s linear infinite;
+      white-space: nowrap;
+      display: inline-flex;
+    }
+
+    /* ---------- Selection ---------- */
+    ::selection { background: rgba(255, 107, 31, 0.25); color: var(--brand); }
+
+    /* ---------- Scrollbar ---------- */
+    ::-webkit-scrollbar { width: 10px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--sky-200); border-radius: 5px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--sky-300); }
+
+    /* ---------- B/A slider helpers ---------- */
+    .ba-slider, .ba-slider * { user-select: none; -webkit-user-select: none; }
+    .ba-slider img { -webkit-user-drag: none; pointer-events: none; }
+
+    /* ---------- Jobber form integration ---------- */
+    .jobber-wrap input[type="text"],
+    .jobber-wrap input[type="email"],
+    .jobber-wrap input[type="tel"],
+    .jobber-wrap input[type="number"],
+    .jobber-wrap textarea,
+    .jobber-wrap select {
+      background-color: #fff !important;
+      border: 1.5px solid #E5EAF0 !important;
+      color: var(--brand) !important;
+      border-radius: 12px !important;
+      padding: 12px 14px !important;
+      font-family: 'Inter', sans-serif !important;
+      font-size: 15px !important;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease !important;
+    }
+    .jobber-wrap input:focus, .jobber-wrap textarea:focus, .jobber-wrap select:focus {
+      border-color: var(--orange) !important;
+      box-shadow: 0 0 0 3px rgba(255, 107, 31, 0.12) !important;
+      outline: none !important;
+    }
+    .jobber-wrap label {
+      color: var(--brand) !important;
+      font-size: 13px !important;
+      font-weight: 600 !important;
+      margin-bottom: 6px !important;
+    }
+    .jobber-wrap button[type="submit"], .jobber-wrap input[type="submit"] {
+      background: var(--orange) !important;
+      color: #fff !important;
+      border: none !important;
+      border-radius: 9999px !important;
+      padding: 16px 36px !important;
+      font-family: 'Inter', sans-serif !important;
+      font-size: 16px !important;
+      font-weight: 700 !important;
+      cursor: pointer !important;
+      transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+      box-shadow: 0 8px 24px rgba(255, 107, 31, 0.35) !important;
+      width: 100% !important;
+    }
+    .jobber-wrap button[type="submit"]:hover, .jobber-wrap input[type="submit"]:hover {
+      transform: translateY(-2px) !important;
+      box-shadow: 0 12px 32px rgba(255, 107, 31, 0.45) !important;
+    }
+  `}</style>
+);
+
+// ============ REUSABLE BUTTONS ============
+const PrimaryCTA = ({ children, href = QUOTE_HASH, large = false, fullWidth = false, icon = "↗" }) => (
+  <a
+    href={href}
+    className={`shine-on-hover inline-flex items-center justify-center gap-2.5 rounded-full font-semibold text-white transition-all duration-300 hover:scale-[1.03] hover:-translate-y-0.5 ${
+      large ? "px-8 py-4 text-base md:text-lg" : "px-6 py-3 text-sm md:text-[15px]"
+    } ${fullWidth ? "w-full" : ""}`}
+    style={{
+      background: "var(--orange)",
+      boxShadow: "0 10px 30px -8px rgba(255, 107, 31, 0.55), 0 0 0 1px rgba(255,107,31,0.25) inset",
+    }}
+  >
+    <span>{children}</span>
+    {icon && <span className="text-[12px]">{icon}</span>}
+  </a>
+);
+
+const SecondaryCTA = ({ children, href = PHONE_TEL, large = false, dark = false, fullWidth = false }) => (
+  <a
+    href={href}
+    className={`inline-flex items-center justify-center gap-2.5 rounded-full font-semibold transition-all duration-300 hover:scale-[1.03] ${
+      large ? "px-8 py-4 text-base md:text-lg" : "px-6 py-3 text-sm md:text-[15px]"
+    } ${fullWidth ? "w-full" : ""}`}
+    style={{
+      background: dark ? "var(--brand)" : "rgba(255,255,255,0.95)",
+      color: dark ? "#fff" : "var(--brand)",
+      border: dark ? "1.5px solid rgba(255,255,255,0.15)" : "1.5px solid #E5EAF0",
+      backdropFilter: "blur(8px)",
+    }}
+  >
+    <PhoneIcon className="w-4 h-4" />
+    <span>{children}</span>
+  </a>
+);
+
+const PhoneIcon = ({ className = "w-5 h-5" }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92Z"/>
+  </svg>
+);
+
+// ============ STICKY TOPBAR ============
+const StickyTopbar = () => (
+  <div className="hidden md:block w-full text-white text-[12px] tracking-wide" style={{ background: "var(--brand)" }}>
+    <div className="max-w-[1400px] mx-auto px-6 lg:px-10 py-2 flex items-center justify-between gap-6">
+      <div className="flex items-center gap-5">
+        <span className="inline-flex items-center gap-2">
+          <span className="relative flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 animate-pulse-dot opacity-80" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
+          </span>
+          <span className="opacity-90">Available now — booking this week</span>
+        </span>
+        <span className="opacity-50">·</span>
+        <span className="opacity-90">Licensed & Insured up to $1M</span>
+        <span className="opacity-50">·</span>
+        <span className="opacity-90">Free quotes in under 4 hours</span>
+      </div>
+      <a href={PHONE_TEL} className="inline-flex items-center gap-2 font-semibold hover:opacity-80 transition-opacity">
+        <PhoneIcon className="w-3.5 h-3.5" />
+        <span>{PHONE_DISPLAY}</span>
+      </a>
+    </div>
+  </div>
+);
+
+// ============ NAVBAR ============
+const Navbar = () => {
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 40);
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  return (
+    <header
+      className="sticky top-0 z-40 w-full transition-all duration-300"
+      style={{
+        background: scrolled ? "rgba(255,255,255,0.92)" : "rgba(255,255,255,0.65)",
+        backdropFilter: "blur(14px)",
+        borderBottom: scrolled ? "1px solid #E5EAF0" : "1px solid transparent",
+        boxShadow: scrolled ? "0 4px 20px rgba(14, 42, 71, 0.06)" : "none",
+      }}
+    >
+      <div className="max-w-[1400px] mx-auto px-4 md:px-6 lg:px-10 py-3 md:py-4 flex items-center justify-between gap-4">
+        {/* Logo */}
+        <a href="#top" className="flex items-center gap-2.5 flex-shrink-0">
+          <img src={`${IMG}/mb-logo.png`} alt="MB Softwash Miami" className="h-12 md:h-14 w-auto" />
+          <div className="hidden sm:flex flex-col leading-tight">
+            <span className="text-[14px] font-bold" style={{ color: "var(--brand)" }}>MB Softwash</span>
+            <span className="text-[10px] uppercase tracking-[0.18em]" style={{ color: "var(--pink)" }}>Miami</span>
+          </div>
+        </a>
+
+        {/* Center links (desktop only) */}
+        <nav className="hidden lg:flex items-center gap-1 text-[14px] font-medium" style={{ color: "var(--brand)" }}>
+          {[
+            ["Services", "#services"],
+            ["Results", "#results"],
+            ["Areas", "#service-areas"],
+            ["FAQ", "#faq"],
+          ].map(([label, href]) => (
+            <a
+              key={href}
+              href={href}
+              className="px-4 py-2 rounded-full hover:bg-sky-100 transition-colors"
+              style={{ color: "var(--brand-soft)" }}
+            >
+              {label}
+            </a>
+          ))}
+        </nav>
+
+        {/* Right cluster */}
+        <div className="flex items-center gap-2 md:gap-3">
+          <a
+            href={PHONE_TEL}
+            className="hidden sm:inline-flex items-center gap-2 px-3 md:px-4 py-2 rounded-full font-semibold text-[13px] md:text-[14px] transition-colors hover:bg-sky-100"
+            style={{ color: "var(--brand)" }}
+          >
+            <PhoneIcon className="w-4 h-4" />
+            <span className="hidden md:inline">{PHONE_DISPLAY}</span>
+          </a>
+          <PrimaryCTA href={QUOTE_HASH} icon="→">Free Estimate</PrimaryCTA>
+        </div>
+      </div>
+    </header>
+  );
+};
+
+// ============ HERO ============
+const Hero = () => {
+  return (
+    <section id="top" className="relative overflow-hidden">
+      {/* Sky gradient background */}
+      <div className="absolute inset-0 miami-sky" />
+
+      {/* Real photo overlay (subtle, sun-drenched) */}
+      <div className="absolute inset-0 overflow-hidden">
+        <img
+          src={`${IMG}/roof-tile-cinematic.jpg`}
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover slow-zoom"
+          style={{ opacity: 0.18, mixBlendMode: "multiply" }}
+        />
+      </div>
+      <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[#FAFBFD] to-transparent" />
+
+      <div className="relative max-w-[1400px] mx-auto px-6 md:px-10 lg:px-16 pt-12 md:pt-20 pb-20 md:pb-32">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
+          {/* LEFT: copy + CTAs */}
+          <div className="lg:col-span-7">
+            {/* Eyebrow chip */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="inline-flex items-center gap-2 rounded-full bg-white shadow-sm border px-3 py-1.5 mb-6"
+              style={{ borderColor: "#E5EAF0" }}
+            >
+              <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.15em] text-white" style={{ background: "var(--pink)" }}>
+                <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                Now Booking
+              </span>
+              <span className="text-[12px] font-medium" style={{ color: "var(--brand-soft)" }}>
+                Spring availability — Miami-Dade luxury homes
+              </span>
+            </motion.div>
+
+            {/* Headline */}
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.1 }}
+              className="text-[2.5rem] md:text-[3.75rem] lg:text-[4.5rem] font-extrabold leading-[1.02] tracking-[-0.025em] mb-5"
+              style={{ color: "var(--brand)" }}
+            >
+              Free roof &amp; exterior <br className="hidden md:block" />
+              <span className="font-display italic font-normal" style={{ color: "var(--pink)" }}>
+                quote in 4 hours.
+              </span>
+            </motion.h1>
+
+            {/* Subhead */}
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="text-base md:text-lg max-w-xl mb-8 leading-relaxed"
+              style={{ color: "var(--brand-soft)" }}
+            >
+              Miami's softwash specialists for roofs, pavers, and exteriors.
+              <strong className="text-[var(--brand)]"> Paint-safe, plant-safe, no high-pressure damage.</strong>
+              {" "}Get your itemized quote today — or we wash your driveway free.
+            </motion.p>
+
+            {/* DUAL CTAs */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+              className="flex flex-wrap items-center gap-3 mb-10"
+            >
+              <PrimaryCTA href={QUOTE_HASH} large icon="→">Get my free quote</PrimaryCTA>
+              <SecondaryCTA href={PHONE_TEL} large>{PHONE_DISPLAY}</SecondaryCTA>
+            </motion.div>
+
+            {/* Trust row */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.5 }}
+              className="flex flex-wrap items-center gap-5 text-[13px]"
+              style={{ color: "var(--brand-soft)" }}
+            >
+              <div className="flex items-center gap-1.5">
+                <span className="text-amber-400 text-base leading-none">★★★★★</span>
+                <span><strong style={{ color: "var(--brand)" }}>4.9</strong> · 230+ reviews</span>
+              </div>
+              <span className="opacity-30">|</span>
+              <span className="font-medium">Licensed &amp; $1M Insured</span>
+              <span className="opacity-30">|</span>
+              <span className="font-medium">Google Guaranteed</span>
+            </motion.div>
+          </div>
+
+          {/* RIGHT: floating credential card */}
+          <motion.aside
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.9, delay: 0.4 }}
+            className="lg:col-span-5"
+          >
+            <div className="relative">
+              {/* Decorative orbs */}
+              <div className="absolute -top-8 -left-8 w-40 h-40 rounded-full opacity-50 blur-3xl" style={{ background: "var(--sky-300)" }} />
+              <div className="absolute -bottom-8 -right-8 w-40 h-40 rounded-full opacity-40 blur-3xl" style={{ background: "var(--pink-soft)" }} />
+
+              <div className="relative rounded-3xl bg-white shadow-2xl p-6 md:p-7 border" style={{ borderColor: "#E5EAF0", boxShadow: "0 30px 60px -20px rgba(14, 42, 71, 0.15)" }}>
+                <div className="flex items-center justify-between mb-5">
+                  <span className="text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: "var(--brand-soft)" }}>Quote response</span>
+                  <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-emerald-600">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    Live
+                  </span>
+                </div>
+
+                <div className="flex items-baseline gap-2 mb-1">
+                  <span className="font-display italic text-7xl leading-none" style={{ color: "var(--brand)" }}>4</span>
+                  <span className="font-display italic text-2xl" style={{ color: "var(--pink)" }}>hrs</span>
+                </div>
+                <p className="text-[14px] leading-relaxed" style={{ color: "var(--brand-soft)" }}>
+                  Average reply time. <strong style={{ color: "var(--brand)" }}>Beat that, we wash your driveway free.</strong>
+                </p>
+
+                <div className="my-5 h-px" style={{ background: "#E5EAF0" }} />
+
+                {/* Trust badges */}
+                <ul className="grid grid-cols-2 gap-3 text-[13px] mb-5">
+                  {[
+                    { icon: "shield", label: "Licensed" },
+                    { icon: "lock", label: "$1M Insured" },
+                    { icon: "check", label: "Google Guaranteed" },
+                    { icon: "star", label: "4.9★ Average" },
+                  ].map((b) => (
+                    <li key={b.label} className="flex items-center gap-2 font-medium" style={{ color: "var(--brand)" }}>
+                      <span className="inline-flex w-7 h-7 rounded-lg items-center justify-center flex-shrink-0" style={{ background: "var(--sky-100)", color: "var(--brand)" }}>
+                        {b.icon === "shield" && <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2C20 17.5 12 22 12 22z"/></svg>}
+                        {b.icon === "lock" && <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>}
+                        {b.icon === "check" && <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>}
+                        {b.icon === "star" && <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>}
+                      </span>
+                      {b.label}
+                    </li>
+                  ))}
+                </ul>
+
+                {/* Inline CTA inside the card */}
+                <PrimaryCTA href={QUOTE_HASH} fullWidth icon="→">Request quote now</PrimaryCTA>
+              </div>
+            </div>
+          </motion.aside>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+// ============ TRUST STRIP (marquee) ============
+const TrustStrip = () => {
+  const items = [
+    "✓ Licensed & $1M Insured",
+    "✓ Google Guaranteed",
+    "✓ 4.9★ on Google · 230+ reviews",
+    "✓ Same-day quotes available",
+    "✓ Paint-safe softwash method",
+    "✓ Serving all of Miami-Dade",
+    "✓ Free Certificate of Insurance on request",
+    "✓ 2-year algae-regrowth warranty",
+  ];
+  return (
+    <section className="py-4 overflow-hidden border-y" style={{ background: "var(--brand)", borderColor: "rgba(255,255,255,0.1)" }}>
+      <div className="marquee-track text-white text-[15px] font-semibold">
+        {[...items, ...items].map((it, i) => (
+          <span key={i} className="px-8 inline-flex items-center gap-2">
+            <span style={{ color: "var(--sun)" }}>{it.split(" ")[0]}</span>
+            <span>{it.substring(2)}</span>
+          </span>
+        ))}
+      </div>
+    </section>
+  );
+};
+
+// ============ SECTION HEADER (light mode version) ============
+const SectionHeader = ({ eyebrow, headline, italicWord, subtext, align = "left" }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true, margin: "-80px" }}
+    transition={{ duration: 0.7 }}
+    className={`mb-10 md:mb-14 ${align === "center" ? "text-center mx-auto" : ""} ${align === "center" ? "max-w-2xl" : "max-w-3xl"}`}
+  >
+    <div className={`inline-flex items-center gap-2 rounded-full px-3 py-1 mb-4`} style={{ background: "var(--sky-100)" }}>
+      <span className="w-1.5 h-1.5 rounded-full" style={{ background: "var(--orange)" }} />
+      <span className="text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: "var(--brand)" }}>
+        {eyebrow}
+      </span>
+    </div>
+    <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold leading-[1.05] tracking-[-0.02em]" style={{ color: "var(--brand)" }}>
+      {headline.split(italicWord)[0]}
+      <span className="font-display italic font-normal" style={{ color: "var(--pink)" }}>{italicWord}</span>
+      {headline.split(italicWord)[1]}
+    </h2>
+    {subtext && (
+      <p className="text-base md:text-lg mt-4 leading-relaxed" style={{ color: "var(--brand-soft)" }}>{subtext}</p>
+    )}
+  </motion.div>
+);
+
+// ============ FEATURED SERVICES (with per-card CTA) ============
+const FeaturedServices = () => {
+  const services = [
+    {
+      title: "Roof Softwash",
+      subtitle: "Tile, shingle & flat roofs",
+      copy: "Low-pressure cleaning that kills algae, mildew, and mold at the root — without damaging tiles or flashing.",
+      span: "md:col-span-7",
+      img: `${IMG}/roof-red-clean.jpg`,
+    },
+    {
+      title: "Paver Sealing",
+      subtitle: "Driveways & walkways",
+      copy: "Deep clean + wet-look sealer. Locks pavers, enriches color, blocks weeds for 3+ years.",
+      span: "md:col-span-5",
+      img: `${IMG}/driveway-after.jpg`,
+    },
+    {
+      title: "House Wash",
+      subtitle: "Stucco, paint & shingles",
+      copy: "Paint-safe surfactants remove black streaks, mildew, and salt residue. No surface damage.",
+      span: "md:col-span-5",
+      img: `${IMG}/exterior-wall-after.jpg`,
+    },
+    {
+      title: "Fence Restoration",
+      subtitle: "Wood, vinyl & aluminum",
+      copy: "Restores natural grain on wood. Removes mold and saltwater staining from any fencing material.",
+      span: "md:col-span-7",
+      img: `${IMG}/fence-after.jpg`,
+    },
+  ];
+
+  return (
+    <section id="services" className="py-16 md:py-24" style={{ background: "var(--bg)" }}>
+      <div className="max-w-[1400px] mx-auto px-6 md:px-10 lg:px-16">
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-10 md:mb-14">
+          <SectionHeader
+            eyebrow="Our Services"
+            headline="What we clean"
+            italicWord="clean"
+            subtext="Four core services for Miami-Dade luxury homes. Each one priced by the square foot, with an itemized written quote in 4 hours."
+          />
+          <div className="flex-shrink-0">
+            <PrimaryCTA href={QUOTE_HASH}>Get pricing</PrimaryCTA>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-5 md:gap-6">
+          {services.map((s, i) => (
+            <motion.div
+              key={s.title}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.7, delay: i * 0.08 }}
+              className={`group relative bg-white border rounded-3xl overflow-hidden ${s.span} flex flex-col`}
+              style={{ borderColor: "#E5EAF0", boxShadow: "0 4px 20px rgba(14, 42, 71, 0.04)" }}
+            >
+              {/* Image (top portion) */}
+              <div className="relative aspect-[16/9] overflow-hidden">
+                <img src={s.img} alt={s.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                <div className="absolute inset-0 halftone opacity-15 pointer-events-none" />
+                <div className="absolute top-4 left-4">
+                  <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.15em] text-white shadow-md" style={{ background: "var(--brand)" }}>
+                    {s.subtitle}
+                  </span>
+                </div>
+              </div>
+
+              {/* Body */}
+              <div className="p-6 md:p-7 flex flex-col flex-1">
+                <h3 className="text-2xl md:text-3xl font-bold mb-2" style={{ color: "var(--brand)" }}>
+                  {s.title}
+                </h3>
+                <p className="text-[14px] md:text-[15px] leading-relaxed mb-5 flex-1" style={{ color: "var(--brand-soft)" }}>
+                  {s.copy}
+                </p>
+                <div className="flex flex-wrap items-center gap-2">
+                  <PrimaryCTA href={QUOTE_HASH} icon="→">Quote this service</PrimaryCTA>
+                  <SecondaryCTA href={PHONE_TEL}>Call</SecondaryCTA>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+// ============ INTERRUPTER BANNER (reusable) ============
+const InterrupterBanner = ({ headline, italicWord, subtext, variant = "orange" }) => {
+  const palettes = {
+    orange: {
+      bg: "linear-gradient(135deg, #FF8A47 0%, #FF6B1F 60%, #E85100 100%)",
+      text: "#fff",
+      sub: "rgba(255,255,255,0.92)",
+      btnFill: "#fff",
+      btnText: "var(--orange)",
+      callBg: "rgba(255,255,255,0.18)",
+      callBorder: "rgba(255,255,255,0.5)",
+    },
+    sky: {
+      bg: "linear-gradient(135deg, #5BB5E5 0%, #3A95C8 100%)",
+      text: "#fff",
+      sub: "rgba(255,255,255,0.92)",
+      btnFill: "var(--orange)",
+      btnText: "#fff",
+      callBg: "rgba(255,255,255,0.18)",
+      callBorder: "rgba(255,255,255,0.5)",
+    },
+    pink: {
+      bg: "linear-gradient(135deg, #E089BD 0%, #C75A9F 100%)",
+      text: "#fff",
+      sub: "rgba(255,255,255,0.92)",
+      btnFill: "var(--orange)",
+      btnText: "#fff",
+      callBg: "rgba(255,255,255,0.18)",
+      callBorder: "rgba(255,255,255,0.5)",
+    },
+  };
+  const p = palettes[variant];
+
+  return (
+    <section className="relative overflow-hidden" style={{ background: p.bg }}>
+      {/* Decorative wave */}
+      <svg className="absolute inset-x-0 top-0 w-full h-12 -mt-px" viewBox="0 0 1440 60" fill="none" preserveAspectRatio="none">
+        <path d="M0,30 Q360,60 720,30 T1440,30 L1440,0 L0,0 Z" fill="var(--bg)" opacity="0.0" />
+      </svg>
+
+      <div className="relative max-w-[1400px] mx-auto px-6 md:px-10 lg:px-16 py-12 md:py-16">
+        <div className="flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-12">
+          <div className="text-center lg:text-left flex-1">
+            <h3 className="text-3xl md:text-4xl lg:text-5xl font-extrabold leading-[1.05] tracking-[-0.02em] mb-3" style={{ color: p.text }}>
+              {headline.split(italicWord)[0]}
+              <span className="font-display italic font-normal">{italicWord}</span>
+              {headline.split(italicWord)[1]}
+            </h3>
+            {subtext && (
+              <p className="text-base md:text-lg" style={{ color: p.sub }}>
+                {subtext}
+              </p>
+            )}
+          </div>
+          <div className="flex flex-col sm:flex-row items-center gap-3 flex-shrink-0">
+            <a
+              href={QUOTE_HASH}
+              className="shine-on-hover inline-flex items-center justify-center gap-2.5 rounded-full px-7 py-3.5 text-[15px] font-bold transition-all hover:scale-[1.04] hover:-translate-y-0.5 whitespace-nowrap"
+              style={{ background: p.btnFill, color: p.btnText, boxShadow: "0 12px 30px rgba(0,0,0,0.18)" }}
+            >
+              Get free quote
+              <span className="text-[12px]">→</span>
+            </a>
+            <a
+              href={PHONE_TEL}
+              className="inline-flex items-center justify-center gap-2.5 rounded-full px-6 py-3.5 text-[15px] font-bold transition-all hover:scale-[1.04] whitespace-nowrap"
+              style={{ background: p.callBg, color: p.text, border: `1.5px solid ${p.callBorder}`, backdropFilter: "blur(8px)" }}
+            >
+              <PhoneIcon className="w-4 h-4" />
+              {PHONE_DISPLAY}
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+// ============ BEFORE / AFTER SLIDER ============
+const BeforeAfterSlider = ({ before, after }) => {
+  const containerRef = useRef(null);
+  const [position, setPosition] = useState(50);
+  const dragging = useRef(false);
+
+  const updatePosition = useCallback((clientX) => {
+    const el = containerRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const pct = Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100));
+    setPosition(pct);
+  }, []);
+
+  useEffect(() => {
+    const onMove = (e) => {
+      if (!dragging.current) return;
+      const x = e.touches ? e.touches[0].clientX : e.clientX;
+      updatePosition(x);
+    };
+    const onUp = () => { dragging.current = false; };
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+    window.addEventListener("touchmove", onMove, { passive: true });
+    window.addEventListener("touchend", onUp);
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+      window.removeEventListener("touchmove", onMove);
+      window.removeEventListener("touchend", onUp);
+    };
+  }, [updatePosition]);
+
+  const startDrag = (e) => {
+    dragging.current = true;
+    const x = e.touches ? e.touches[0].clientX : e.clientX;
+    updatePosition(x);
+  };
+
+  return (
+    <div
+      ref={containerRef}
+      onMouseDown={startDrag}
+      onTouchStart={startDrag}
+      className="ba-slider relative w-full aspect-[4/3] md:aspect-[16/10] rounded-3xl overflow-hidden bg-white border-2 cursor-ew-resize select-none shadow-xl"
+      style={{ borderColor: "#E5EAF0" }}
+    >
+      <img src={after} alt="After" className="absolute inset-0 w-full h-full object-cover" draggable={false} />
+      <div className="absolute inset-0 overflow-hidden" style={{ clipPath: `inset(0 ${100 - position}% 0 0)` }}>
+        <img src={before} alt="Before" className="absolute inset-0 w-full h-full object-cover" draggable={false} />
+      </div>
+
+      <div className="absolute top-4 left-4 z-20">
+        <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.15em] text-white px-3 py-1.5 rounded-full shadow-lg" style={{ background: "var(--brand)" }}>
+          <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
+          Before
+        </span>
+      </div>
+      <div className="absolute top-4 right-4 z-20">
+        <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.15em] text-white px-3 py-1.5 rounded-full shadow-lg" style={{ background: "var(--orange)" }}>
+          <span className="w-1.5 h-1.5 rounded-full bg-white" />
+          After
+        </span>
+      </div>
+
+      <div className="absolute top-0 bottom-0 z-10 pointer-events-none" style={{ left: `${position}%`, transform: "translateX(-50%)" }}>
+        <div className="w-1 h-full" style={{ background: "var(--orange)", boxShadow: "0 0 20px rgba(255,107,31,0.6)" }} />
+        <div
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-white flex items-center justify-center pointer-events-auto cursor-ew-resize shadow-xl"
+          style={{ border: "3px solid var(--orange)" }}
+        >
+          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="var(--orange)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="9 18 3 12 9 6" />
+            <polyline points="15 6 21 12 15 18" />
+          </svg>
+        </div>
+      </div>
+
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 pointer-events-none">
+        <span className="text-[11px] font-bold uppercase tracking-[0.15em] text-white bg-black/50 backdrop-blur-md px-3 py-1.5 rounded-full">
+          Drag to compare
+        </span>
+      </div>
+    </div>
+  );
+};
+
+// ============ RESULTS SECTION ============
+const ResultsSection = () => {
+  const cases = [
+    { id: "roof", title: "Tile roof restoration", subtitle: "Pinecrest, FL", before: `${IMG}/roof-tile-before.jpg`, after: `${IMG}/roof-tile-after.jpg` },
+    { id: "wall", title: "Shingle wall & stucco", subtitle: "Coral Gables, FL", before: `${IMG}/exterior-wall-before.jpg`, after: `${IMG}/exterior-wall-after.jpg` },
+    { id: "fence", title: "Cedar privacy fence", subtitle: "Coconut Grove, FL", before: `${IMG}/fence-before.jpg`, after: `${IMG}/fence-after.jpg` },
+    { id: "driveway", title: "Paver driveway, sealed", subtitle: "Key Biscayne, FL", before: `${IMG}/driveway-before.jpg`, after: `${IMG}/driveway-after.jpg` },
+  ];
+  const [activeIdx, setActiveIdx] = useState(0);
+  const active = cases[activeIdx];
+
+  return (
+    <section id="results" className="py-16 md:py-24" style={{ background: "linear-gradient(180deg, #FAFBFD 0%, #EAF6FD 100%)" }}>
+      <div className="max-w-[1400px] mx-auto px-6 md:px-10 lg:px-16">
+        <SectionHeader
+          eyebrow="Before & After"
+          headline="See the transformation"
+          italicWord="transformation"
+          subtext="Real Miami homes. Drag the slider on each case to see the result. Hundreds more on Instagram."
+          align="center"
+        />
+
+        {/* Tabs */}
+        <div className="flex flex-wrap gap-2 justify-center mb-8">
+          {cases.map((c, i) => (
+            <button
+              key={c.id}
+              onClick={() => setActiveIdx(i)}
+              className={`text-[13px] md:text-sm rounded-full px-5 py-2.5 font-semibold transition-all ${activeIdx === i ? "text-white shadow-lg" : "bg-white border hover:scale-[1.02]"}`}
+              style={
+                activeIdx === i
+                  ? { background: "var(--brand)" }
+                  : { borderColor: "#E5EAF0", color: "var(--brand-soft)" }
+              }
+            >
+              {c.title}
+            </button>
+          ))}
+        </div>
+
+        <motion.div
+          key={active.id}
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+        >
+          <BeforeAfterSlider before={active.before} after={active.after} />
+        </motion.div>
+
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-8">
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-[0.2em] mb-1" style={{ color: "var(--orange)" }}>
+              {active.subtitle}
+            </p>
+            <h3 className="text-xl md:text-2xl font-bold" style={{ color: "var(--brand)" }}>
+              {active.title}
+            </h3>
+          </div>
+          <div className="flex gap-3">
+            <SecondaryCTA href={PHONE_TEL}>Call about results</SecondaryCTA>
+            <PrimaryCTA href={QUOTE_HASH} icon="→">Quote my home</PrimaryCTA>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+// ============ RECENT JOBS (replaces Journal + Explorations) ============
+const RecentJobs = () => {
+  const jobs = [
+    { service: "Tile Roof Softwash", area: "Pinecrest", date: "Mar 2026", img: `${IMG}/roof-red-clean.jpg`, sqft: "3,200 sqft" },
+    { service: "Paver Sealing", area: "Key Biscayne", date: "Mar 2026", img: `${IMG}/driveway-after.jpg`, sqft: "1,800 sqft" },
+    { service: "House Wash", area: "Coral Gables", date: "Feb 2026", img: `${IMG}/exterior-wall-after.jpg`, sqft: "2,400 sqft" },
+    { service: "Fence Restoration", area: "Coconut Grove", date: "Feb 2026", img: `${IMG}/fence-after.jpg`, sqft: "120 ft linear" },
+    { service: "Roof Softwash", area: "Palmetto Bay", date: "Feb 2026", img: `${IMG}/roof-red-skyview.jpg`, sqft: "4,100 sqft" },
+    { service: "Full Property Package", area: "Cutler Bay", date: "Jan 2026", img: `${IMG}/aerial-1.jpg`, sqft: "Estate" },
+  ];
+
+  return (
+    <section className="py-16 md:py-24" style={{ background: "var(--bg)" }}>
+      <div className="max-w-[1400px] mx-auto px-6 md:px-10 lg:px-16">
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-10 md:mb-14">
+          <SectionHeader
+            eyebrow="Recent Work"
+            headline="This month in Miami"
+            italicWord="Miami"
+            subtext="A snapshot of jobs we've completed across Miami-Dade. Each one quoted in under 4 hours, scheduled the same week."
+          />
+          <div className="flex-shrink-0">
+            <PrimaryCTA href={QUOTE_HASH}>Add my home</PrimaryCTA>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
+          {jobs.map((j, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.6, delay: i * 0.06 }}
+              className="bg-white rounded-2xl overflow-hidden border group hover:-translate-y-1 transition-transform duration-300"
+              style={{ borderColor: "#E5EAF0", boxShadow: "0 4px 20px rgba(14, 42, 71, 0.04)" }}
+            >
+              <div className="aspect-[4/3] overflow-hidden relative">
+                <img src={j.img} alt={j.service} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                <div className="absolute top-3 left-3">
+                  <span className="inline-block text-[10px] font-bold uppercase tracking-[0.15em] text-white px-2.5 py-1 rounded-full" style={{ background: "var(--orange)" }}>
+                    Completed
+                  </span>
+                </div>
+                <div className="absolute top-3 right-3">
+                  <span className="inline-block text-[10px] font-bold uppercase tracking-[0.15em] px-2.5 py-1 rounded-full bg-white/95 backdrop-blur" style={{ color: "var(--brand)" }}>
+                    {j.sqft}
+                  </span>
+                </div>
+              </div>
+              <div className="p-5">
+                <p className="text-[11px] font-bold uppercase tracking-[0.18em] mb-1" style={{ color: "var(--pink)" }}>
+                  {j.area} · {j.date}
+                </p>
+                <h3 className="text-lg font-bold" style={{ color: "var(--brand)" }}>
+                  {j.service}
+                </h3>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        <div className="text-center mt-10">
+          <p className="text-base mb-4" style={{ color: "var(--brand-soft)" }}>
+            <strong style={{ color: "var(--brand)" }}>Booking this week.</strong> Same-day quotes available.
+          </p>
+          <div className="inline-flex flex-wrap items-center justify-center gap-3">
+            <PrimaryCTA href={QUOTE_HASH} large icon="→">Get my quote</PrimaryCTA>
+            <SecondaryCTA href={PHONE_TEL} large>{PHONE_DISPLAY}</SecondaryCTA>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+// ============ STATS / FEATURES ============
+const Stats = () => {
+  const stats = [
+    { num: "12+", label: "Years in Miami", sub: "Locally owned & operated" },
+    { num: "850+", label: "Homes Restored", sub: "Across Miami-Dade county" },
+    { num: "4.9★", label: "Google Average", sub: "230+ verified reviews" },
+    { num: "4hr", label: "Quote Response", sub: "Or driveway wash free" },
+  ];
+  return (
+    <section className="py-16 md:py-20" style={{ background: "var(--brand)" }}>
+      <div className="max-w-[1400px] mx-auto px-6 md:px-10 lg:px-16">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-10">
+          {stats.map((s, i) => (
+            <motion.div
+              key={s.label}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.6, delay: i * 0.1 }}
+              className="text-center md:text-left"
+            >
+              <div className="font-display italic text-5xl md:text-6xl lg:text-7xl leading-none mb-2" style={{ color: "var(--sun)" }}>
+                {s.num}
+              </div>
+              <div className="text-sm md:text-base font-bold uppercase tracking-[0.12em] text-white mb-1">
+                {s.label}
+              </div>
+              <div className="text-[12px] md:text-[13px]" style={{ color: "rgba(255,255,255,0.65)" }}>
+                {s.sub}
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+// ============ SERVICE AREAS ============
+const ServiceAreas = () => {
+  const areas = [
+    { name: "Coral Gables", zips: "33134 · 33143 · 33145 · 33146", note: "Mediterranean Revival stucco + barrel-tile under banyan canopy. Recurring contracts here." },
+    { name: "Pinecrest", zips: "33156 · 33158", note: "Acre-plus lots with mature oak. Tile roofs need softwash every 18 months." },
+    { name: "Key Biscayne", zips: "33149", note: "Saltwater spray + humidity. Coastal-grade rinse protocol." },
+    { name: "Coconut Grove", zips: "33133", note: "Historic homes near Biscayne Bay. Lowest-pressure softwash settings." },
+    { name: "Palmetto Bay", zips: "33157 · 33158", note: "Estate-scale paver driveways and screened pool enclosures." },
+    { name: "South Miami", zips: "33143 · 33155", note: "House wash + window cleaning combos most-requested." },
+    { name: "Cutler Bay", zips: "33157 · 33189 · 33190", note: "Post-Andrew construction with concrete tile roofs." },
+    { name: "Miami Beach", zips: "33139 · 33140 · 33141", note: "Art Deco buildings and waterfront condos." },
+  ];
+
+  return (
+    <section id="service-areas" className="py-16 md:py-24" style={{ background: "linear-gradient(180deg, #FAFBFD 0%, #EAF6FD 100%)" }}>
+      <div className="max-w-[1400px] mx-auto px-6 md:px-10 lg:px-16">
+        <SectionHeader
+          eyebrow="Service Areas"
+          headline="Across Miami-Dade County"
+          italicWord="Miami-Dade"
+          subtext="Eight neighborhoods we know well. If yours isn't listed, call us — we quote luxury exterior projects across all of South Florida."
+          align="center"
+        />
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
+          {areas.map((a, i) => (
+            <motion.a
+              key={a.name}
+              href={QUOTE_HASH}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.5, delay: i * 0.04 }}
+              className="group bg-white rounded-2xl p-5 md:p-6 border hover:-translate-y-1 transition-all duration-300 cursor-pointer"
+              style={{ borderColor: "#E5EAF0", boxShadow: "0 4px 16px rgba(14, 42, 71, 0.04)" }}
+            >
+              <div className="flex items-start justify-between mb-3">
+                <h3 className="text-xl font-bold" style={{ color: "var(--brand)" }}>
+                  {a.name}
+                </h3>
+                <span className="inline-flex items-center justify-center w-7 h-7 rounded-full transition-transform group-hover:scale-110" style={{ background: "var(--sky-100)" }}>
+                  <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M5 12h14M13 5l7 7-7 7"/>
+                  </svg>
+                </span>
+              </div>
+              <p className="text-[11px] font-bold tracking-[0.1em] tabular-nums mb-3" style={{ color: "var(--pink)" }}>
+                {a.zips}
+              </p>
+              <p className="text-[13px] leading-relaxed" style={{ color: "var(--brand-soft)" }}>
+                {a.note}
+              </p>
+            </motion.a>
+          ))}
+        </div>
+
+        <div className="text-center mt-10">
+          <p className="text-base mb-4" style={{ color: "var(--brand-soft)" }}>
+            Outside this list?{" "}
+            <a href={PHONE_TEL} className="font-bold underline-offset-4 hover:underline" style={{ color: "var(--orange)" }}>
+              Call {PHONE_DISPLAY}
+            </a>
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+// ============ FAQ ============
+const FAQItem = ({ q, a, isOpen, onToggle, index }) => {
+  const contentRef = useRef(null);
+  const [height, setHeight] = useState(0);
+
+  useEffect(() => {
+    if (contentRef.current) setHeight(isOpen ? contentRef.current.scrollHeight : 0);
+  }, [isOpen, a]);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{ duration: 0.5, delay: index * 0.04 }}
+      className="bg-white border rounded-2xl overflow-hidden transition-all"
+      style={{
+        borderColor: isOpen ? "var(--orange)" : "#E5EAF0",
+        boxShadow: isOpen ? "0 8px 24px rgba(255,107,31,0.12)" : "0 2px 8px rgba(14,42,71,0.04)",
+      }}
+    >
+      <button onClick={onToggle} className="w-full text-left p-5 md:p-6 flex items-start gap-4 group" aria-expanded={isOpen}>
+        <span className="flex-shrink-0 inline-flex items-center justify-center w-7 h-7 rounded-full text-[12px] font-bold tabular-nums" style={{ background: "var(--sky-100)", color: "var(--brand)" }}>
+          {String(index + 1).padStart(2, "0")}
+        </span>
+        <h3 className="flex-1 text-base md:text-lg font-bold leading-tight pt-0.5" style={{ color: "var(--brand)" }}>
+          {q}
+        </h3>
+        <span className="flex-shrink-0 mt-0.5 relative w-6 h-6">
+          <span className="absolute top-1/2 left-0 right-0 h-[2px] rounded-full" style={{ background: "var(--brand)", transform: "translateY(-50%)" }} />
+          <span
+            className="absolute top-0 bottom-0 left-1/2 w-[2px] rounded-full transition-all duration-400"
+            style={{ background: "var(--brand)", transform: `translateX(-50%) ${isOpen ? "rotate(90deg)" : "rotate(0deg)"}`, opacity: isOpen ? 0 : 1 }}
+          />
+        </span>
+      </button>
+      <div style={{ height: `${height}px`, transition: "height 0.5s cubic-bezier(0.25, 0.1, 0.25, 1)", overflow: "hidden" }}>
+        <div ref={contentRef} className="px-5 md:px-6 pb-6 md:pb-7 pl-[60px]">
+          <p className="text-[14px] md:text-[15px] leading-relaxed" style={{ color: "var(--brand-soft)" }}>{a}</p>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
+const FAQ = () => {
+  const faqs = [
+    { q: "How does the softwash method work?", a: "Softwash combines low-pressure water (under 500 psi — about garden-hose strength) with biodegradable cleaning solutions specifically formulated to kill algae, mildew, mold, and bacteria at the root. Instead of blasting dirt off a surface like pressure washing does, softwash dissolves and neutralizes the organic growth, then rinses cleanly. The result lasts longer, doesn't damage tiles, paint, or pavers, and is the method recommended by most roofing manufacturers." },
+    { q: "Do I need to be home during the cleaning?", a: "No, you don't need to be present. Our team can perform the service efficiently as long as we have proper access to the areas being cleaned. We understand your time is valuable, so we offer the flexibility to schedule the service whenever it works best for you. If you can't be there, we'll keep you updated on progress and send photos of the final result for your peace of mind." },
+    { q: "Will the chemicals damage my lawn or plants?", a: "Our softwash solutions are designed to be effective at cleaning, but — like any chemical — they can affect grass or plants if not applied properly. We take every precaution to minimize risk: correct dilution ratios, thorough pre-rinsing of nearby vegetation, and active protection of your landscaping throughout the process. While we work with extreme care to deliver the best results without compromising your property, it's worth noting that a minimal residual risk always exists with any exterior cleaning service." },
+    { q: "Do you use high-pressure water on roofs?", a: "No. We never use high-pressure water on roofs. For roofing surfaces we exclusively use the softwash method — low-pressure application of specialized cleaning solutions. This effectively removes dirt, mold, and algae without compromising the integrity of tiles, shingles, or any roofing material. High-pressure on roofs causes cracking, displacement, and premature aging, so we always opt for safer methods that deliver effective and longer-lasting results." },
+    { q: "How long does the cleaning take?", a: "It depends on the scope of the project. We work to be as efficient as possible, and our average service time is around 2–4 hours. Larger estate properties or full-property packages (roof + house wash + driveway) may take longer; we'll always give you a clear time estimate when we send your quote." },
+    { q: "Are you insured if anything happens?", a: "Yes — we're fully insured up to $1,000,000 in general liability, so there's nothing to worry about. If you'd like a Certificate of Insurance (COI) for your records, your HOA, or your property manager, just let us know and we'll send it over right away." },
+    { q: "How do you price your services?", a: "Every quote is based on three factors: the size of the area to be cleaned (in square feet), the complexity of the project (surface type, access, condition), and the time the project is expected to take. We send itemized quotes — no vague verbal estimates — so you know exactly what you're paying for and why." },
+  ];
+  const [openIdx, setOpenIdx] = useState(0);
+
+  return (
+    <section id="faq" className="py-16 md:py-24" style={{ background: "var(--bg)" }}>
+      <div className="max-w-[900px] mx-auto px-6 md:px-10 lg:px-16">
+        <SectionHeader
+          eyebrow="FAQ"
+          headline="Common questions"
+          italicWord="questions"
+          subtext="If yours isn't here, call or text us. We answer fast."
+          align="center"
+        />
+
+        <div className="flex flex-col gap-3 md:gap-4">
+          {faqs.map((faq, i) => (
+            <FAQItem key={i} q={faq.q} a={faq.a} index={i} isOpen={openIdx === i} onToggle={() => setOpenIdx(openIdx === i ? -1 : i)} />
+          ))}
+        </div>
+
+        {/* Closing CTA */}
+        <div className="mt-10 p-6 md:p-8 rounded-2xl text-center" style={{ background: "var(--sky-100)" }}>
+          <p className="text-base md:text-lg font-semibold mb-4" style={{ color: "var(--brand)" }}>
+            Still have questions?
+          </p>
+          <div className="inline-flex flex-wrap items-center justify-center gap-3">
+            <PrimaryCTA href={QUOTE_HASH} icon="→">Send us a message</PrimaryCTA>
+            <SecondaryCTA href={PHONE_TEL}>{PHONE_DISPLAY}</SecondaryCTA>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+// ============ QUOTE FORM (Jobber embed) ============
+const QuoteForm = () => {
+  const JOBBER_CLIENT_HUB_ID = "05846ef7-3c3f-457b-81ae-8ab4d5fc687d-772673";
+  const JOBBER_FORM_URL = "https://clienthub.getjobber.com/client_hubs/05846ef7-3c3f-457b-81ae-8ab4d5fc687d/public/work_request/embedded_work_request_form?form_id=772673";
+
+  useEffect(() => {
+    const styleHref = "https://d3ey4dbjkt2f6s.cloudfront.net/assets/external/work_request_embed.css";
+    if (!document.querySelector(`link[href="${styleHref}"]`)) {
+      const link = document.createElement("link");
+      link.rel = "stylesheet"; link.href = styleHref; link.media = "screen";
+      document.head.appendChild(link);
+    }
+    const scriptSrc = "https://d3ey4dbjkt2f6s.cloudfront.net/assets/static_link/work_request_embed_snippet.js";
+    if (!document.querySelector(`script[data-clienthub-id="${JOBBER_CLIENT_HUB_ID}"]`)) {
+      const script = document.createElement("script");
+      script.src = scriptSrc;
+      script.setAttribute("clienthub_id", JOBBER_CLIENT_HUB_ID);
+      script.setAttribute("form_url", JOBBER_FORM_URL);
+      script.setAttribute("data-clienthub-id", JOBBER_CLIENT_HUB_ID);
+      script.async = true;
+      document.body.appendChild(script);
+    }
+  }, []);
+
+  return (
+    <section id="quote" className="py-16 md:py-24 relative overflow-hidden" style={{ background: "linear-gradient(180deg, #EAF6FD 0%, #FAFBFD 100%)" }}>
+      <div className="max-w-[1400px] mx-auto px-6 md:px-10 lg:px-16">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-start">
+          {/* LEFT */}
+          <div className="lg:col-span-5 lg:sticky lg:top-28">
+            <SectionHeader
+              eyebrow="Free Quote"
+              headline="Quote in 4 hours"
+              italicWord="4 hours"
+              subtext="Tell us what you need cleaned. You'll get an itemized written quote within 4 hours during business hours — or we wash your driveway free."
+            />
+
+            <ul className="flex flex-col gap-3 mb-8">
+              {[
+                "Itemized written quote — no verbal estimates",
+                "Licensed & $1M Insured — COI on request",
+                "Softwash method — paint-safe, plant-safe",
+                "Or we wash your driveway free",
+              ].map((item, i) => (
+                <li key={i} className="flex items-start gap-3 text-[14px] md:text-[15px]" style={{ color: "var(--brand)" }}>
+                  <span className="flex-shrink-0 w-5 h-5 rounded-full mt-0.5 flex items-center justify-center" style={{ background: "var(--orange)" }}>
+                    <svg className="w-3 h-3 text-white" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="2 6 5 9 10 3" />
+                    </svg>
+                  </span>
+                  <span className="font-medium">{item}</span>
+                </li>
+              ))}
+            </ul>
+
+            <div className="rounded-2xl p-5 border" style={{ background: "var(--white)", borderColor: "#E5EAF0" }}>
+              <p className="text-[12px] font-bold uppercase tracking-[0.18em] mb-2" style={{ color: "var(--pink)" }}>Prefer to talk?</p>
+              <a href={PHONE_TEL} className="text-2xl md:text-3xl font-bold inline-flex items-center gap-2.5 hover:opacity-80 transition-opacity" style={{ color: "var(--brand)" }}>
+                <PhoneIcon className="w-6 h-6" />
+                {PHONE_DISPLAY}
+              </a>
+              <p className="text-[12px] mt-2" style={{ color: "var(--brand-soft)" }}>Call or text — both go straight to our team.</p>
+            </div>
+          </div>
+
+          {/* RIGHT: Jobber form */}
+          <div className="lg:col-span-7">
+            <div className="jobber-wrap relative rounded-3xl bg-white p-6 md:p-8 lg:p-10 border" style={{ borderColor: "#E5EAF0", boxShadow: "0 30px 60px -20px rgba(14, 42, 71, 0.12)" }}>
+              <div className="mb-6 pb-6 border-b" style={{ borderColor: "#E5EAF0" }}>
+                <div className="inline-flex items-center gap-2 rounded-full px-3 py-1 mb-3" style={{ background: "var(--orange)", color: "#fff" }}>
+                  <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                  <span className="text-[11px] font-bold uppercase tracking-[0.15em]">Reply within 4h</span>
+                </div>
+                <h3 className="text-2xl md:text-3xl font-extrabold mb-2" style={{ color: "var(--brand)" }}>
+                  Request your free quote
+                </h3>
+                <p className="text-[14px] md:text-[15px]" style={{ color: "var(--brand-soft)" }}>
+                  Fill out the form below and we'll reply with an itemized scope and price.
+                </p>
+              </div>
+
+              {/* Jobber injects here */}
+              <div id={JOBBER_CLIENT_HUB_ID} />
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+// ============ FOOTER ============
+const Footer = () => (
+  <footer className="text-white" style={{ background: "var(--brand)" }}>
+    <div className="max-w-[1400px] mx-auto px-6 md:px-10 lg:px-16 pt-16 md:pt-20 pb-8">
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-8 mb-12">
+        {/* Brand */}
+        <div className="md:col-span-5">
+          <img src={`${IMG}/mb-logo.png`} alt="MB Softwash Miami" className="h-16 w-auto mb-4" />
+          <p className="text-[14px] mb-6 max-w-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.75)" }}>
+            Miami-Dade's softwash specialists. Roof, paver, and exterior cleaning for luxury homes — paint-safe, plant-safe, no high-pressure damage.
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <PrimaryCTA href={QUOTE_HASH} icon="→">Free Quote</PrimaryCTA>
+            <SecondaryCTA href={PHONE_TEL} dark>{PHONE_DISPLAY}</SecondaryCTA>
+          </div>
+        </div>
+
+        {/* Links */}
+        <div className="md:col-span-2">
+          <h4 className="text-[12px] font-bold uppercase tracking-[0.18em] mb-4" style={{ color: "var(--sky-300)" }}>Services</h4>
+          <ul className="flex flex-col gap-2 text-[14px]">
+            {["Roof Softwash", "Paver Sealing", "House Wash", "Fence Restoration"].map((s) => (
+              <li key={s}><a href={QUOTE_HASH} className="hover:opacity-80 transition-opacity" style={{ color: "rgba(255,255,255,0.85)" }}>{s}</a></li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="md:col-span-2">
+          <h4 className="text-[12px] font-bold uppercase tracking-[0.18em] mb-4" style={{ color: "var(--sky-300)" }}>Areas</h4>
+          <ul className="flex flex-col gap-2 text-[14px]">
+            {["Coral Gables", "Pinecrest", "Key Biscayne", "Coconut Grove", "All Miami-Dade"].map((s) => (
+              <li key={s}><a href="#service-areas" className="hover:opacity-80 transition-opacity" style={{ color: "rgba(255,255,255,0.85)" }}>{s}</a></li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="md:col-span-3">
+          <h4 className="text-[12px] font-bold uppercase tracking-[0.18em] mb-4" style={{ color: "var(--sky-300)" }}>Contact</h4>
+          <ul className="flex flex-col gap-3 text-[14px]" style={{ color: "rgba(255,255,255,0.85)" }}>
+            <li>
+              <a href={PHONE_TEL} className="inline-flex items-center gap-2 hover:opacity-80 transition-opacity">
+                <PhoneIcon className="w-4 h-4" /> {PHONE_DISPLAY}
+              </a>
+            </li>
+            <li>
+              <a href={PHONE_SMS} className="inline-flex items-center gap-2 hover:opacity-80 transition-opacity">
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+                Text us
+              </a>
+            </li>
+            <li>
+              <a href="mailto:hello@mbsoftwashmiami.com" className="inline-flex items-center gap-2 hover:opacity-80 transition-opacity">
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                  <polyline points="22,6 12,13 2,6"/>
+                </svg>
+                hello@mbsoftwashmiami.com
+              </a>
+            </li>
+            <li className="flex items-center gap-2 mt-2">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 animate-pulse-dot" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
+              </span>
+              <span className="text-[12px] uppercase tracking-[0.12em]">Available now</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div className="pt-8 border-t flex flex-col sm:flex-row items-center justify-between gap-4 text-[12px]" style={{ borderColor: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.55)" }}>
+        <span>© 2026 MB Softwash Miami · Licensed & Insured · Serving Miami-Dade County</span>
+        <div className="flex items-center gap-5">
+          {["Instagram", "Facebook", "Google", "Yelp"].map((s) => (
+            <a key={s} href="#" className="hover:text-white transition-colors uppercase tracking-[0.15em]">{s}</a>
+          ))}
+        </div>
+      </div>
+    </div>
+  </footer>
+);
+
+// ============ FAB (Mobile floating phone button) ============
+const MobileFAB = () => (
+  <a
+    href={PHONE_TEL}
+    className="lg:hidden fixed bottom-20 right-4 z-50 w-14 h-14 rounded-full text-white flex items-center justify-center fab-pulse"
+    style={{ background: "var(--orange)" }}
+    aria-label="Call MB Softwash"
+  >
+    <PhoneIcon className="w-6 h-6" />
+  </a>
+);
+
+// ============ STICKY MOBILE BOTTOM BAR ============
+const MobileStickyBottom = () => (
+  <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 grid grid-cols-2 gap-2 p-3 backdrop-blur-md border-t" style={{ background: "rgba(255,255,255,0.95)", borderColor: "#E5EAF0", boxShadow: "0 -8px 24px rgba(14,42,71,0.08)" }}>
+    <a
+      href={PHONE_TEL}
+      className="inline-flex items-center justify-center gap-2 rounded-full px-4 py-3 font-bold text-[14px] border-2"
+      style={{ borderColor: "var(--brand)", color: "var(--brand)" }}
+    >
+      <PhoneIcon className="w-4 h-4" />
+      Call
+    </a>
+    <a
+      href={QUOTE_HASH}
+      className="inline-flex items-center justify-center gap-2 rounded-full px-4 py-3 font-bold text-[14px] text-white"
+      style={{ background: "var(--orange)", boxShadow: "0 8px 20px rgba(255, 107, 31, 0.4)" }}
+    >
+      Free Quote →
+    </a>
+  </div>
+);
+
+// ============ APP ============
+function App() {
+  return (
+    <div className="min-h-screen pb-20 lg:pb-0">
+      <StyleInjector />
+      <StickyTopbar />
+      <Navbar />
+      <Hero />
+      <TrustStrip />
+      <FeaturedServices />
+      <InterrupterBanner
+        headline="Don't wait. Get your free estimate today."
+        italicWord="today."
+        subtext="Most quotes are returned in under 4 hours during business hours."
+        variant="orange"
+      />
+      <ResultsSection />
+      <RecentJobs />
+      <InterrupterBanner
+        headline="Same-day quotes are available."
+        italicWord="available."
+        subtext="Just need a phone call. We'll come measure, give you a price, and book the job same week."
+        variant="sky"
+      />
+      <Stats />
+      <ServiceAreas />
+      <InterrupterBanner
+        headline="Don't see your area? We probably still cover it."
+        italicWord="cover it."
+        subtext="Call us — we quote luxury exterior projects across all of South Florida."
+        variant="pink"
+      />
+      <FAQ />
+      <QuoteForm />
+      <Footer />
+      <MobileFAB />
+      <MobileStickyBottom />
+    </div>
+  );
+}
+  </script>
+</body>
+</html>
