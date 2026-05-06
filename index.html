@@ -37,9 +37,9 @@
   </script>
 
   <style>
-    html, body { background: #081828; margin: 0; padding: 0; }
+    html, body { background: #0D4F72; margin: 0; padding: 0; }
     #loading-fallback {
-      position: fixed; inset: 0; background: #081828; color: #555;
+      position: fixed; inset: 0; background: #0D4F72; color: #aad;
       display: flex; align-items: center; justify-content: center;
       font-family: system-ui, sans-serif; font-size: 11px;
       letter-spacing: 0.3em; text-transform: uppercase; z-index: 1;
@@ -145,15 +145,15 @@ const StyleInjector = () => (
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap');
 
     :root {
-      --dark:        #081828;
-      --dark-2:      #081828;
-      --celeste:     #0C2D4A;
-      --surface:     #112438;
-      --surface-2:   #163050;
-      --sky-accent:  #A8D5F0;
-      --sky-dim:     rgba(168,213,240,0.12);
-      --sky-border:  rgba(168,213,240,0.15);
-      --brand:       #0E2A47;
+      --dark:        #0D4F72;
+      --dark-2:      #0D4F72;
+      --celeste:     #1A7A9A;
+      --surface:     #165D82;
+      --surface-2:   #1E8AAE;
+      --sky-accent:  #7FD6F0;
+      --sky-dim:     rgba(127,214,240,0.14);
+      --sky-border:  rgba(127,214,240,0.18);
+      --brand:       #0A3E5C;
       --pink:        #C75A9F;
       --pink-soft:   #E089BD;
       --orange:      #FF6B1F;
@@ -480,7 +480,7 @@ const Hero = () => {
         className="absolute inset-0"
         style={{
           background:
-            "linear-gradient(to bottom, rgba(6,16,28,0.25) 0%, rgba(6,16,28,0.55) 45%, rgba(6,16,28,0.92) 80%, #06101C 100%)",
+            "linear-gradient(to bottom, rgba(13,79,114,0.20) 0%, rgba(13,79,114,0.52) 45%, rgba(13,79,114,0.90) 80%, #0D4F72 100%)",
         }}
       />
       {/* Side vignette */}
@@ -488,7 +488,7 @@ const Hero = () => {
         className="absolute inset-0"
         style={{
           background:
-            "radial-gradient(ellipse at center, transparent 40%, rgba(6,16,28,0.6) 100%)",
+            "radial-gradient(ellipse at center, transparent 40%, rgba(13,79,114,0.55) 100%)",
         }}
       />
 
@@ -602,7 +602,7 @@ const Hero = () => {
               <div
                 className="relative rounded-3xl p-6 md:p-8 border"
                 style={{
-                  background: "rgba(6,16,28,0.75)",
+                  background: "rgba(13,79,114,0.75)",
                   backdropFilter: "blur(24px)",
                   borderColor: "rgba(168,213,240,0.15)",
                   boxShadow: "0 40px 80px -20px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06)",
@@ -792,7 +792,7 @@ const FeaturedServices = () => {
               <div
                 className="absolute inset-0"
                 style={{
-                  background: "linear-gradient(to top, rgba(6,16,28,0.98) 0%, rgba(6,16,28,0.65) 38%, rgba(6,16,28,0.12) 70%, transparent 100%)",
+                  background: "linear-gradient(to top, rgba(13,79,114,0.98) 0%, rgba(13,79,114,0.65) 38%, rgba(13,79,114,0.12) 70%, transparent 100%)",
                   zIndex: 1,
                 }}
               />
@@ -808,7 +808,7 @@ const FeaturedServices = () => {
                 <span
                   className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.15em] text-white"
                   style={{
-                    background: "rgba(6,16,28,0.65)",
+                    background: "rgba(13,79,114,0.65)",
                     border: "1px solid rgba(255,255,255,0.15)",
                     backdropFilter: "blur(8px)",
                   }}
@@ -902,7 +902,7 @@ const ProcessSection = () => {
                   {/* Dark gradient */}
                   <div
                     className="absolute inset-0"
-                    style={{ background: "linear-gradient(to bottom, rgba(6,16,28,0.15) 0%, rgba(6,16,28,0.78) 100%)" }}
+                    style={{ background: "linear-gradient(to bottom, rgba(13,79,114,0.15) 0%, rgba(13,79,114,0.78) 100%)" }}
                   />
 
                   {/* Large outline step number */}
@@ -980,7 +980,7 @@ const ProcessSection = () => {
 };
 
 // ============ INTERRUPTER BANNER ============
-const InterrupterBanner = ({ headline, italicWord, subtext, variant = "orange", topColor = "#06101C", bottomColor = "#0A1828" }) => {
+const InterrupterBanner = ({ headline, italicWord, subtext, variant = "orange", topColor = "#0D4F72", bottomColor = "#1A7A9A" }) => {
   const palettes = {
     orange: {
       bg: "linear-gradient(135deg, #FF8A47 0%, #FF6B1F 60%, #E85100 100%)",
@@ -1108,7 +1108,7 @@ const BeforeAfterSlider = ({ before, after }) => {
       </div>
 
       <div className="absolute top-4 left-4 z-20">
-        <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.15em] text-white px-3 py-1.5 rounded-full shadow-lg" style={{ background: "rgba(6,16,28,0.75)", border: "1px solid rgba(255,255,255,0.15)", backdropFilter: "blur(8px)" }}>
+        <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.15em] text-white px-3 py-1.5 rounded-full shadow-lg" style={{ background: "rgba(13,79,114,0.75)", border: "1px solid rgba(255,255,255,0.15)", backdropFilter: "blur(8px)" }}>
           <span className="w-1.5 h-1.5 rounded-full bg-red-400" />Before
         </span>
       </div>
@@ -1122,7 +1122,7 @@ const BeforeAfterSlider = ({ before, after }) => {
         <div className="w-0.5 h-full" style={{ background: "var(--orange)", boxShadow: "0 0 20px rgba(255,107,31,0.7)" }} />
         <div
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-14 h-14 rounded-full flex items-center justify-center pointer-events-auto cursor-ew-resize shadow-2xl"
-          style={{ background: "rgba(6,16,28,0.85)", border: "2px solid var(--orange)", backdropFilter: "blur(8px)" }}
+          style={{ background: "rgba(13,79,114,0.85)", border: "2px solid var(--orange)", backdropFilter: "blur(8px)" }}
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="var(--orange)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="9 18 3 12 9 6" />
@@ -1247,7 +1247,7 @@ const RecentJobs = () => {
                   </span>
                 </div>
                 <div className="absolute top-3 right-3">
-                  <span className="inline-block text-[10px] font-bold uppercase tracking-[0.15em] px-2.5 py-1 rounded-full" style={{ background: "rgba(6,16,28,0.75)", color: "var(--sky-accent)", border: "1px solid rgba(168,213,240,0.2)", backdropFilter: "blur(8px)" }}>
+                  <span className="inline-block text-[10px] font-bold uppercase tracking-[0.15em] px-2.5 py-1 rounded-full" style={{ background: "rgba(13,79,114,0.75)", color: "var(--sky-accent)", border: "1px solid rgba(168,213,240,0.2)", backdropFilter: "blur(8px)" }}>
                     {j.sqft}
                   </span>
                 </div>
@@ -1816,7 +1816,7 @@ const MobileFAB = () => (
 const MobileStickyBottom = () => (
   <div
     className="lg:hidden fixed bottom-0 left-0 right-0 z-40 grid grid-cols-2 gap-2 p-3 border-t"
-    style={{ background: "rgba(6,16,28,0.96)", borderColor: "rgba(255,255,255,0.08)", backdropFilter: "blur(20px)", boxShadow: "0 -8px 32px rgba(0,0,0,0.4)" }}
+    style={{ background: "rgba(13,79,114,0.96)", borderColor: "rgba(255,255,255,0.08)", backdropFilter: "blur(20px)", boxShadow: "0 -8px 32px rgba(0,0,0,0.4)" }}
   >
     <a
       href={PHONE_TEL}
@@ -1852,8 +1852,8 @@ function App() {
         italicWord="today."
         subtext="Most quotes are returned in under 4 hours during business hours."
         variant="orange"
-        topColor="#0C2D4A"
-        bottomColor="#081828"
+        topColor="#1A7A9A"
+        bottomColor="#0D4F72"
       />
       <ResultsSection />
       <RecentJobs />
@@ -1863,8 +1863,8 @@ function App() {
         italicWord="available."
         subtext="Just need a phone call. We'll come measure, give you a price, and book the job same week."
         variant="sky"
-        topColor="#081828"
-        bottomColor="#0C2D4A"
+        topColor="#0D4F72"
+        bottomColor="#1A7A9A"
       />
       <Stats />
       <ServiceAreas />
@@ -1873,8 +1873,8 @@ function App() {
         italicWord="cover it."
         subtext="Call us — we quote luxury exterior projects across all of South Florida."
         variant="pink"
-        topColor="#081828"
-        bottomColor="#0C2D4A"
+        topColor="#0D4F72"
+        bottomColor="#1A7A9A"
       />
       <FAQ />
       <QuoteForm />
