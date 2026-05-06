@@ -37,9 +37,9 @@
   </script>
 
   <style>
-    html, body { background: #06101C; margin: 0; padding: 0; }
+    html, body { background: #081828; margin: 0; padding: 0; }
     #loading-fallback {
-      position: fixed; inset: 0; background: #06101C; color: #555;
+      position: fixed; inset: 0; background: #081828; color: #555;
       display: flex; align-items: center; justify-content: center;
       font-family: system-ui, sans-serif; font-size: 11px;
       letter-spacing: 0.3em; text-transform: uppercase; z-index: 1;
@@ -145,10 +145,11 @@ const StyleInjector = () => (
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap');
 
     :root {
-      --dark:        #06101C;
-      --dark-2:      #0A1828;
-      --surface:     #0D1B2A;
-      --surface-2:   #122336;
+      --dark:        #081828;
+      --dark-2:      #081828;
+      --celeste:     #0C2D4A;
+      --surface:     #112438;
+      --surface-2:   #163050;
       --sky-accent:  #A8D5F0;
       --sky-dim:     rgba(168,213,240,0.12);
       --sky-border:  rgba(168,213,240,0.15);
@@ -389,7 +390,7 @@ const Navbar = () => {
     <header
       className="sticky top-0 z-40 w-full transition-all duration-500"
       style={{
-        background: scrolled ? "rgba(6,16,28,0.96)" : "rgba(6,16,28,0.0)",
+        background: scrolled ? "rgba(8,24,40,0.97)" : "rgba(8,24,40,0.0)",
         backdropFilter: scrolled ? "blur(20px)" : "blur(0px)",
         borderBottom: scrolled ? "1px solid rgba(255,255,255,0.06)" : "1px solid transparent",
         boxShadow: scrolled ? "0 4px 40px rgba(0,0,0,0.4)" : "none",
@@ -862,7 +863,7 @@ const ProcessSection = () => {
   ];
 
   return (
-    <section className="py-16 md:py-24" style={{ background: "var(--dark)" }}>
+    <section className="py-16 md:py-24" style={{ background: "var(--celeste)" }}>
       <div className="max-w-[1400px] mx-auto px-6 md:px-10 lg:px-16">
         <SectionHeader
           eyebrow="How It Works"
@@ -884,10 +885,11 @@ const ProcessSection = () => {
                 transition={{ duration: 0.7, delay: i * 0.15 }}
                 className="group relative rounded-3xl overflow-hidden flex-1"
                 style={{
-                  background: "var(--surface)",
-                  border: "1px solid var(--border)",
-                  boxShadow: "0 8px 40px rgba(0,0,0,0.35)",
+                  background: "rgba(255,255,255,0.07)",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  boxShadow: "0 8px 40px rgba(0,0,0,0.25)",
                   margin: "0 8px",
+                  backdropFilter: "blur(8px)",
                 }}
               >
                 {/* Photo with overlays */}
@@ -1211,7 +1213,7 @@ const RecentJobs = () => {
   ];
 
   return (
-    <section className="py-16 md:py-24" style={{ background: "var(--dark)" }}>
+    <section className="py-16 md:py-24" style={{ background: "var(--celeste)" }}>
       <div className="max-w-[1400px] mx-auto px-6 md:px-10 lg:px-16">
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-10 md:mb-14">
           <SectionHeader
@@ -1234,7 +1236,7 @@ const RecentJobs = () => {
               viewport={{ once: true, margin: "-50px" }}
               transition={{ duration: 0.6, delay: i * 0.06 }}
               className="rounded-2xl overflow-hidden group hover:-translate-y-1 transition-transform duration-300"
-              style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "0 8px 32px rgba(0,0,0,0.3)" }}
+              style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.1)", boxShadow: "0 8px 32px rgba(0,0,0,0.2)", backdropFilter: "blur(8px)" }}
             >
               <div className="aspect-[4/3] overflow-hidden relative">
                 <img src={j.img} alt={j.service} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
@@ -1425,7 +1427,7 @@ const Stats = () => {
     { value: 4,   suffix: "hr", decimals: 0, label: "Quote Response",  sub: "Or driveway wash free" },
   ];
   return (
-    <section className="relative overflow-hidden" style={{ background: "var(--surface)", paddingTop: "5rem", paddingBottom: "5rem" }}>
+    <section className="relative overflow-hidden" style={{ background: "var(--celeste)", paddingTop: "5rem", paddingBottom: "5rem" }}>
       <div className="absolute inset-0 overflow-hidden">
         <img src={`${IMG}/aerial-2.jpg`} alt="" className="w-full h-full object-cover" style={{ opacity: 0.08 }} />
       </div>
@@ -1525,9 +1527,10 @@ const FAQItem = ({ q, a, isOpen, onToggle, index }) => {
       transition={{ duration: 0.5, delay: index * 0.04 }}
       className="rounded-2xl overflow-hidden transition-all"
       style={{
-        background: "var(--surface)",
-        border: `1px solid ${isOpen ? "rgba(255,107,31,0.4)" : "var(--border)"}`,
-        boxShadow: isOpen ? "0 8px 32px rgba(255,107,31,0.1)" : "0 2px 12px rgba(0,0,0,0.2)",
+        background: "rgba(255,255,255,0.06)",
+        backdropFilter: "blur(8px)",
+        border: `1px solid ${isOpen ? "rgba(255,107,31,0.45)" : "rgba(255,255,255,0.1)"}`,
+        boxShadow: isOpen ? "0 8px 32px rgba(255,107,31,0.12)" : "0 2px 12px rgba(0,0,0,0.15)",
       }}
     >
       <button onClick={onToggle} className="w-full text-left p-5 md:p-6 flex items-start gap-4 group" aria-expanded={isOpen}>
@@ -1568,7 +1571,7 @@ const FAQ = () => {
   const [openIdx, setOpenIdx] = useState(0);
 
   return (
-    <section id="faq" className="py-16 md:py-24" style={{ background: "var(--dark)" }}>
+    <section id="faq" className="py-16 md:py-24" style={{ background: "var(--celeste)" }}>
       <div className="max-w-[900px] mx-auto px-6 md:px-10 lg:px-16">
         <SectionHeader
           eyebrow="FAQ"
@@ -1849,8 +1852,8 @@ function App() {
         italicWord="today."
         subtext="Most quotes are returned in under 4 hours during business hours."
         variant="orange"
-        topColor="#06101C"
-        bottomColor="#0A1828"
+        topColor="#0C2D4A"
+        bottomColor="#081828"
       />
       <ResultsSection />
       <RecentJobs />
@@ -1860,8 +1863,8 @@ function App() {
         italicWord="available."
         subtext="Just need a phone call. We'll come measure, give you a price, and book the job same week."
         variant="sky"
-        topColor="#0A1828"
-        bottomColor="#0D1B2A"
+        topColor="#081828"
+        bottomColor="#0C2D4A"
       />
       <Stats />
       <ServiceAreas />
@@ -1870,8 +1873,8 @@ function App() {
         italicWord="cover it."
         subtext="Call us — we quote luxury exterior projects across all of South Florida."
         variant="pink"
-        topColor="#0A1828"
-        bottomColor="#06101C"
+        topColor="#081828"
+        bottomColor="#0C2D4A"
       />
       <FAQ />
       <QuoteForm />
