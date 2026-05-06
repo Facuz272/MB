@@ -103,6 +103,41 @@ const PHONE_DISPLAY = "(305) 834-2218";
 const PHONE_TEL = "tel:+13058342218";
 const PHONE_SMS = "sms:+13058342218";
 const QUOTE_HASH = "#quote";
+const { useMemo } = React;
+
+// ============ COUNTER HOOK ============
+const useCountUp = (target, duration, decimals) => {
+  const [count, setCount] = useState(0);
+  const elRef = useRef(null);
+  const started = useRef(false);
+
+  useEffect(() => {
+    const el = elRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !started.current) {
+          started.current = true;
+          const t0 = performance.now();
+          const tick = (now) => {
+            const p = Math.min((now - t0) / duration, 1);
+            const eased = 1 - Math.pow(1 - p, 3);
+            const cur = eased * target;
+            setCount(decimals > 0 ? parseFloat(cur.toFixed(decimals)) : Math.floor(cur));
+            if (p < 1) requestAnimationFrame(tick);
+            else setCount(target);
+          };
+          requestAnimationFrame(tick);
+        }
+      },
+      { threshold: 0.5 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [target, duration, decimals]);
+
+  return [count, elRef];
+};
 
 // ============ DESIGN TOKENS ============
 const StyleInjector = () => (
@@ -497,7 +532,12 @@ const Hero = () => {
               <br className="hidden md:block" />
               <span
                 className="font-display italic font-normal"
-                style={{ color: "var(--orange)" }}
+                style={{
+                  background: "linear-gradient(135deg, #FF6B1F 0%, #FF3D8A 55%, #C75A9F 100%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
+                }}
               >
                 quote in 4 hours.
               </span>
@@ -732,36 +772,57 @@ const FeaturedServices = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-50px" }}
               transition={{ duration: 0.7, delay: i * 0.08 }}
-              className={`group relative rounded-3xl overflow-hidden ${s.span} flex flex-col`}
+              className={`group relative rounded-3xl overflow-hidden ${s.span}`}
               style={{
-                background: "var(--surface)",
-                border: "1px solid var(--border)",
-                boxShadow: "0 8px 40px rgba(0,0,0,0.3)",
+                minHeight: s.span === "md:col-span-7" ? "460px" : "400px",
+                border: "1px solid rgba(255,255,255,0.05)",
+                boxShadow: "0 8px 48px rgba(0,0,0,0.45)",
               }}
             >
-              {/* Image */}
-              <div className="relative aspect-[16/9] overflow-hidden">
-                <img
-                  src={s.img}
-                  alt={s.title}
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                />
-                <div className="absolute inset-0 halftone opacity-10 pointer-events-none" />
-                <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(13,27,42,0.7) 100%)" }} />
-                <div className="absolute top-4 left-4">
-                  <span
-                    className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.15em] text-white shadow-md"
-                    style={{ background: "rgba(6,16,28,0.7)", border: "1px solid rgba(255,255,255,0.15)", backdropFilter: "blur(8px)" }}
-                  >
-                    {s.subtitle}
-                  </span>
-                </div>
+              {/* Full-bleed photo */}
+              <img
+                src={s.img}
+                alt={s.title}
+                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                style={{ zIndex: 0 }}
+              />
+
+              {/* Cinematic gradient — transparent top, near-black bottom */}
+              <div
+                className="absolute inset-0"
+                style={{
+                  background: "linear-gradient(to top, rgba(6,16,28,0.98) 0%, rgba(6,16,28,0.65) 38%, rgba(6,16,28,0.12) 70%, transparent 100%)",
+                  zIndex: 1,
+                }}
+              />
+
+              {/* Hover: subtle brightness lift */}
+              <div
+                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                style={{ background: "rgba(255,107,31,0.04)", zIndex: 2 }}
+              />
+
+              {/* Subtitle badge — top-left */}
+              <div className="absolute top-5 left-5 z-10">
+                <span
+                  className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.15em] text-white"
+                  style={{
+                    background: "rgba(6,16,28,0.65)",
+                    border: "1px solid rgba(255,255,255,0.15)",
+                    backdropFilter: "blur(8px)",
+                  }}
+                >
+                  {s.subtitle}
+                </span>
               </div>
 
-              {/* Body */}
-              <div className="p-6 md:p-7 flex flex-col flex-1">
+              {/* Content — pinned to bottom */}
+              <div className="absolute inset-x-0 bottom-0 z-10 p-6 md:p-8">
                 <h3 className="text-2xl md:text-3xl font-bold mb-2 text-white">{s.title}</h3>
-                <p className="text-[14px] md:text-[15px] leading-relaxed mb-5 flex-1" style={{ color: "var(--text-muted)" }}>
+                <p
+                  className="text-[14px] md:text-[15px] leading-relaxed mb-5"
+                  style={{ color: "rgba(200,225,248,0.8)", maxWidth: "480px" }}
+                >
                   {s.copy}
                 </p>
                 <div className="flex flex-wrap items-center gap-2">
@@ -777,8 +838,147 @@ const FeaturedServices = () => {
   );
 };
 
+// ============ PROCESS SECTION ============
+const ProcessSection = () => {
+  const steps = [
+    {
+      num: "01",
+      title: "Request your quote",
+      desc: "Fill out the form or call us. We send you an itemized written quote in under 4 hours — or your driveway wash is free.",
+      img: `${IMG}/process-1.jpg`,
+    },
+    {
+      num: "02",
+      title: "We schedule the job",
+      desc: "Pick a day that works for you. We confirm 24h before, show up on time, and prep the area carefully before starting.",
+      img: `${IMG}/process-2.jpg`,
+    },
+    {
+      num: "03",
+      title: "You enjoy the result",
+      desc: "Low-pressure, plant-safe, paint-safe. Our team handles everything. You come back to a property that looks brand new.",
+      img: `${IMG}/process-3.jpg`,
+    },
+  ];
+
+  return (
+    <section className="py-16 md:py-24" style={{ background: "var(--dark)" }}>
+      <div className="max-w-[1400px] mx-auto px-6 md:px-10 lg:px-16">
+        <SectionHeader
+          eyebrow="How It Works"
+          headline="Three steps to a clean home"
+          italicWord="clean home"
+          subtext="Simple, transparent process. No surprise costs. No high-pressure tactics — in every sense of the word."
+          align="center"
+        />
+
+        {/* Steps grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-0 md:gap-0 relative">
+          {steps.map((s, i) => (
+            <div key={s.num} className="flex flex-col md:flex-row">
+              {/* Card */}
+              <motion.div
+                initial={{ opacity: 0, y: 32 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-60px" }}
+                transition={{ duration: 0.7, delay: i * 0.15 }}
+                className="group relative rounded-3xl overflow-hidden flex-1"
+                style={{
+                  background: "var(--surface)",
+                  border: "1px solid var(--border)",
+                  boxShadow: "0 8px 40px rgba(0,0,0,0.35)",
+                  margin: "0 8px",
+                }}
+              >
+                {/* Photo with overlays */}
+                <div className="relative overflow-hidden" style={{ aspectRatio: "4/3" }}>
+                  <img
+                    src={s.img}
+                    alt={s.title}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
+                  {/* Dark gradient */}
+                  <div
+                    className="absolute inset-0"
+                    style={{ background: "linear-gradient(to bottom, rgba(6,16,28,0.15) 0%, rgba(6,16,28,0.78) 100%)" }}
+                  />
+
+                  {/* Large outline step number */}
+                  <div className="absolute top-3 right-4 leading-none select-none pointer-events-none">
+                    <span
+                      className="font-display italic"
+                      style={{
+                        fontSize: "6.5rem",
+                        lineHeight: 1,
+                        color: "transparent",
+                        WebkitTextStroke: "1.5px rgba(255,255,255,0.18)",
+                      }}
+                    >
+                      {s.num}
+                    </span>
+                  </div>
+
+                  {/* Step pill bottom-left */}
+                  <div className="absolute bottom-4 left-4 flex items-center gap-2">
+                    <span
+                      className="inline-flex items-center justify-center w-6 h-6 rounded-full text-[11px] font-extrabold text-white"
+                      style={{ background: "var(--orange)", boxShadow: "0 4px 12px rgba(255,107,31,0.5)" }}
+                    >
+                      {i + 1}
+                    </span>
+                    <span
+                      className="text-[10px] font-bold uppercase tracking-[0.2em]"
+                      style={{ color: "rgba(255,255,255,0.7)" }}
+                    >
+                      Step {s.num}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Text body */}
+                <div className="p-6">
+                  <h3 className="text-xl md:text-2xl font-bold mb-2 text-white">{s.title}</h3>
+                  <p className="text-[14px] leading-relaxed" style={{ color: "var(--text-muted)" }}>
+                    {s.desc}
+                  </p>
+                </div>
+              </motion.div>
+
+              {/* Connector arrow between steps (desktop only) */}
+              {i < 2 && (
+                <div className="hidden md:flex flex-col items-center justify-center flex-shrink-0" style={{ width: "0px", position: "relative" }}>
+                  <div
+                    className="absolute"
+                    style={{
+                      top: "calc(37.5% - 1px)",
+                      left: "-20px",
+                      width: "40px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "3px",
+                    }}
+                  >
+                    <div style={{ flex: 1, height: "1.5px", background: "linear-gradient(90deg, var(--orange), var(--pink))" }} />
+                    <svg width="8" height="12" viewBox="0 0 8 12" fill="none">
+                      <path d="M1 1l6 5-6 5" stroke="var(--pink)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        <div className="text-center mt-12">
+          <PrimaryCTA href={QUOTE_HASH} large icon="→">Start with step 1</PrimaryCTA>
+        </div>
+      </div>
+    </section>
+  );
+};
+
 // ============ INTERRUPTER BANNER ============
-const InterrupterBanner = ({ headline, italicWord, subtext, variant = "orange" }) => {
+const InterrupterBanner = ({ headline, italicWord, subtext, variant = "orange", topColor = "#06101C", bottomColor = "#0A1828" }) => {
   const palettes = {
     orange: {
       bg: "linear-gradient(135deg, #FF8A47 0%, #FF6B1F 60%, #E85100 100%)",
@@ -800,10 +1000,27 @@ const InterrupterBanner = ({ headline, italicWord, subtext, variant = "orange" }
     },
   };
   const p = palettes[variant];
+  const D = 52; // diagonal height in px
 
   return (
     <section className="relative overflow-hidden" style={{ background: p.bg }}>
-      <div className="relative max-w-[1400px] mx-auto px-6 md:px-10 lg:px-16 py-12 md:py-16">
+      {/* Top diagonal — previous section color cuts into banner from left */}
+      <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: `${D}px`, lineHeight: 0, zIndex: 2, pointerEvents: "none" }}>
+        <svg viewBox={`0 0 1440 ${D}`} preserveAspectRatio="none" style={{ width: "100%", height: `${D}px`, display: "block" }}>
+          <polygon points={`0,0 1440,0 0,${D}`} fill={topColor} />
+        </svg>
+      </div>
+      {/* Bottom diagonal — next section color cuts in from right */}
+      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: `${D}px`, lineHeight: 0, zIndex: 2, pointerEvents: "none" }}>
+        <svg viewBox={`0 0 1440 ${D}`} preserveAspectRatio="none" style={{ width: "100%", height: `${D}px`, display: "block" }}>
+          <polygon points={`1440,0 1440,${D} 0,${D}`} fill={bottomColor} />
+        </svg>
+      </div>
+
+      <div
+        className="relative z-10 max-w-[1400px] mx-auto px-6 md:px-10 lg:px-16"
+        style={{ paddingTop: `calc(3.5rem + ${D}px)`, paddingBottom: `calc(3.5rem + ${D}px)` }}
+      >
         <div className="flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-12">
           <div className="text-center lg:text-left flex-1">
             <h3 className="text-3xl md:text-4xl lg:text-5xl font-extrabold leading-[1.05] tracking-[-0.02em] mb-3" style={{ color: p.text }}>
@@ -1057,42 +1274,165 @@ const RecentJobs = () => {
   );
 };
 
+// ============ TESTIMONIALS ============
+const GoogleIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 20 20" style={{ flexShrink: 0 }}>
+    <path d="M19.6 10.23c0-.68-.06-1.36-.18-2H10v3.79h5.4a4.63 4.63 0 0 1-2 3.04v2.52h3.24c1.9-1.75 3-4.32 3-7.35z" fill="#4285F4"/>
+    <path d="M10 20c2.7 0 4.97-.9 6.63-2.42l-3.24-2.52a5.97 5.97 0 0 1-8.9-3.14H1.17v2.6A10 10 0 0 0 10 20z" fill="#34A853"/>
+    <path d="M4.49 11.92A5.97 5.97 0 0 1 4.18 10c0-.67.12-1.32.31-1.92V5.48H1.17A10 10 0 0 0 0 10c0 1.61.39 3.14 1.17 4.52l3.32-2.6z" fill="#FBBC05"/>
+    <path d="M10 3.98a5.42 5.42 0 0 1 3.83 1.5l2.86-2.86A9.6 9.6 0 0 0 10 0 10 10 0 0 0 1.17 5.48l3.32 2.6A5.97 5.97 0 0 1 10 3.98z" fill="#EA4335"/>
+  </svg>
+);
+
+const StarRow = ({ count = 5 }) => (
+  <div className="flex gap-0.5">
+    {[...Array(count)].map((_, i) => (
+      <svg key={i} className="w-4 h-4" viewBox="0 0 24 24" fill="#FBBF24">
+        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+      </svg>
+    ))}
+  </div>
+);
+
+const TestimonialsSection = () => {
+  const reviews = [
+    { name: "Maria G.", area: "Coral Gables", initials: "MG", avatarBg: "#FF6B1F", rating: 5, text: "MB Softwash transformed our tile roof. The algae that had been building up for years was completely gone after one treatment. Quote arrived in under an hour — professional from start to finish." },
+    { name: "Carlos R.", area: "Pinecrest", initials: "CR", avatarBg: "#C75A9F", rating: 5, text: "Used them for our driveway and paver sealing. The result was better than expected — looks completely brand new. Already booked them for the house wash next month." },
+    { name: "Jennifer M.", area: "Key Biscayne", initials: "JM", avatarBg: "#3A95C8", rating: 5, text: "Skeptical at first about softwash vs. pressure washing, but the difference is real. No damage to our roof tiles and the result is still holding after 14 months. Worth every penny." },
+    { name: "David T.", area: "Coconut Grove", initials: "DT", avatarBg: "#E85100", rating: 5, text: "Fast, professional, and the most detailed quote we received from any company. Showed up exactly on time, which in Miami is rare. The fence restoration looks incredible." },
+    { name: "Ana P.", area: "Palmetto Bay", initials: "AP", avatarBg: "#C75A9F", rating: 5, text: "Our fence looked 10 years older than it was. After the restoration it genuinely looks brand new. The crew protected all our plants beforehand — nothing was rushed or damaged." },
+    { name: "Robert K.", area: "South Miami", initials: "RK", avatarBg: "#3A95C8", rating: 5, text: "Used MB Softwash for the whole property: roof, driveway, and house wash. Pricing was fair and transparent. Our neighbors have already asked us for their contact information." },
+  ];
+
+  return (
+    <section className="py-16 md:py-24" style={{ background: "var(--dark-2)" }}>
+      <div className="max-w-[1400px] mx-auto px-6 md:px-10 lg:px-16">
+        <SectionHeader
+          eyebrow="Google Reviews"
+          headline="What our clients say"
+          italicWord="clients say"
+          subtext="4.9 stars across 230+ verified Google reviews. Real Miami-Dade homeowners, real results."
+          align="center"
+        />
+
+        {/* Google aggregate badge */}
+        <div className="flex justify-center mb-12">
+          <div
+            className="inline-flex items-center gap-3 rounded-full px-5 py-3"
+            style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "0 4px 20px rgba(0,0,0,0.3)" }}
+          >
+            <svg width="22" height="22" viewBox="0 0 20 20">
+              <path d="M19.6 10.23c0-.68-.06-1.36-.18-2H10v3.79h5.4a4.63 4.63 0 0 1-2 3.04v2.52h3.24c1.9-1.75 3-4.32 3-7.35z" fill="#4285F4"/>
+              <path d="M10 20c2.7 0 4.97-.9 6.63-2.42l-3.24-2.52a5.97 5.97 0 0 1-8.9-3.14H1.17v2.6A10 10 0 0 0 10 20z" fill="#34A853"/>
+              <path d="M4.49 11.92A5.97 5.97 0 0 1 4.18 10c0-.67.12-1.32.31-1.92V5.48H1.17A10 10 0 0 0 0 10c0 1.61.39 3.14 1.17 4.52l3.32-2.6z" fill="#FBBC05"/>
+              <path d="M10 3.98a5.42 5.42 0 0 1 3.83 1.5l2.86-2.86A9.6 9.6 0 0 0 10 0 10 10 0 0 0 1.17 5.48l3.32 2.6A5.97 5.97 0 0 1 10 3.98z" fill="#EA4335"/>
+            </svg>
+            <span className="font-bold text-white text-[15px]">4.9</span>
+            <StarRow />
+            <span className="text-[13px]" style={{ color: "var(--text-muted)" }}>230+ Google reviews</span>
+          </div>
+        </div>
+
+        {/* Review grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
+          {reviews.map((r, i) => (
+            <motion.div
+              key={r.name}
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-40px" }}
+              transition={{ duration: 0.6, delay: i * 0.07 }}
+              className="rounded-2xl p-6 flex flex-col gap-4 hover:-translate-y-1 transition-transform duration-300"
+              style={{
+                background: "var(--surface)",
+                border: "1px solid var(--border)",
+                boxShadow: "0 4px 24px rgba(0,0,0,0.25)",
+              }}
+            >
+              {/* Stars + Google icon */}
+              <div className="flex items-center justify-between">
+                <StarRow count={r.rating} />
+                <GoogleIcon />
+              </div>
+
+              {/* Quote text */}
+              <p className="text-[14px] leading-relaxed flex-1 italic" style={{ color: "rgba(200,225,248,0.78)" }}>
+                "{r.text}"
+              </p>
+
+              {/* Author row */}
+              <div
+                className="flex items-center gap-3 pt-4"
+                style={{ borderTop: "1px solid var(--border)" }}
+              >
+                <div
+                  className="w-10 h-10 rounded-full flex items-center justify-center text-[13px] font-bold text-white flex-shrink-0"
+                  style={{ background: `linear-gradient(135deg, ${r.avatarBg} 0%, ${r.avatarBg}99 100%)`, boxShadow: `0 4px 12px ${r.avatarBg}44` }}
+                >
+                  {r.initials}
+                </div>
+                <div>
+                  <p className="text-[14px] font-semibold text-white leading-tight">{r.name}</p>
+                  <p className="text-[12px] leading-tight" style={{ color: "var(--text-muted)" }}>{r.area} · Google Review</p>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        <div className="text-center mt-12">
+          <p className="text-[13px] mb-5" style={{ color: "var(--text-muted)" }}>
+            Join 230+ satisfied Miami-Dade homeowners
+          </p>
+          <PrimaryCTA href={QUOTE_HASH} large icon="→">Get your free quote</PrimaryCTA>
+        </div>
+      </div>
+    </section>
+  );
+};
+
 // ============ STATS ============
+const StatCounter = ({ value, suffix, decimals, label, sub, index }) => {
+  const [count, elRef] = useCountUp(value, 1800 + index * 200, decimals);
+  const display = decimals > 0 ? count.toFixed(decimals) : count;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{ duration: 0.6, delay: index * 0.1 }}
+      className="text-center md:text-left"
+    >
+      <div
+        ref={elRef}
+        className="font-display italic text-5xl md:text-6xl lg:text-7xl leading-none mb-2"
+        style={{ color: "var(--sun)" }}
+      >
+        {display}{suffix}
+      </div>
+      <div className="text-sm md:text-base font-bold uppercase tracking-[0.12em] text-white mb-1">{label}</div>
+      <div className="text-[12px] md:text-[13px]" style={{ color: "var(--text-muted)" }}>{sub}</div>
+    </motion.div>
+  );
+};
+
 const Stats = () => {
   const stats = [
-    { num: "12+", label: "Years in Miami", sub: "Locally owned & operated" },
-    { num: "850+", label: "Homes Restored", sub: "Across Miami-Dade county" },
-    { num: "4.9★", label: "Google Average", sub: "230+ verified reviews" },
-    { num: "4hr", label: "Quote Response", sub: "Or driveway wash free" },
+    { value: 12,  suffix: "+",  decimals: 0, label: "Years in Miami",  sub: "Locally owned & operated" },
+    { value: 850, suffix: "+",  decimals: 0, label: "Homes Restored",  sub: "Across Miami-Dade county" },
+    { value: 4.9, suffix: "★",  decimals: 1, label: "Google Average",  sub: "230+ verified reviews" },
+    { value: 4,   suffix: "hr", decimals: 0, label: "Quote Response",  sub: "Or driveway wash free" },
   ];
   return (
-    <section className="py-16 md:py-20 relative overflow-hidden" style={{ background: "var(--surface)" }}>
-      {/* Subtle photo bg */}
+    <section className="relative overflow-hidden" style={{ background: "var(--surface)", paddingTop: "5rem", paddingBottom: "5rem" }}>
       <div className="absolute inset-0 overflow-hidden">
-        <img
-          src={`${IMG}/aerial-2.jpg`}
-          alt=""
-          className="w-full h-full object-cover"
-          style={{ opacity: 0.08 }}
-        />
+        <img src={`${IMG}/aerial-2.jpg`} alt="" className="w-full h-full object-cover" style={{ opacity: 0.08 }} />
       </div>
       <div className="relative z-10 max-w-[1400px] mx-auto px-6 md:px-10 lg:px-16">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-10">
           {stats.map((s, i) => (
-            <motion.div
-              key={s.label}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.6, delay: i * 0.1 }}
-              className="text-center md:text-left"
-            >
-              <div className="font-display italic text-5xl md:text-6xl lg:text-7xl leading-none mb-2" style={{ color: "var(--sun)" }}>
-                {s.num}
-              </div>
-              <div className="text-sm md:text-base font-bold uppercase tracking-[0.12em] text-white mb-1">{s.label}</div>
-              <div className="text-[12px] md:text-[13px]" style={{ color: "var(--text-muted)" }}>{s.sub}</div>
-            </motion.div>
+            <StatCounter key={s.label} {...s} index={i} />
           ))}
         </div>
       </div>
@@ -1503,19 +1843,25 @@ function App() {
       <Hero />
       <TrustStrip />
       <FeaturedServices />
+      <ProcessSection />
       <InterrupterBanner
         headline="Don't wait. Get your free estimate today."
         italicWord="today."
         subtext="Most quotes are returned in under 4 hours during business hours."
         variant="orange"
+        topColor="#06101C"
+        bottomColor="#0A1828"
       />
       <ResultsSection />
       <RecentJobs />
+      <TestimonialsSection />
       <InterrupterBanner
         headline="Same-day quotes are available."
         italicWord="available."
         subtext="Just need a phone call. We'll come measure, give you a price, and book the job same week."
         variant="sky"
+        topColor="#0A1828"
+        bottomColor="#0D1B2A"
       />
       <Stats />
       <ServiceAreas />
@@ -1524,6 +1870,8 @@ function App() {
         italicWord="cover it."
         subtext="Call us — we quote luxury exterior projects across all of South Florida."
         variant="pink"
+        topColor="#0A1828"
+        bottomColor="#06101C"
       />
       <FAQ />
       <QuoteForm />
