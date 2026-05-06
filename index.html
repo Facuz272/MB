@@ -10,6 +10,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
+  <!-- GSAP core + ScrollTrigger (cargado antes del bootstrap de React) -->
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+
   <!-- Tailwind via Play CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -101,6 +105,11 @@
    Orange CTA (#FF6B1F) + Pink (#C75A9F) + Sky accent (#A8D5F0)
    + Sun yellow (#FFD24A) on deep dark (#06101C)
    ===================================================================== */
+
+/** @type {import("gsap").gsap} Instancia global de GSAP cargada vía CDN. */
+const gsap = window.gsap;
+/** @type {typeof import("gsap/ScrollTrigger").ScrollTrigger} Plugin de scroll de GSAP. */
+const ScrollTrigger = window.ScrollTrigger;
 
 const IMG = "./images";
 const PHONE_DISPLAY = "(305) 834-2218";
@@ -546,21 +555,209 @@ const Navbar = () => {
   );
 };
 
+// ============ MÓDULO DE ANIMACIONES DEL HERO ============
+
+/**
+ * @typedef {Object} HeroRefs
+ * @property {HTMLElement} seccion      - Elemento raíz de la sección hero.
+ * @property {HTMLElement} bgWrapper    - Contenedor de la imagen de fondo.
+ * @property {HTMLElement} textoColumna - Columna izquierda con copy y CTAs.
+ * @property {HTMLElement} eyebrow      - Etiqueta eyebrow superior.
+ * @property {HTMLElement} headline     - Titular principal H1.
+ * @property {HTMLElement} subhead      - Párrafo subtítulo.
+ * @property {HTMLElement} ctaGroup     - Contenedor de botones de acción.
+ * @property {HTMLElement} trustRow     - Fila de indicadores de confianza.
+ * @property {HTMLElement|null} aside   - Tarjeta lateral de credenciales (solo escritorio).
+ */
+
+const HeroAnimaciones = {
+
+  /**
+   * @description Registra el plugin ScrollTrigger en el core de GSAP.
+   */
+  registrarPlugins() {
+    gsap.registerPlugin(ScrollTrigger);
+  },
+
+  /**
+   * @description Aplica el estado inicial invisible y desplazado a todos los
+   * elementos animables del hero antes de que comience la secuencia de entrada.
+   * @param {HeroRefs} refs - Mapa de referencias a los elementos del hero.
+   */
+  establecerEstadoInicial(refs) {
+    gsap.set(refs.bgWrapper, { scale: 1.18 });
+    gsap.set(
+      [refs.eyebrow, refs.headline, refs.subhead, refs.ctaGroup, refs.trustRow],
+      { autoAlpha: 0, y: 36 }
+    );
+    if (refs.aside) gsap.set(refs.aside, { autoAlpha: 0, x: 44 });
+  },
+
+  /**
+   * @description Construye y reproduce la timeline de animación de entrada del hero.
+   * Cada elemento aparece con ligera demora escalonada para crear sensación de profundidad.
+   * @param {HeroRefs} refs - Mapa de referencias a los elementos del hero.
+   * @returns {gsap.core.Timeline} La timeline de entrada resultante.
+   */
+  crearTimelineEntrada(refs) {
+    const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+
+    tl.to(refs.bgWrapper,  { scale: 1.12, duration: 2.2, ease: "power2.out" }, 0)
+      .to(refs.eyebrow,    { autoAlpha: 1, y: 0, duration: 0.7 },  0.35)
+      .to(refs.headline,   { autoAlpha: 1, y: 0, duration: 1.0 },  0.52)
+      .to(refs.subhead,    { autoAlpha: 1, y: 0, duration: 0.85 }, 0.70)
+      .to(refs.ctaGroup,   { autoAlpha: 1, y: 0, duration: 0.8 },  0.84)
+      .to(refs.trustRow,   { autoAlpha: 1, y: 0, duration: 0.7 },  0.96);
+
+    if (refs.aside) {
+      tl.to(refs.aside, { autoAlpha: 1, x: 0, duration: 1.1, ease: "power2.out" }, 0.55);
+    }
+
+    return tl;
+  },
+
+  /**
+   * @description Configura el efecto parallax de la imagen de fondo vinculado
+   * al progreso de scroll. La imagen se desplaza más lento que la página.
+   * @param {HTMLElement} bgWrapper - Contenedor de la imagen de fondo.
+   * @param {HTMLElement} seccion   - Elemento raíz de la sección hero.
+   */
+  configurarParallaxFondo(bgWrapper, seccion) {
+    gsap.to(bgWrapper, {
+      yPercent: 22,
+      ease: "none",
+      scrollTrigger: {
+        trigger: seccion,
+        start: "top top",
+        end: "bottom top",
+        scrub: true,
+      },
+    });
+  },
+
+  /**
+   * @description Configura el desvanecimiento y desplazamiento vertical de la
+   * columna de texto al avanzar el scroll dentro del hero. Al retroceder, el
+   * efecto se revierte de forma fluida gracias al scrub.
+   * @param {HTMLElement} textoColumna - Contenedor con el copy y CTAs del hero.
+   * @param {HTMLElement} seccion      - Elemento raíz de la sección hero.
+   */
+  configurarScrollTexto(textoColumna, seccion) {
+    gsap.to(textoColumna, {
+      y: -65,
+      autoAlpha: 0,
+      ease: "none",
+      scrollTrigger: {
+        trigger: seccion,
+        start: "18% top",
+        end: "58% top",
+        scrub: 1.2,
+      },
+    });
+  },
+
+  /**
+   * @description Configura la reducción de escala del fondo conforme el hero
+   * abandona el viewport, produciendo un efecto de zoom-out al salir.
+   * @param {HTMLElement} bgWrapper - Contenedor de la imagen de fondo.
+   * @param {HTMLElement} seccion   - Elemento raíz de la sección hero.
+   */
+  configurarZoomSalida(bgWrapper, seccion) {
+    gsap.to(bgWrapper, {
+      scale: 1.0,
+      ease: "none",
+      scrollTrigger: {
+        trigger: seccion,
+        start: "35% top",
+        end: "bottom top",
+        scrub: 1,
+      },
+    });
+  },
+
+  /**
+   * @description Punto de entrada del módulo. Inicializa todas las animaciones
+   * del hero respetando la preferencia de movimiento reducido del sistema operativo.
+   * Cuando el usuario tiene activado "Reducir movimiento", los elementos se revelan
+   * instantáneamente sin transiciones.
+   * @param {HeroRefs} refs - Mapa completo de referencias del hero.
+   * @returns {gsap.MatchMedia} Instancia de matchMedia para revertir en desmontaje.
+   */
+  inicializar(refs) {
+    HeroAnimaciones.registrarPlugins();
+
+    const mm = gsap.matchMedia();
+
+    mm.add(
+      {
+        sinMovimiento: "(prefers-reduced-motion: reduce)",
+        conMovimiento: "(prefers-reduced-motion: no-preference)",
+      },
+      (ctx) => {
+        if (ctx.conditions.sinMovimiento) {
+          gsap.set(
+            [refs.eyebrow, refs.headline, refs.subhead, refs.ctaGroup, refs.trustRow],
+            { autoAlpha: 1, y: 0 }
+          );
+          if (refs.aside) gsap.set(refs.aside, { autoAlpha: 1, x: 0 });
+          gsap.set(refs.bgWrapper, { scale: 1.12 });
+          return;
+        }
+
+        HeroAnimaciones.establecerEstadoInicial(refs);
+        HeroAnimaciones.crearTimelineEntrada(refs);
+        HeroAnimaciones.configurarParallaxFondo(refs.bgWrapper, refs.seccion);
+        HeroAnimaciones.configurarScrollTexto(refs.textoColumna, refs.seccion);
+        HeroAnimaciones.configurarZoomSalida(refs.bgWrapper, refs.seccion);
+      }
+    );
+
+    return mm;
+  },
+};
+
 // ============ HERO — CINEMATIC FULL-BLEED ============
 const Hero = () => {
-  const { scrollY } = useScroll();
-  const imgY = useTransform(scrollY, [0, 700], [0, 180]);
+  const seccionRef     = useRef(null);
+  const bgWrapperRef   = useRef(null);
+  const textoColumnaRef = useRef(null);
+  const eyebrowRef     = useRef(null);
+  const headlineRef    = useRef(null);
+  const subheadRef     = useRef(null);
+  const ctaGroupRef    = useRef(null);
+  const trustRowRef    = useRef(null);
+  const asideRef       = useRef(null);
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      HeroAnimaciones.inicializar({
+        seccion:      seccionRef.current,
+        bgWrapper:    bgWrapperRef.current,
+        textoColumna: textoColumnaRef.current,
+        eyebrow:      eyebrowRef.current,
+        headline:     headlineRef.current,
+        subhead:      subheadRef.current,
+        ctaGroup:     ctaGroupRef.current,
+        trustRow:     trustRowRef.current,
+        aside:        asideRef.current,
+      });
+    }, seccionRef);
+
+    return () => ctx.revert();
+  }, []);
 
   return (
     <section
+      ref={seccionRef}
       id="top"
       className="relative overflow-hidden"
       style={{ minHeight: "92vh", display: "flex", alignItems: "center" }}
     >
-      {/* ---- Cinematic background photo with parallax ---- */}
-      <motion.div
+      {/* Fondo: imagen con Ken Burns + parallax y zoom via GSAP */}
+      <div
+        ref={bgWrapperRef}
         className="absolute inset-0 overflow-hidden"
-        style={{ y: imgY, scale: 1.12 }}
+        style={{ willChange: "transform" }}
       >
         <img
           src={`${IMG}/aerial-1.jpg`}
@@ -578,9 +775,9 @@ const Hero = () => {
             objectPosition: "center 40%",
           }}
         />
-      </motion.div>
+      </div>
 
-      {/* ---- Cinematic dark overlay (multi-layer) ---- */}
+      {/* Overlay gradiente principal */}
       <div
         className="absolute inset-0"
         style={{
@@ -588,7 +785,7 @@ const Hero = () => {
             "linear-gradient(to bottom, rgba(13,79,114,0.20) 0%, rgba(13,79,114,0.52) 45%, rgba(13,79,114,0.90) 80%, #0D4F72 100%)",
         }}
       />
-      {/* Side vignette */}
+      {/* Viñeta lateral */}
       <div
         className="absolute inset-0"
         style={{
@@ -597,17 +794,16 @@ const Hero = () => {
         }}
       />
 
-      {/* ---- Content ---- */}
-      <div className="relative z-10 w-full max-w-[1400px] mx-auto px-4 sm:px-4 sm:px-6 md:px-10 lg:px-16 pt-6 md:pt-16 pb-20 md:pb-28">
+      {/* Contenido principal */}
+      <div className="relative z-10 w-full max-w-[1400px] mx-auto px-4 sm:px-6 md:px-10 lg:px-16 pt-6 md:pt-16 pb-20 md:pb-28">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
 
-          {/* LEFT: copy + CTAs */}
-          <div className="lg:col-span-7">
-            {/* Eyebrow chip */}
-            <motion.div
-              initial={{ opacity: 0, y: 14 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7 }}
+          {/* Columna izquierda — copy y CTAs */}
+          <div ref={textoColumnaRef} className="lg:col-span-7" style={{ willChange: "transform, opacity" }}>
+
+            {/* Eyebrow */}
+            <div
+              ref={eyebrowRef}
               className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 mb-7"
               style={{
                 background: "rgba(255,255,255,0.08)",
@@ -625,13 +821,11 @@ const Hero = () => {
               <span className="text-[12px] font-medium" style={{ color: "rgba(200,225,248,0.85)" }}>
                 Spring availability — Miami-Dade luxury homes
               </span>
-            </motion.div>
+            </div>
 
-            {/* Headline */}
-            <motion.h1
-              initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.9, delay: 0.1 }}
+            {/* Titular principal */}
+            <h1
+              ref={headlineRef}
               className="text-[2rem] sm:text-[2.7rem] md:text-[4rem] lg:text-[5rem] font-extrabold leading-[1.05] tracking-[-0.03em] mb-6 text-white"
             >
               Free roof &amp; exterior{" "}
@@ -647,37 +841,31 @@ const Hero = () => {
               >
                 quote in 4 hours.
               </span>
-            </motion.h1>
+            </h1>
 
-            {/* Subhead */}
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.9, delay: 0.2 }}
+            {/* Subtítulo */}
+            <p
+              ref={subheadRef}
               className="text-base md:text-[1.1rem] max-w-xl mb-9 leading-relaxed"
               style={{ color: "rgba(200,225,248,0.8)" }}
             >
               Miami's softwash specialists for roofs, pavers, and exteriors.{" "}
               <strong className="text-white font-semibold">Paint-safe, plant-safe, no high-pressure damage.</strong>{" "}
               Get your itemized quote today — or we wash your driveway free.
-            </motion.p>
+            </p>
 
-            {/* DUAL CTAs */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.9, delay: 0.3 }}
+            {/* Botones de acción */}
+            <div
+              ref={ctaGroupRef}
               className="flex flex-wrap items-center gap-3 mb-10"
             >
               <PrimaryCTA href={QUOTE_HASH} large icon="→">Get my free quote</PrimaryCTA>
               <SecondaryCTA href={PHONE_TEL} large ghost>{PHONE_DISPLAY}</SecondaryCTA>
-            </motion.div>
+            </div>
 
-            {/* Trust row */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.9, delay: 0.5 }}
+            {/* Fila de confianza */}
+            <div
+              ref={trustRowRef}
               className="flex flex-wrap items-center gap-5 text-[13px]"
               style={{ color: "rgba(200,225,248,0.65)" }}
             >
@@ -689,18 +877,16 @@ const Hero = () => {
               <span>Licensed &amp; $1M Insured</span>
               <span className="opacity-30">|</span>
               <span>Google Guaranteed</span>
-            </motion.div>
+            </div>
           </div>
 
-          {/* RIGHT: floating credential card — hidden on mobile, shown lg+ */}
-          <motion.aside
-            initial={{ opacity: 0, x: 30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 1.0, delay: 0.4 }}
+          {/* Tarjeta de credenciales — solo escritorio (lg+) */}
+          <aside
+            ref={asideRef}
             className="lg:col-span-5 hidden lg:block"
+            style={{ willChange: "transform, opacity" }}
           >
             <div className="relative">
-              {/* Glow orbs */}
               <div className="absolute -top-10 -left-10 w-48 h-48 rounded-full opacity-25 blur-3xl" style={{ background: "var(--sky-accent)" }} />
               <div className="absolute -bottom-10 -right-10 w-48 h-48 rounded-full opacity-20 blur-3xl" style={{ background: "var(--pink)" }} />
 
@@ -734,13 +920,12 @@ const Hero = () => {
 
                 <div className="mb-6 h-px" style={{ background: "rgba(255,255,255,0.07)" }} />
 
-                {/* Trust badges */}
                 <ul className="grid grid-cols-2 gap-3 text-[13px] mb-6">
                   {[
                     { icon: "shield", label: "Licensed" },
-                    { icon: "lock", label: "$1M Insured" },
-                    { icon: "check", label: "Google Guaranteed" },
-                    { icon: "star", label: "4.9★ Average" },
+                    { icon: "lock",   label: "$1M Insured" },
+                    { icon: "check",  label: "Google Guaranteed" },
+                    { icon: "star",   label: "4.9★ Average" },
                   ].map((b) => (
                     <li key={b.label} className="flex items-center gap-2 font-medium" style={{ color: "var(--text)" }}>
                       <span
@@ -748,9 +933,9 @@ const Hero = () => {
                         style={{ background: "rgba(168,213,240,0.1)", color: "var(--sky-accent)" }}
                       >
                         {b.icon === "shield" && <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2C20 17.5 12 22 12 22z"/></svg>}
-                        {b.icon === "lock" && <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>}
-                        {b.icon === "check" && <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>}
-                        {b.icon === "star" && <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>}
+                        {b.icon === "lock"   && <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>}
+                        {b.icon === "check"  && <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>}
+                        {b.icon === "star"   && <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>}
                       </span>
                       {b.label}
                     </li>
@@ -760,7 +945,8 @@ const Hero = () => {
                 <PrimaryCTA href={QUOTE_HASH} fullWidth icon="→">Request quote now</PrimaryCTA>
               </div>
             </div>
-          </motion.aside>
+          </aside>
+
         </div>
       </div>
     </section>
