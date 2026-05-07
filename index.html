@@ -236,6 +236,7 @@
   <!-- GSAP core + plugins (todos gratuitos desde adquisición de Webflow) -->
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/Observer.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/SplitText.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/CustomEase.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrambleTextPlugin.min.js"></script>
@@ -342,6 +343,8 @@ const SplitText = window.SplitText || null;
 const CustomEase = window.CustomEase || null;
 /** @type {typeof import("gsap/ScrambleTextPlugin").ScrambleTextPlugin|null} Plugin de texto scramble de GSAP. */
 const ScrambleTextPlugin = window.ScrambleTextPlugin || null;
+/** @type {typeof import("gsap/Observer").Observer|null} Plugin de detección de dirección de scroll de GSAP. */
+const Observer = window.Observer || null;
 
 const IMG = "./images";
 const PHONE_DISPLAY = "(305) 834-2218";
@@ -508,6 +511,32 @@ const StyleInjector = () => (
     ::-webkit-scrollbar-thumb { background: var(--surface-2); border-radius: 4px; }
     ::-webkit-scrollbar-thumb:hover { background: var(--sky-accent); }
 
+    /* ---------- Navbar inteligente (GSAP Observer) ---------- */
+    /*
+     * La clase .navbar-header controla el glass effect a través del data-attribute [data-scrolled].
+     * GSAP gestiona el transform (yPercent) por separado — NO usar transition en transform
+     * para evitar conflictos con el tween de GSAP Observer.
+     */
+    .navbar-header {
+      background: rgba(10,62,90,0.0);
+      backdrop-filter: blur(0px);
+      -webkit-backdrop-filter: blur(0px);
+      border-bottom: 1px solid transparent;
+      box-shadow: none;
+      /* Solo transicionar propiedades de glass — nunca transform */
+      transition: background 0.45s ease, backdrop-filter 0.45s ease,
+                  -webkit-backdrop-filter 0.45s ease, border-color 0.45s ease,
+                  box-shadow 0.45s ease;
+      will-change: transform;
+    }
+    .navbar-header[data-scrolled="true"] {
+      background: rgba(10,62,90,0.97);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      box-shadow: 0 4px 40px rgba(0,0,0,0.3);
+    }
+
     /* ---------- B/A slider ---------- */
     .ba-slider, .ba-slider * { user-select: none; -webkit-user-select: none; }
     .ba-slider img { -webkit-user-drag: none; pointer-events: none; }
@@ -646,21 +675,95 @@ const NAV_LINKS = [
   ["FAQ", "#faq"],
 ];
 
+/**
+ * @module NavbarAnimaciones
+ * @description Módulo que gestiona el comportamiento inteligente de la navbar con GSAP.
+ *
+ * Comportamiento:
+ * - Oculta la navbar con `yPercent: -100` al scrollear hacia abajo (Stripe / Linear / Vercel pattern).
+ * - La muestra de nuevo con `yPercent: 0` al scrollear hacia arriba.
+ * - No se oculta mientras el menú móvil esté abierto.
+ * - No se oculta si el usuario está dentro de los primeros 80 px de la página.
+ * - Aplica el efecto vidrio (glass) a través de ScrollTrigger para evitar conflictos con React state.
+ */
+const NavbarAnimaciones = {
+  /**
+   * @description Inicializa Observer (hide/show) + ScrollTrigger (glass effect) para la navbar.
+   * @param {HTMLElement} headerEl - Elemento <header> de la navbar.
+   * @param {React.MutableRefObject<boolean>} menuOpenRef - Ref que indica si el menú móvil está abierto.
+   * @returns {Function} Función de cleanup que destruye Observer y ScrollTrigger asociados.
+   */
+  inicializar(headerEl, menuOpenRef) {
+    if (!headerEl) return () => {};
+
+    const cleanups = [];
+    const UMBRAL_TOP_PX = 80; // px desde el top antes de activar el hide
+
+    // ── Glass background (ScrollTrigger) ──────────────────────────────────────
+    // Se aplica/quita un data-attribute; la transición visual la maneja CSS (sin conflicto con GSAP transform).
+    const glassTrigger = ScrollTrigger.create({
+      start: `top+=${UMBRAL_TOP_PX} top`,
+      onEnter:     () => headerEl.setAttribute("data-scrolled", "true"),
+      onLeaveBack: () => headerEl.removeAttribute("data-scrolled"),
+    });
+    cleanups.push(() => glassTrigger.kill());
+
+    // ── Hide / Show con Observer ──────────────────────────────────────────────
+    if (Observer) {
+      gsap.registerPlugin(Observer);
+
+      let oculta = false;
+
+      /** @description Oculta la navbar deslizándola hacia arriba. */
+      const ocultar = () => {
+        if (oculta) return;
+        oculta = true;
+        gsap.to(headerEl, { yPercent: -100, duration: 0.38, ease: "power2.inOut", overwrite: true });
+      };
+
+      /** @description Muestra la navbar deslizándola hacia abajo hasta su posición original. */
+      const mostrar = () => {
+        if (!oculta) return;
+        oculta = false;
+        gsap.to(headerEl, { yPercent: 0, duration: 0.35, ease: "power2.out", overwrite: true });
+      };
+
+      const obs = Observer.create({
+        type: "scroll,wheel,touch",
+        tolerance: 8,
+        onDown: () => {
+          // No ocultar si: menú abierto, o estamos cerca del top de la página
+          if (menuOpenRef.current || window.scrollY < UMBRAL_TOP_PX) return;
+          ocultar();
+        },
+        onUp: () => mostrar(),
+      });
+
+      cleanups.push(() => obs.kill());
+    }
+
+    return () => cleanups.forEach(fn => fn());
+  },
+};
+
 const Navbar = () => {
-  const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const headerRef  = useRef(null);
+  const menuOpenRef = useRef(false);
 
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 60);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+  // Mantiene menuOpenRef sincronizado con el estado React (evita closures obsoletos en Observer)
+  useEffect(() => { menuOpenRef.current = menuOpen; }, [menuOpen]);
 
+  // Si el menú se abre mientras la navbar estaba oculta → forzar que vuelva a aparecer
   useEffect(() => {
+    if (menuOpen && headerRef.current) {
+      gsap.to(headerRef.current, { yPercent: 0, duration: 0.3, ease: "power2.out", overwrite: true });
+    }
     document.body.style.overflow = menuOpen ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
   }, [menuOpen]);
 
+  // Teclado: Escape cierra el menú móvil
   useEffect(() => {
     if (!menuOpen) return;
     const onKey = (e) => { if (e.key === "Escape") setMenuOpen(false); };
@@ -668,18 +771,19 @@ const Navbar = () => {
     return () => document.removeEventListener("keydown", onKey);
   }, [menuOpen]);
 
+  // Inicializar NavbarAnimaciones (Observer + ScrollTrigger glass)
+  useEffect(() => {
+    const cleanup = NavbarAnimaciones.inicializar(headerRef.current, menuOpenRef);
+    return cleanup;
+  }, []);
+
   const close = () => setMenuOpen(false);
 
   return (
     <>
       <header
-        className="sticky top-0 z-50 w-full transition-all duration-500"
-        style={{
-          background: scrolled ? "rgba(10,62,90,0.97)" : "rgba(10,62,90,0.0)",
-          backdropFilter: scrolled ? "blur(20px)" : "blur(0px)",
-          borderBottom: scrolled ? "1px solid rgba(255,255,255,0.06)" : "1px solid transparent",
-          boxShadow: scrolled ? "0 4px 40px rgba(0,0,0,0.3)" : "none",
-        }}
+        ref={headerRef}
+        className="sticky top-0 z-50 w-full navbar-header"
       >
         <div className="max-w-[1400px] mx-auto px-4 md:px-6 lg:px-10 py-3 md:py-4 flex items-center justify-between gap-4">
           {/* Logo */}
