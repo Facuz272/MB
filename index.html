@@ -548,6 +548,9 @@ const StyleInjector = () => (
         0 0 32px rgba(199, 90, 159, 0.40),
         0 12px 36px rgba(0, 0, 0, 0.40);
 
+      /* Logo se sale por arriba/abajo de la pill — overflow visible obligatorio */
+      overflow: visible;
+
       transition: box-shadow 0.45s ease;
       will-change: transform;
     }
@@ -1202,18 +1205,22 @@ const Navbar = () => {
         className="z-50 navbar-header"
       >
         {/*
-          Capsule flotante:
-          · `position: fixed; top: 14px` y centrado con margin-inline auto desde CSS
-            (NO desde transform, para no chocar con el GSAP entrance/Observer).
-          · Layout 3 columnas [1fr | auto | 1fr] mantiene el logo perfectamente
-            centrado independientemente del contenido de los costados.
-          · z-50 sobre el menú móvil (z-40) para que el hamburger quede siempre clickable.
+          Layout simétrico con pop-out logo:
+          · Flex con .nav-left y .nav-right en flex:1, justify-content opuestos.
+          · Placeholder central reserva el ancho del logo dentro del flow para
+            que las dos columnas flex:1 queden simétricas y el contenido no
+            choque con el logo.
+          · El logo está OUT of flow (position absolute, z-10) y se sale por
+            arriba/abajo de la cápsula gracias a height > navbar height +
+            overflow:visible en .navbar-header.
+          · Padding interior generoso (px-6 md:px-10) para separar contenido
+            del borde neon.
         */}
-        <div className="px-3 md:px-5 lg:px-6 py-2 md:py-2.5 relative">
-          <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 md:gap-4">
+        <div className="px-6 md:px-10 py-2 md:py-2.5 relative">
+          <div className="flex items-center w-full">
 
-            {/* ── IZQUIERDA: Services · Results · Areas (lg+) ── */}
-            <nav className="hidden lg:flex items-center justify-end gap-0.5">
+            {/* ── nav-left · flex:1 · pegada al borde izquierdo ── */}
+            <nav className="nav-left hidden lg:flex flex-1 items-center justify-start gap-2 xl:gap-3">
               {NAV_LINKS_LEFT.map(([label, href]) => (
                 <a
                   key={href}
@@ -1226,28 +1233,19 @@ const Navbar = () => {
                 </a>
               ))}
             </nav>
-            {/* Spacer en mobile — mantiene el logo centrado al ocupar 1fr aunque esté vacío */}
-            <div className="lg:hidden" aria-hidden="true" />
+            {/* En mobile (< lg), nav-left no se renderiza — este spacer ocupa flex:1
+                para mantener simetría con el cluster derecho que sí tiene el hamburger. */}
+            <div className="lg:hidden flex-1" aria-hidden="true" />
 
-            {/* ── CENTRO: Logo MB Softwash (más chico para encajar en la pill) ── */}
-            <a
-              href="#top"
-              onClick={close}
-              className="flex items-center justify-center flex-shrink-0"
-              aria-label="MB Softwash · Inicio"
-            >
-              <img
-                src={`${IMG}/mb-logo.png`}
-                alt="MB Softwash Miami"
-                className="h-10 md:h-12 w-auto"
-                loading="eager"
-                decoding="async"
-              />
-            </a>
+            {/* ── Placeholder del logo en el flow ──
+                Reserva ancho fijo central para que las dos columnas flex:1 queden
+                simétricas y NO se solapen con el logo absolutamente posicionado.
+                Ancho > height del logo (logo es ~1:1) + buffer visual. */}
+            <div className="w-[110px] md:w-[140px] flex-shrink-0" aria-hidden="true" />
 
-            {/* ── DERECHA: FAQ · phone · Free Estimate compacto · hamburger ── */}
-            <div className="flex items-center justify-end gap-1.5 md:gap-2.5">
-              <nav className="hidden lg:flex items-center gap-0.5">
+            {/* ── nav-right · flex:1 · pegada al borde derecho ── */}
+            <div className="nav-right flex flex-1 items-center justify-end gap-1.5 md:gap-2.5">
+              <nav className="hidden lg:flex items-center gap-2 xl:gap-3">
                 {NAV_LINKS_RIGHT.map(([label, href]) => (
                   <a
                     key={href}
@@ -1300,6 +1298,30 @@ const Navbar = () => {
             </div>
 
           </div>
+
+          {/*
+            POP-OUT LOGO:
+            · position: absolute · centrado con left/top:50% + -translate-1/2
+            · z-10 sobre el flex flow para no quedar cortado
+            · drop-shadow para integrarlo con el efecto neon
+            · mucho más grande (h-[100px] mobile, h-[120px] desktop) que el alto
+              de la cápsula (~72px) — sobresale ~14-24px arriba y abajo.
+          */}
+          <a
+            href="#top"
+            onClick={close}
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 flex items-center justify-center transition-transform duration-300 hover:scale-105"
+            aria-label="MB Softwash · Inicio"
+          >
+            <img
+              src={`${IMG}/mb-logo.png`}
+              alt="MB Softwash Miami"
+              className="block h-[100px] md:h-[120px] w-auto"
+              style={{ filter: "drop-shadow(0 6px 20px rgba(0,0,0,0.45)) drop-shadow(0 0 16px rgba(45,212,255,0.25))" }}
+              loading="eager"
+              decoding="async"
+            />
+          </a>
         </div>
       </header>
 
@@ -1311,8 +1333,8 @@ const Navbar = () => {
         aria-hidden={!menuOpen}
       >
         {/* Spacer para la altura del header */}
-        {/* Spacer = altura del floating capsule (~58px) + top offset (14px) + 12px de aire */}
-        <div className="h-[84px] flex-shrink-0" />
+        {/* Spacer = top offset (14px) + capsule height (~72px) + pop-out logo extra (~24px) + buffer */}
+        <div className="h-[130px] flex-shrink-0" />
 
         <nav className="flex flex-col px-6 pt-8 pb-6 flex-1 overflow-y-auto">
           {NAV_LINKS.map(([label, href]) => (
