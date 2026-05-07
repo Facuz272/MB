@@ -1913,126 +1913,198 @@ const SectionHeader = ({ eyebrow, headline, italicWord, subtext, align = "left" 
   </div>
 );
 
-// ============ FEATURED SERVICES ============
-const FeaturedServices = () => {
-  const services = [
-    {
-      title: "Roof Softwash",
-      subtitle: "Tile, shingle & flat roofs",
-      copy: "Low-pressure cleaning that kills algae, mildew, and mold at the root — without damaging tiles or flashing.",
-      span: "md:col-span-7",
-      img: `${IMG}/roof-red-clean.jpg`,
-    },
-    {
-      title: "Paver Sealing",
-      subtitle: "Driveways & walkways",
-      copy: "Deep clean + wet-look sealer. Locks pavers, enriches color, blocks weeds for 3+ years.",
-      span: "md:col-span-5",
-      img: `${IMG}/driveway-after.jpg`,
-    },
-    {
-      title: "House Wash",
-      subtitle: "Stucco, paint & shingles",
-      copy: "Paint-safe surfactants remove black streaks, mildew, and salt residue. No surface damage.",
-      span: "md:col-span-5",
-      img: `${IMG}/exterior-wall-after.jpg`,
-    },
-    {
-      title: "Fence Restoration",
-      subtitle: "Wood, vinyl & aluminum",
-      copy: "Restores natural grain on wood. Removes mold and saltwater staining from any fencing material.",
-      span: "md:col-span-7",
-      img: `${IMG}/fence-after.jpg`,
-    },
-  ];
+// ============ TRUST & GUARANTEE SECTION ============
+//
+// Segunda sección de la home — reemplaza la antigua "What we clean" según
+// feedback del cliente. Layout 2-col en desktop (texto izq · foto+badge der),
+// stacked en mobile, fondo blanco con "pink interlining" para mantener la
+// estética del header.
+const TrustGuarantee = () => (
+  <section
+    id="trust"
+    data-gsap-section
+    className="relative"
+    style={{
+      background: "#ffffff",
+      // Padding generoso (80px vertical / 5% horizontal). Fallback px-4 en
+      // pantallas micro para no chocar con los bordes.
+      padding: "80px 5%",
+      // Pink interlining — borde superior rosa grueso + halo sutil que
+      // empalma con la cápsula del header.
+      borderTop: "4px solid var(--brand-pink)",
+      borderBottom: "4px solid var(--brand-pink)",
+    }}
+  >
+    <div className="max-w-[1200px] mx-auto">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
 
-  return (
-    <section id="services" className="py-16 md:py-24" style={{ background: "var(--dark)" }}>
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-10 lg:px-16">
-        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-10 md:mb-14">
-          <SectionHeader
-            eyebrow="Our Services"
-            headline="What we clean"
-            italicWord="clean"
-            subtext="Four core services for Miami-Dade luxury homes. Each one priced by the square foot, with an itemized written quote in 4 hours."
-          />
-          <div className="flex-shrink-0">
-            <PrimaryCTA href={QUOTE_HASH}>Get pricing</PrimaryCTA>
+        {/* ── COLUMNA IZQUIERDA — texto + badges de garantía ── */}
+        <div data-gsap-header className="order-1">
+          <h2
+            data-gsap-headline
+            className="text-[1.9rem] md:text-[2.4rem] lg:text-[2.8rem] font-extrabold leading-[1.1] tracking-[-0.02em] mb-6"
+            style={{ color: "var(--brand-dark-blue)" }}
+          >
+            Five Star Rated business &amp;{" "}
+            <span style={{ color: "var(--brand-pink)" }}>
+              100% Money Back Guaranteed
+            </span>{" "}
+            by Google.
+          </h2>
+
+          <p
+            data-gsap-subtext
+            className="text-base md:text-[1.05rem] leading-relaxed mb-8 max-w-xl font-medium"
+            style={{ color: "var(--brand-dark-blue)" }}
+          >
+            With more than 150 five stars reviews and 100% money back guaranteed
+            by Google Guaranteed, meaning that MB Softwash has been screened by
+            Google and is guaranteed to get the job right or money back up to
+            $2,000 by Google Guaranteed (a lifetime cap).
+          </p>
+
+          {/* Badges row — Google Guaranteed + 5.0 Star Customer Reviews */}
+          <div className="flex flex-wrap items-center gap-4">
+
+            {/* Google Guaranteed badge */}
+            <div
+              className="flex items-center gap-3 px-5 py-3 rounded-2xl"
+              style={{
+                background: "#ffffff",
+                border: "1.5px solid var(--brand-pink)",
+                boxShadow: "0 6px 18px -4px rgba(199,90,159,0.25), 0 0 0 1px rgba(199,90,159,0.08) inset",
+              }}
+            >
+              {/* Google G logo (SVG inline para no depender de assets externos) */}
+              <svg className="w-8 h-8 flex-shrink-0" viewBox="0 0 48 48" aria-hidden="true">
+                <path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4C12.955 4 4 12.955 4 24s8.955 20 20 20s20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z" />
+                <path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4C16.318 4 9.656 8.337 6.306 14.691z" />
+                <path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238A11.91 11.91 0 0 1 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z" />
+                <path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303a12.04 12.04 0 0 1-4.087 5.571l.003-.002l6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z" />
+              </svg>
+              <div className="flex flex-col leading-tight">
+                <span
+                  className="text-[11px] font-extrabold uppercase tracking-[0.14em]"
+                  style={{ color: "var(--brand-dark-blue)" }}
+                >
+                  Google Guaranteed
+                </span>
+                <span
+                  className="text-[12px] font-medium"
+                  style={{ color: "var(--brand-dark-blue)", opacity: 0.7 }}
+                >
+                  Up to $2,000 protection
+                </span>
+              </div>
+            </div>
+
+            {/* 5.0 Star Customer Reviews */}
+            <div
+              className="flex items-center gap-3 px-5 py-3 rounded-2xl"
+              style={{
+                background: "#ffffff",
+                border: "1.5px solid var(--brand-pink)",
+                boxShadow: "0 6px 18px -4px rgba(199,90,159,0.25), 0 0 0 1px rgba(199,90,159,0.08) inset",
+              }}
+            >
+              <div
+                className="flex items-center justify-center w-8 h-8 flex-shrink-0 rounded-lg"
+                style={{ background: "rgba(13,79,114,0.06)" }}
+              >
+                <span
+                  className="text-base font-extrabold"
+                  style={{ color: "var(--brand-dark-blue)" }}
+                >
+                  5.0
+                </span>
+              </div>
+              <div className="flex flex-col leading-tight">
+                <span
+                  className="text-[11px] font-extrabold uppercase tracking-[0.14em]"
+                  style={{ color: "var(--brand-dark-blue)" }}
+                >
+                  Customer Reviews
+                </span>
+                <span className="text-[14px] tracking-wide" aria-label="5 stars">
+                  <span style={{ color: "#F5A623" }}>★★★★★</span>
+                  <span
+                    className="text-[11px] font-medium ml-1.5"
+                    style={{ color: "var(--brand-dark-blue)", opacity: 0.7 }}
+                  >
+                    150+ reviews
+                  </span>
+                </span>
+              </div>
+            </div>
+
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-5 md:gap-6">
-          {services.map((s, i) => (
-            <div
-              key={s.title}
-              data-gsap-card
-              className={`group relative rounded-3xl overflow-hidden ${s.span}`}
-              style={{
-                minHeight: s.span === "md:col-span-7" ? "460px" : "400px",
-                border: "1px solid rgba(255,255,255,0.05)",
-                boxShadow: "0 8px 48px rgba(0,0,0,0.45)",
+        {/* ── COLUMNA DERECHA — team photo + badge "Top Rated" ── */}
+        <div className="relative order-2 mx-auto w-full max-w-[500px] lg:max-w-none">
+
+          {/* Wrapper de la foto: borde rosa + sombra + glow rosa */}
+          <div
+            className="relative rounded-3xl overflow-hidden"
+            style={{
+              border: "3px solid var(--brand-pink)",
+              boxShadow:
+                "0 24px 64px -18px rgba(13,79,114,0.30), " +
+                "0 0 32px rgba(199,90,159,0.20), " +
+                "0 0 0 1px rgba(199,90,159,0.10) inset",
+            }}
+          >
+            <img
+              src="/api/placeholder/500/400"
+              alt="MB Softwash team"
+              className="team-photo block w-full h-auto"
+              loading="lazy"
+              decoding="async"
+              /* Fallback elegante si /api/placeholder/... no resuelve (no hay
+                 endpoint estático en GitHub Pages) — usa una foto del repo
+                 mientras el cliente sube la foto real del equipo. */
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = `${IMG}/process-2.jpg`;
               }}
-            >
-              {/* Full-bleed photo */}
-              <img
-                src={s.img}
-                alt={s.title}
-                loading="lazy"
-                decoding="async"
-                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                style={{ zIndex: 0 }}
-              />
+            />
+          </div>
 
-              {/* Cinematic gradient — transparent top, near-black bottom */}
-              <div
-                className="absolute inset-0"
-                style={{
-                  background: "linear-gradient(to top, rgba(13,79,114,0.98) 0%, rgba(13,79,114,0.65) 38%, rgba(13,79,114,0.12) 70%, transparent 100%)",
-                  zIndex: 1,
-                }}
-              />
-
-              {/* Hover: subtle brightness lift */}
-              <div
-                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                style={{ background: "rgba(255,107,31,0.04)", zIndex: 2 }}
-              />
-
-              {/* Subtitle badge — top-left */}
-              <div className="absolute top-5 left-5 z-10">
-                <span
-                  className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.15em] text-white"
-                  style={{
-                    background: "rgba(13,79,114,0.65)",
-                    border: "1px solid rgba(255,255,255,0.15)",
-                    backdropFilter: "blur(8px)",
-                  }}
-                >
-                  {s.subtitle}
+          {/* Badge "Top Rated" — position absolute, esquina superior derecha,
+              sale de la foto para reforzar la sensación 3D que ya tenemos en el logo. */}
+          <div
+            className="absolute -top-5 -right-5 md:-top-6 md:-right-6 z-10 flex flex-col items-center justify-center w-24 h-24 md:w-28 md:h-28 rounded-full text-center select-none"
+            style={{
+              background: "linear-gradient(135deg, var(--brand-pink) 0%, var(--pink-soft) 100%)",
+              boxShadow:
+                "0 0 0 3px #ffffff, " +
+                "0 0 0 5px var(--brand-pink), " +
+                "0 12px 28px -6px rgba(199,90,159,0.55), " +
+                "0 0 22px rgba(199,90,159,0.45)",
+            }}
+            aria-label="Top Rated"
+          >
+            <div className="flex items-center gap-0.5 mb-0.5" aria-hidden="true">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <span key={i} className="text-[8px] md:text-[10px] leading-none" style={{ color: "#FFD24A" }}>
+                  ★
                 </span>
-              </div>
-
-              {/* Content — pinned to bottom */}
-              <div className="absolute inset-x-0 bottom-0 z-10 p-6 md:p-8">
-                <h3 className="text-2xl md:text-3xl font-bold mb-2 text-white">{s.title}</h3>
-                <p
-                  className="text-[14px] md:text-[15px] leading-relaxed mb-5"
-                  style={{ color: "rgba(200,225,248,0.8)", maxWidth: "480px" }}
-                >
-                  {s.copy}
-                </p>
-                <div className="flex flex-wrap items-center gap-2">
-                  <PrimaryCTA href={QUOTE_HASH} icon="→">Quote this service</PrimaryCTA>
-                  <SecondaryCTA href={PHONE_TEL}>Call</SecondaryCTA>
-                </div>
-              </div>
+              ))}
             </div>
-          ))}
+            <div className="text-white text-[10px] md:text-[11px] font-extrabold uppercase tracking-[0.18em] leading-none">
+              Top
+            </div>
+            <div className="text-white text-[10px] md:text-[11px] font-extrabold uppercase tracking-[0.18em] leading-none mt-0.5">
+              Rated
+            </div>
+          </div>
+
         </div>
+
       </div>
-    </section>
-  );
-};
+    </div>
+  </section>
+);
 
 // ============ PROCESS SECTION ============
 const ProcessSection = () => {
@@ -3052,7 +3124,7 @@ function App() {
       <Navbar />
       <Hero />
       <TrustStrip />
-      <FeaturedServices />
+      <TrustGuarantee />
       <ProcessSection />
       <InterrupterBanner
         headline="Don't wait. Get your free estimate today."
