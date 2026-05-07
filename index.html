@@ -1280,7 +1280,11 @@ const HeroAnimaciones = {
     const ease = CustomEase ? "mb.out" : "power4.out";
 
     if (!SplitText) {
-      return gsap.from(headline, { autoAlpha: 0, y: 40, duration: 1.0, ease });
+      // Fallback sin SplitText (plugin Club). El H1 ya viene pre-seteado a
+      // autoAlpha:0, y:40 desde establecerEstadoInicial — animamos hacia el
+      // estado visible con `to`, no `from` (which leería el estado actual
+      // como destino y dejaría el H1 invisible).
+      return gsap.to(headline, { autoAlpha: 1, y: 0, duration: 1.0, ease });
     }
 
     const split = SplitText.create(headline, { type: "chars,words", smartWrap: true });
