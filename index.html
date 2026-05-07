@@ -1573,25 +1573,59 @@ const SeccionesAnimaciones = {
   },
 
   /**
-   * @description Anima cada titular de sección con SplitText y máscara de líneas.
-   * Las líneas suben desde detrás de un clip invisible al entrar en el viewport.
+   * @description Anima cada bloque SectionHeader con una timeline coordinada de tres pasos:
+   *
+   *  1. Eyebrow pill  — sube 14px + fade-in (0.55s)
+   *  2. Líneas del H2 — salen de detrás de la máscara de clip con stagger (0.9s × línea)
+   *  3. Subtext <p>   — sube 16px + fade-in solapado con el final del H2 (0.65s)
+   *
+   * Cada header tiene su propia `gsap.timeline({ paused: true })` activada por
+   * un ScrollTrigger independiente (`once: true`) cuando el contenedor entra al 86% del viewport.
+   * La separación de timelines garantiza que cada sección anime de forma autónoma
+   * sin que el scroll de otra la cancele.
+   *
+   * Compatible con `italicWord`: SplitText divide en líneas completas (type:"lines"),
+   * por lo que el `<span>` del italicWord queda dentro de su línea con su estilo intacto.
    */
   animarTitulares() {
     if (!SplitText) return;
     const ease = CustomEase ? "mb.out" : "power3.out";
 
-    document.querySelectorAll("[data-gsap-headline]").forEach(el => {
-      const split = SplitText.create(el, { type: "lines", mask: "lines" });
+    document.querySelectorAll("[data-gsap-headline]").forEach(h2 => {
+      const contenedor = h2.closest("[data-gsap-header]") || h2.parentElement;
+      const eyebrow    = contenedor.querySelector("[data-gsap-eyebrow]");
+      const subtexto   = contenedor.querySelector("[data-gsap-subtext]");
+
+      // type:"lines" + mask:"lines" crea automáticamente un div overflow:hidden
+      // por línea — efecto de cortinilla sin CSS adicional.
+      const split = SplitText.create(h2, { type: "lines", mask: "lines" });
+
+      // Timeline propia por header — paused hasta que ScrollTrigger la dispara
+      const tl = gsap.timeline({ paused: true, defaults: { ease } });
+
+      // ① Eyebrow: fade-in + leve rise
+      if (eyebrow) {
+        tl.from(eyebrow, { opacity: 0, y: 14, duration: 0.55 });
+      }
+
+      // ② Líneas del headline: cada una sube desde detrás de su máscara
+      tl.from(
+        split.lines,
+        { yPercent: 110, duration: 0.9, stagger: 0.07 },
+        eyebrow ? "-=0.3" : 0,   // solapar con eyebrow si existe
+      );
+
+      // ③ Subtext: fade-in con leve desplazamiento, solapado con el final del headline
+      if (subtexto) {
+        tl.from(subtexto, { opacity: 0, y: 16, duration: 0.65 }, "-=0.5");
+      }
+
+      // Disparar la timeline cuando el contenedor completo entra en el viewport
       ScrollTrigger.create({
-        trigger: el,
-        start: "top 88%",
+        trigger: contenedor,
+        start: "top 86%",
         once: true,
-        onEnter: () => gsap.from(split.lines, {
-          yPercent: 110,
-          duration: 0.95,
-          ease,
-          stagger: 0.08,
-        }),
+        onEnter: () => tl.play(),
       });
     });
   },
@@ -1669,9 +1703,14 @@ const SeccionesAnimaciones = {
 // ============ SECTION HEADER ============
 const SectionHeader = ({ eyebrow, headline, italicWord, subtext, align = "left" }) => (
   <div
+    data-gsap-header
     className={`mb-10 md:mb-14 ${align === "center" ? "text-center mx-auto" : ""} ${align === "center" ? "max-w-2xl" : "max-w-3xl"}`}
   >
-    <div className="inline-flex items-center gap-2 rounded-full px-3 py-1 mb-4" style={{ background: "rgba(168,213,240,0.08)", border: "1px solid rgba(168,213,240,0.15)" }}>
+    <div
+      data-gsap-eyebrow
+      className="inline-flex items-center gap-2 rounded-full px-3 py-1 mb-4"
+      style={{ background: "rgba(168,213,240,0.08)", border: "1px solid rgba(168,213,240,0.15)" }}
+    >
       <span className="w-1.5 h-1.5 rounded-full" style={{ background: "var(--orange)" }} />
       <span className="text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: "var(--sky-accent)" }}>
         {eyebrow}
@@ -1687,7 +1726,11 @@ const SectionHeader = ({ eyebrow, headline, italicWord, subtext, align = "left" 
       {headline.split(italicWord)[1]}
     </h2>
     {subtext && (
-      <p className="text-base md:text-lg mt-4 leading-relaxed" style={{ color: "var(--text-muted)" }}>{subtext}</p>
+      <p
+        data-gsap-subtext
+        className="text-base md:text-lg mt-4 leading-relaxed"
+        style={{ color: "var(--text-muted)" }}
+      >{subtext}</p>
     )}
   </div>
 );
