@@ -863,7 +863,7 @@ const PhoneIcon = ({ className = "w-5 h-5" }) => (
 
 // ============ STICKY TOPBAR ============
 const StickyTopbar = () => (
-  <div className="hidden md:block w-full text-white text-[12px] tracking-wide" style={{ background: "rgba(10,62,90,0.95)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+  <div data-topbar className="hidden md:block w-full text-white text-[12px] tracking-wide" style={{ background: "rgba(10,62,90,0.95)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
     <div className="max-w-[1400px] mx-auto px-6 lg:px-10 py-2 flex items-center justify-between gap-6">
       <div className="flex items-center gap-5">
         <span className="inline-flex items-center gap-2">
@@ -896,30 +896,62 @@ const NAV_LINKS = [
 
 /**
  * @module NavbarAnimaciones
- * @description Módulo que gestiona el comportamiento inteligente de la navbar con GSAP.
+ * @description Módulo que gestiona la entrada del chrome superior y el comportamiento
+ * inteligente de la navbar con GSAP.
  *
- * Comportamiento:
- * - Oculta la navbar con `yPercent: -100` al scrollear hacia abajo (Stripe / Linear / Vercel pattern).
- * - La muestra de nuevo con `yPercent: 0` al scrollear hacia arriba.
- * - No se oculta mientras el menú móvil esté abierto.
- * - No se oculta si el usuario está dentro de los primeros 80 px de la página.
- * - Aplica el efecto vidrio (glass) a través de ScrollTrigger para evitar conflictos con React state.
+ * Secuencia de carga (coordinada con HeroAnimaciones):
+ *   t=0.00s  Topbar desliza desde arriba (0.5s)
+ *   t=0.08s  Navbar desliza desde arriba (0.65s)
+ *   t=0.73s  → onComplete: activa ScrollTrigger (glass) + Observer (hide/show)
+ *
+ * Comportamiento post-carga:
+ *   Scroll ↓ → ocultar (yPercent:-100, power2.inOut)
+ *   Scroll ↑ → mostrar  (yPercent:0,   power2.out)
+ *   Menú abierto o scrollY < 80px → skip hide
  */
 const NavbarAnimaciones = {
+
   /**
-   * @description Inicializa Observer (hide/show) + ScrollTrigger (glass effect) para la navbar.
-   * @param {HTMLElement} headerEl - Elemento <header> de la navbar.
-   * @param {React.MutableRefObject<boolean>} menuOpenRef - Ref que indica si el menú móvil está abierto.
-   * @returns {Function} Función de cleanup que destruye Observer y ScrollTrigger asociados.
+   * @description Anima la entrada del topbar y la navbar al cargar la página.
+   * Ambos parten de `yPercent:-110, autoAlpha:0` y deslizan hasta su posición normal.
+   * El Observer y el ScrollTrigger de glass se activan en el `onComplete` para
+   * evitar que interfieran con la animación de entrada.
+   * @param {HTMLElement}  headerEl    - Elemento <header> de la navbar.
+   * @param {React.MutableRefObject<boolean>} menuOpenRef
+   * @param {string}       ease        - Ease de marca ("mb.out" o fallback).
+   * @returns {gsap.core.Timeline} Timeline de entrada (para poder matarla en cleanup).
    */
-  inicializar(headerEl, menuOpenRef) {
-    if (!headerEl) return () => {};
+  crearEntrada(headerEl, menuOpenRef, ease) {
+    const topbarEl = document.querySelector("[data-topbar]");
 
+    // Estado inicial: fuera del viewport por arriba e invisible
+    gsap.set(headerEl, { yPercent: -110, autoAlpha: 0 });
+    if (topbarEl) gsap.set(topbarEl, { yPercent: -110, autoAlpha: 0 });
+
+    const tl = gsap.timeline({
+      defaults: { ease },
+      onComplete: () => NavbarAnimaciones.configurarScroll(headerEl, menuOpenRef),
+    });
+
+    // Topbar ligeramente antes que la navbar para dar sensación de capas
+    if (topbarEl) tl.to(topbarEl, { yPercent: 0, autoAlpha: 1, duration: 0.5 }, 0);
+    tl.to(headerEl,  { yPercent: 0, autoAlpha: 1, duration: 0.65 }, 0.08);
+
+    return tl;
+  },
+
+  /**
+   * @description Configura el glass effect (ScrollTrigger) y el hide/show (Observer).
+   * Se invoca desde el `onComplete` de `crearEntrada` para que no compitan
+   * con la animación de entrada si el usuario scrollea durante los primeros 0.7s.
+   * @param {HTMLElement} headerEl
+   * @param {React.MutableRefObject<boolean>} menuOpenRef
+   */
+  configurarScroll(headerEl, menuOpenRef) {
     const cleanups = [];
-    const UMBRAL_TOP_PX = 80; // px desde el top antes de activar el hide
+    const UMBRAL_TOP_PX = 80;
 
-    // ── Glass background (ScrollTrigger) ──────────────────────────────────────
-    // Se aplica/quita un data-attribute; la transición visual la maneja CSS (sin conflicto con GSAP transform).
+    // ── Glass background via data-attribute (CSS transition, sin conflicto con GSAP) ──
     const glassTrigger = ScrollTrigger.create({
       start: `top+=${UMBRAL_TOP_PX} top`,
       onEnter:     () => headerEl.setAttribute("data-scrolled", "true"),
@@ -930,7 +962,6 @@ const NavbarAnimaciones = {
     // ── Hide / Show con Observer ──────────────────────────────────────────────
     if (Observer) {
       gsap.registerPlugin(Observer);
-
       let oculta = false;
 
       /** @description Oculta la navbar deslizándola hacia arriba. */
@@ -940,7 +971,7 @@ const NavbarAnimaciones = {
         gsap.to(headerEl, { yPercent: -100, duration: 0.38, ease: "power2.inOut", overwrite: true });
       };
 
-      /** @description Muestra la navbar deslizándola hacia abajo hasta su posición original. */
+      /** @description Muestra la navbar deslizándola hacia su posición original. */
       const mostrar = () => {
         if (!oculta) return;
         oculta = false;
@@ -951,7 +982,6 @@ const NavbarAnimaciones = {
         type: "scroll,wheel,touch",
         tolerance: 8,
         onDown: () => {
-          // No ocultar si: menú abierto, o estamos cerca del top de la página
           if (menuOpenRef.current || window.scrollY < UMBRAL_TOP_PX) return;
           ocultar();
         },
@@ -961,7 +991,25 @@ const NavbarAnimaciones = {
       cleanups.push(() => obs.kill());
     }
 
-    return () => cleanups.forEach(fn => fn());
+    // Guardar cleanup en el elemento para que inicializar() pueda devolver la función correcta
+    headerEl._scrollCleanup = () => cleanups.forEach(fn => fn());
+  },
+
+  /**
+   * @description Punto de entrada. Lanza la animación de entrada y devuelve
+   * una función de cleanup que mata la timeline y el scroll setup.
+   * @param {HTMLElement} headerEl
+   * @param {React.MutableRefObject<boolean>} menuOpenRef
+   * @returns {Function} Cleanup para useEffect.
+   */
+  inicializar(headerEl, menuOpenRef) {
+    if (!headerEl) return () => {};
+    const ease = CustomEase ? "mb.out" : "power3.out";
+    const tlEntrada = NavbarAnimaciones.crearEntrada(headerEl, menuOpenRef, ease);
+    return () => {
+      tlEntrada.kill();
+      if (headerEl._scrollCleanup) headerEl._scrollCleanup();
+    };
   },
 };
 
@@ -1192,25 +1240,46 @@ const HeroAnimaciones = {
    * @param {HeroRefs} refs - Mapa de referencias a los elementos del hero.
    * @returns {gsap.core.Timeline} La timeline de entrada resultante.
    */
+  /**
+   * @description Construye y reproduce la timeline de animación de entrada del hero.
+   *
+   * Secuencia coordinada con NavbarAnimaciones (que tarda ~0.73s en completar la entrada
+   * del chrome). Los elementos de contenido están desplazados +0.45s para que el primer
+   * elemento del hero (eyebrow) aparezca justo cuando la navbar termina de aterrizar:
+   *
+   *   t=0.00s  bgWrapper: zoom 1.18 → 1.12 (2.4s) — la página empieza a "respirar"
+   *   t=0.60s  eyebrow badge: fade-up
+   *   t=0.68s  aside card (desktop): desliza desde la derecha
+   *   t=0.78s  H1 cinético: caracteres convergen desde el espacio
+   *   t=1.18s  subhead: fade-up
+   *   t=1.35s  CTAs: fade-up
+   *   t=1.45s  aside number: ScrambleText "4"
+   *   t=1.48s  trust row: fade-up
+   *
+   * @param {HeroRefs} refs - Mapa de referencias a los elementos del hero.
+   * @returns {gsap.core.Timeline}
+   */
   crearTimelineEntrada(refs) {
     const ease = CustomEase ? "mb.out" : "power3.out";
     const tl = gsap.timeline({ defaults: { ease } });
 
+    // Fondo empieza de inmediato — lento zoom que da "vida" mientras el chrome aterriza
     tl.to(refs.bgWrapper, { scale: 1.12, duration: 2.4, ease: "power2.out" }, 0)
-      .to(refs.eyebrow,   { autoAlpha: 1, y: 0, duration: 0.7 }, 0.15)
-      .add(HeroAnimaciones.crearKineticTitular(refs.headline),   0.3)
-      .to(refs.subhead,   { autoAlpha: 1, y: 0, duration: 0.85 }, 0.75)
-      .to(refs.ctaGroup,  { autoAlpha: 1, y: 0, duration: 0.8 },  0.92)
-      .to(refs.trustRow,  { autoAlpha: 1, y: 0, duration: 0.7 },  1.06);
+    // Contenido espera ~0.45s para que navbar y topbar lleguen primero
+      .to(refs.eyebrow,  { autoAlpha: 1, y: 0, duration: 0.7  }, 0.60)
+      .add(HeroAnimaciones.crearKineticTitular(refs.headline),    0.78)
+      .to(refs.subhead,  { autoAlpha: 1, y: 0, duration: 0.85 }, 1.18)
+      .to(refs.ctaGroup, { autoAlpha: 1, y: 0, duration: 0.8  }, 1.35)
+      .to(refs.trustRow, { autoAlpha: 1, y: 0, duration: 0.7  }, 1.48);
 
     if (refs.aside) {
-      tl.to(refs.aside, { autoAlpha: 1, x: 0, duration: 1.1, ease: "power2.out" }, 0.45);
+      tl.to(refs.aside, { autoAlpha: 1, x: 0, duration: 1.1, ease: "power2.out" }, 0.68);
 
       if (refs.asideNumber && ScrambleTextPlugin) {
         tl.to(refs.asideNumber, {
           duration: 1.1,
           scrambleText: { text: "4", chars: "0123456789", revealDelay: 0.35, speed: 0.6 },
-        }, 1.05);
+        }, 1.45);
       }
     }
 
