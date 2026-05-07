@@ -517,17 +517,27 @@ const StyleInjector = () => (
      * GSAP gestiona el transform (yPercent) por separado — NO usar transition en transform
      * para evitar conflictos con el tween de GSAP Observer.
      */
+    /*
+     * Estética "Miami neon" — navbar dark navy con borde rosa luminoso.
+     * Tres capas de box-shadow: ring rosa interior + glow exterior + sombra suave.
+     * Al scrollear, el glow se intensifica (data-scrolled="true").
+     */
     .navbar-header {
-      /* #1 Fondo blanco · #2 borde inferior rosa de marca */
-      background: #ffffff;
+      background: var(--dark);
       border-bottom: 2px solid var(--pink);
-      box-shadow: 0 1px 0 rgba(199,90,159,0.15);
+      box-shadow:
+        0 0 0 1px rgba(199,90,159,0.18) inset,   /* ring rosa interior */
+        0 0 24px rgba(199,90,159,0.35),          /* glow rosa exterior */
+        0 4px 24px rgba(0,0,0,0.35);             /* sombra suave bajo navbar */
       /* Solo transicionar propiedades visuales — nunca transform (GSAP lo controla) */
-      transition: box-shadow 0.45s ease, border-color 0.45s ease;
+      transition: box-shadow 0.45s ease;
       will-change: transform;
     }
     .navbar-header[data-scrolled="true"] {
-      box-shadow: 0 4px 28px rgba(13,79,114,0.18), 0 1px 0 rgba(199,90,159,0.25);
+      box-shadow:
+        0 0 0 1px rgba(199,90,159,0.35) inset,
+        0 0 36px rgba(199,90,159,0.55),          /* glow más intenso al scrollear */
+        0 6px 32px rgba(0,0,0,0.5);
     }
 
     /* ---------- B/A slider ---------- */
@@ -855,12 +865,17 @@ const PhoneIcon = ({ className = "w-5 h-5" }) => (
 );
 
 // ============ NAVBAR ============
-const NAV_LINKS = [
+// Layout split: 3 links a la izquierda del logo, 1 a la derecha (más phone + CTA).
+const NAV_LINKS_LEFT = [
   ["Services", "#services"],
   ["Results", "#results"],
   ["Areas", "#service-areas"],
+];
+const NAV_LINKS_RIGHT = [
   ["FAQ", "#faq"],
 ];
+// Lista completa para el menú móvil (mantiene el orden visual izq→der).
+const NAV_LINKS = [...NAV_LINKS_LEFT, ...NAV_LINKS_RIGHT];
 
 /**
  * @module MenuAnimaciones
@@ -1129,61 +1144,103 @@ const Navbar = () => {
         ref={headerRef}
         className="sticky top-0 z-50 w-full navbar-header"
       >
-        <div className="max-w-[1400px] mx-auto px-4 md:px-6 lg:px-10 py-3 md:py-4 flex items-center justify-between gap-4">
-          {/* Logo */}
-          <a href="#top" className="flex items-center gap-3 flex-shrink-0" onClick={close}>
-            <img src={`${IMG}/mb-logo.png`} alt="MB Softwash Miami" className="h-11 md:h-14 w-auto" loading="lazy" />
-            <div className="hidden sm:flex flex-col leading-tight">
-              <span className="text-[14px] font-bold" style={{ color: "var(--dark)" }}>MB Softwash</span>
-              <span className="text-[10px] uppercase tracking-[0.2em]" style={{ color: "var(--pink)" }}>Miami</span>
-            </div>
-          </a>
+        {/*
+          Layout 3 columnas: [1fr | auto | 1fr]
+          · Las dos columnas de los costados son 1fr cada una (anchos iguales),
+            por lo que el logo del centro queda PERFECTAMENTE centrado sin importar
+            si la izquierda y la derecha tienen distinto contenido.
+          · En mobile (< lg), las navs de los costados ocultas — solo se ve logo + hamburger.
+        */}
+        <div className="max-w-[1400px] mx-auto px-4 md:px-6 lg:px-10 py-3 md:py-4">
+          <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 md:gap-4">
 
-          {/* Desktop nav links — #3 color dark blue, hover rosa de marca */}
-          <nav className="hidden lg:flex items-center gap-1 text-[14px] font-semibold">
-            {NAV_LINKS.map(([label, href]) => (
-              <a
-                key={href}
-                href={href}
-                className="px-4 py-2 rounded-full transition-all"
-                style={{ color: "var(--dark)" }}
-                onMouseEnter={e => { e.currentTarget.style.color = "var(--pink)"; e.currentTarget.style.background = "rgba(199,90,159,0.06)"; }}
-                onMouseLeave={e => { e.currentTarget.style.color = "var(--dark)"; e.currentTarget.style.background = "transparent"; }}
-              >
-                {label}
-              </a>
-            ))}
-          </nav>
+            {/* ── IZQUIERDA: Services · Results · Areas (lg+) ── */}
+            <nav className="hidden lg:flex items-center justify-end gap-1">
+              {NAV_LINKS_LEFT.map(([label, href]) => (
+                <a
+                  key={href}
+                  href={href}
+                  className="px-3 xl:px-4 py-2 rounded-full font-bold uppercase tracking-wider text-[12px] xl:text-[13px] text-white transition-all"
+                  onMouseEnter={e => { e.currentTarget.style.color = "var(--pink)"; e.currentTarget.style.background = "rgba(199,90,159,0.14)"; }}
+                  onMouseLeave={e => { e.currentTarget.style.color = "#fff"; e.currentTarget.style.background = "transparent"; }}
+                >
+                  {label}
+                </a>
+              ))}
+            </nav>
+            {/* Spacer en mobile — mantiene el logo centrado al ocupar 1fr aunque esté vacío */}
+            <div className="lg:hidden" aria-hidden="true" />
 
-          {/* Right cluster */}
-          <div className="flex items-center gap-2 md:gap-3">
+            {/* ── CENTRO: Logo MB Softwash (siempre visible, absolutamente centrado) ── */}
             <a
-              href={PHONE_TEL}
-              className="hidden sm:inline-flex items-center gap-2 px-3 md:px-4 py-2 rounded-full font-semibold text-[13px] md:text-[14px] transition-all"
-              style={{ color: "var(--dark)" }}
-              onMouseEnter={e => e.currentTarget.style.background = "rgba(13,79,114,0.06)"}
-              onMouseLeave={e => e.currentTarget.style.background = "transparent"}
+              href="#top"
+              onClick={close}
+              className="flex items-center justify-center flex-shrink-0"
+              aria-label="MB Softwash · Inicio"
             >
-              <PhoneIcon className="w-4 h-4" />
-              <span className="hidden md:inline">{PHONE_DISPLAY}</span>
+              <img
+                src={`${IMG}/mb-logo.png`}
+                alt="MB Softwash Miami"
+                className="h-12 md:h-16 w-auto"
+                loading="eager"
+                decoding="async"
+              />
             </a>
-            <PrimaryCTA href={QUOTE_HASH} icon="→">
-              <span className="hidden sm:inline">Free Estimate</span>
-              <span className="sm:hidden">Quote</span>
-            </PrimaryCTA>
 
-            {/* Hamburger — mobile/tablet only · barras dark blue para contraste sobre navbar blanca */}
-            <button
-              className="lg:hidden flex flex-col items-center justify-center w-10 h-10 rounded-xl gap-[5px] flex-shrink-0 transition-colors"
-              style={{ background: "rgba(13,79,114,0.06)", border: "1px solid rgba(13,79,114,0.15)" }}
-              onClick={() => setMenuOpen(v => !v)}
-              aria-label={menuOpen ? "Close menu" : "Open menu"}
-              aria-expanded={menuOpen}
-            >
-              <span className="block h-[2px] w-5 rounded-full transition-all duration-300" style={{ background: "var(--dark)", transform: menuOpen ? "rotate(45deg) translate(0, 7px)" : "none" }} />
-              <span className="block h-[2px] w-5 rounded-full transition-all duration-300" style={{ background: "var(--dark)", opacity: menuOpen ? 0 : 1 }} />
-              <span className="block h-[2px] w-5 rounded-full transition-all duration-300" style={{ background: "var(--dark)", transform: menuOpen ? "rotate(-45deg) translate(0, -7px)" : "none" }} />
-            </button>
+            {/* ── DERECHA: FAQ · phone · Free Estimate (lg+) · hamburger (< lg) ── */}
+            <div className="flex items-center justify-end gap-2 md:gap-3">
+              <nav className="hidden lg:flex items-center gap-1">
+                {NAV_LINKS_RIGHT.map(([label, href]) => (
+                  <a
+                    key={href}
+                    href={href}
+                    className="px-3 xl:px-4 py-2 rounded-full font-bold uppercase tracking-wider text-[12px] xl:text-[13px] text-white transition-all"
+                    onMouseEnter={e => { e.currentTarget.style.color = "var(--pink)"; e.currentTarget.style.background = "rgba(199,90,159,0.14)"; }}
+                    onMouseLeave={e => { e.currentTarget.style.color = "#fff"; e.currentTarget.style.background = "transparent"; }}
+                  >
+                    {label}
+                  </a>
+                ))}
+              </nav>
+
+              {/* Phone — visible solo lg+ (hover rosa neon) */}
+              <a
+                href={PHONE_TEL}
+                className="hidden lg:inline-flex items-center gap-2 px-3 xl:px-4 py-2 rounded-full font-bold text-[12px] xl:text-[13px] text-white transition-all"
+                onMouseEnter={e => { e.currentTarget.style.color = "var(--pink)"; e.currentTarget.style.background = "rgba(199,90,159,0.14)"; }}
+                onMouseLeave={e => { e.currentTarget.style.color = "#fff"; e.currentTarget.style.background = "transparent"; }}
+              >
+                <PhoneIcon className="w-4 h-4" />
+                <span>{PHONE_DISPLAY}</span>
+              </a>
+
+              {/* CTA Free Estimate — gradiente rosa con glow neon */}
+              <a
+                href={QUOTE_HASH}
+                className="hidden lg:inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 font-bold uppercase tracking-wider text-white text-[12px] xl:text-[13px] transition-all hover:scale-[1.04] hover:-translate-y-0.5"
+                style={{
+                  background: "linear-gradient(135deg, var(--pink) 0%, var(--pink-soft) 100%)",
+                  boxShadow: "0 0 0 1px rgba(255,255,255,0.14) inset, 0 6px 22px -4px rgba(199,90,159,0.7), 0 0 18px rgba(199,90,159,0.35)",
+                }}
+              >
+                <span>Free Estimate</span>
+                <span aria-hidden="true">→</span>
+              </a>
+
+              {/* Hamburger — solo mobile/tablet · barras BLANCAS sobre fondo dark */}
+              <button
+                className="lg:hidden flex flex-col items-center justify-center w-10 h-10 rounded-xl gap-[5px] flex-shrink-0 transition-colors"
+                style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(199,90,159,0.3)" }}
+                onClick={() => setMenuOpen(v => !v)}
+                aria-label={menuOpen ? "Close menu" : "Open menu"}
+                aria-expanded={menuOpen}
+              >
+                <span className="block h-[2px] w-5 rounded-full bg-white transition-all duration-300" style={{ transform: menuOpen ? "rotate(45deg) translate(0, 7px)" : "none" }} />
+                <span className="block h-[2px] w-5 rounded-full bg-white transition-all duration-300" style={{ opacity: menuOpen ? 0 : 1 }} />
+                <span className="block h-[2px] w-5 rounded-full bg-white transition-all duration-300" style={{ transform: menuOpen ? "rotate(-45deg) translate(0, -7px)" : "none" }} />
+              </button>
+            </div>
+
           </div>
         </div>
       </header>
