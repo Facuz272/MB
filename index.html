@@ -301,7 +301,7 @@
     // Preamble destructures globals into local scope for the compiled code
     const preamble = `
       const { useState, useEffect, useRef, useCallback } = React;
-      const { motion, AnimatePresence, useScroll, useTransform } = FramerMotion;
+      const { motion, AnimatePresence } = FramerMotion; // AnimatePresence reservado para futuros usos; motion usado en ResultsSection
     `;
 
     try {
@@ -895,6 +895,107 @@ const NAV_LINKS = [
 ];
 
 /**
+ * @module MenuAnimaciones
+ * @description Gestiona la apertura y cierre del menú móvil con GSAP puro,
+ * reemplazando completamente AnimatePresence y motion.* de Framer Motion.
+ *
+ * Técnica de apertura  — clip-path curtain wipe (inset de arriba hacia abajo):
+ *   inset(0 0 100% 0) → inset(0 0 0% 0)   en 0.48s (mb.out / expo.out)
+ *   Links entran en stagger desde y:28/opacity:0  solapado con el final del wipe.
+ *   CTAs y badges entran después de los links.
+ *
+ * Técnica de cierre — colapso inverso:
+ *   Extras + links salen en stagger inverso (from:"end") → curtain vuelve a inset(0 0 100% 0).
+ *   autoAlpha:0 en onComplete para liberar pointer-events.
+ *
+ * El overlay `<div ref={menuRef}>` vive siempre en el DOM (no condicional).
+ * MenuAnimaciones.ocultarInicial() lo oculta en el primer useEffect para evitar flash.
+ */
+const MenuAnimaciones = {
+
+  /**
+   * @description Aplica el estado inicial oculto al overlay.
+   * Debe llamarse en un useEffect de montaje (no en render) para que los refs estén disponibles.
+   * @param {HTMLElement} menuEl - El div overlay del menú.
+   */
+  ocultarInicial(menuEl) {
+    gsap.set(menuEl, { autoAlpha: 0, clipPath: "inset(0 0 100% 0)" });
+  },
+
+  /**
+   * @description Abre el menú con curtain wipe + stagger de links + fade de extras.
+   * Mata cualquier tween en curso antes de lanzar la nueva timeline.
+   * @param {HTMLElement} menuEl - El div overlay del menú.
+   * @returns {gsap.core.Timeline}
+   */
+  abrir(menuEl) {
+    const ease = CustomEase ? "mb.out" : "expo.out";
+    const links  = menuEl.querySelectorAll("[data-menu-link]");
+    const extras = menuEl.querySelectorAll("[data-menu-extra]");
+
+    gsap.killTweensOf([menuEl, ...links, ...extras]);
+
+    const tl = gsap.timeline();
+
+    // ① Curtain wipe: el overlay cae desde arriba
+    tl.fromTo(
+      menuEl,
+      { clipPath: "inset(0 0 100% 0)", autoAlpha: 1 },
+      { clipPath: "inset(0 0 0% 0)",   duration: 0.48, ease },
+    );
+
+    // ② Links entran en stagger, solapados con el final del wipe
+    tl.fromTo(
+      links,
+      { opacity: 0, y: 28 },
+      { opacity: 1, y: 0, duration: 0.42, ease: "power3.out", stagger: 0.055 },
+      "-=0.18",
+    );
+
+    // ③ CTAs y badges entran después de los links
+    tl.fromTo(
+      extras,
+      { opacity: 0, y: 14 },
+      { opacity: 1, y: 0, duration: 0.35, ease: "power2.out", stagger: 0.06 },
+      "-=0.22",
+    );
+
+    return tl;
+  },
+
+  /**
+   * @description Cierra el menú: los extras + links colapsan en orden inverso,
+   * luego el curtain sube. autoAlpha:0 en onComplete libera pointer-events.
+   * @param {HTMLElement} menuEl - El div overlay del menú.
+   * @returns {gsap.core.Timeline}
+   */
+  cerrar(menuEl) {
+    const links  = Array.from(menuEl.querySelectorAll("[data-menu-link]")).reverse();
+    const extras = Array.from(menuEl.querySelectorAll("[data-menu-extra]")).reverse();
+
+    gsap.killTweensOf([menuEl, ...links, ...extras]);
+
+    const tl = gsap.timeline({
+      onComplete: () => gsap.set(menuEl, { autoAlpha: 0 }),
+    });
+
+    // ① Extras + links salen rápido en orden inverso (sensación de colapso)
+    tl.to([...extras, ...links], {
+      opacity: 0, y: -12, duration: 0.15, ease: "power2.in", stagger: 0.025,
+    });
+
+    // ② Curtain vuelve a subir
+    tl.to(
+      menuEl,
+      { clipPath: "inset(0 0 100% 0)", duration: 0.36, ease: "power3.inOut" },
+      "-=0.04",
+    );
+
+    return tl;
+  },
+};
+
+/**
  * @module NavbarAnimaciones
  * @description Módulo que gestiona la entrada del chrome superior y el comportamiento
  * inteligente de la navbar con GSAP.
@@ -1015,16 +1116,29 @@ const NavbarAnimaciones = {
 
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
-  const headerRef  = useRef(null);
+  const headerRef   = useRef(null);
+  const menuRef     = useRef(null);
   const menuOpenRef = useRef(false);
 
-  // Mantiene menuOpenRef sincronizado con el estado React (evita closures obsoletos en Observer)
+  // Mantiene menuOpenRef sincronizado (evita closures obsoletos en Observer)
   useEffect(() => { menuOpenRef.current = menuOpen; }, [menuOpen]);
 
-  // Si el menú se abre mientras la navbar estaba oculta → forzar que vuelva a aparecer
+  // Estado inicial del overlay: oculto por GSAP desde el primer mount
   useEffect(() => {
-    if (menuOpen && headerRef.current) {
-      gsap.to(headerRef.current, { yPercent: 0, duration: 0.3, ease: "power2.out", overwrite: true });
+    if (menuRef.current) MenuAnimaciones.ocultarInicial(menuRef.current);
+  }, []);
+
+  // Abrir / cerrar menú + scroll lock + navbar force-show
+  useEffect(() => {
+    if (!menuRef.current) return;
+    if (menuOpen) {
+      // Si la navbar estaba oculta por el Observer, la forzamos a aparecer primero
+      if (headerRef.current) {
+        gsap.to(headerRef.current, { yPercent: 0, duration: 0.3, ease: "power2.out", overwrite: true });
+      }
+      MenuAnimaciones.abrir(menuRef.current);
+    } else {
+      MenuAnimaciones.cerrar(menuRef.current);
     }
     document.body.style.overflow = menuOpen ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
@@ -1038,7 +1152,7 @@ const Navbar = () => {
     return () => document.removeEventListener("keydown", onKey);
   }, [menuOpen]);
 
-  // Inicializar NavbarAnimaciones (Observer + ScrollTrigger glass)
+  // Inicializar NavbarAnimaciones (entrada + Observer + ScrollTrigger glass)
   useEffect(() => {
     const cleanup = NavbarAnimaciones.inicializar(headerRef.current, menuOpenRef);
     return cleanup;
@@ -1109,52 +1223,43 @@ const Navbar = () => {
         </div>
       </header>
 
-      {/* Mobile full-screen menu */}
-      <AnimatePresence>
-        {menuOpen && (
-          <motion.div
-            key="mobile-menu"
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.22 }}
-            className="lg:hidden fixed inset-0 z-40 flex flex-col"
-            style={{ background: "rgba(10,62,90,0.98)", backdropFilter: "blur(24px)" }}
-          >
-            {/* Spacer for header height */}
-            <div className="h-[60px] flex-shrink-0" />
+      {/* Menú móvil — siempre en DOM, visibilidad gestionada por MenuAnimaciones (GSAP) */}
+      <div
+        ref={menuRef}
+        className="lg:hidden fixed inset-0 z-40 flex flex-col"
+        style={{ background: "rgba(10,62,90,0.98)", backdropFilter: "blur(24px)" }}
+        aria-hidden={!menuOpen}
+      >
+        {/* Spacer para la altura del header */}
+        <div className="h-[60px] flex-shrink-0" />
 
-            <nav className="flex flex-col px-6 pt-8 pb-6 flex-1 overflow-y-auto">
-              {NAV_LINKS.map(([label, href], i) => (
-                <motion.a
-                  key={href}
-                  href={href}
-                  onClick={close}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.06 }}
-                  className="flex items-center justify-between py-5 text-[1.6rem] font-extrabold text-white border-b"
-                  style={{ borderColor: "rgba(255,255,255,0.1)" }}
-                >
-                  {label}
-                  <span style={{ color: "var(--orange)" }}>→</span>
-                </motion.a>
-              ))}
+        <nav className="flex flex-col px-6 pt-8 pb-6 flex-1 overflow-y-auto">
+          {NAV_LINKS.map(([label, href]) => (
+            <a
+              key={href}
+              href={href}
+              onClick={close}
+              data-menu-link
+              className="flex items-center justify-between py-5 text-[1.6rem] font-extrabold text-white border-b"
+              style={{ borderColor: "rgba(255,255,255,0.1)" }}
+            >
+              {label}
+              <span style={{ color: "var(--orange)" }}>→</span>
+            </a>
+          ))}
 
-              <div className="mt-10 flex flex-col gap-3">
-                <PrimaryCTA href={QUOTE_HASH} fullWidth large icon="→" onClick={close}>Get my free quote</PrimaryCTA>
-                <SecondaryCTA href={PHONE_TEL} fullWidth large ghost onClick={close}>{PHONE_DISPLAY}</SecondaryCTA>
-              </div>
+          <div data-menu-extra className="mt-10 flex flex-col gap-3">
+            <PrimaryCTA href={QUOTE_HASH} fullWidth large icon="→" onClick={close}>Get my free quote</PrimaryCTA>
+            <SecondaryCTA href={PHONE_TEL} fullWidth large ghost onClick={close}>{PHONE_DISPLAY}</SecondaryCTA>
+          </div>
 
-              <div className="mt-auto pt-10 flex flex-wrap gap-x-6 gap-y-2 text-[12px]" style={{ color: "rgba(200,225,248,0.5)" }}>
-                <span>✓ Licensed &amp; $1M Insured</span>
-                <span>✓ 4.9★ Google · 230+ reviews</span>
-                <span>✓ Quotes in 4 hours</span>
-              </div>
-            </nav>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          <div data-menu-extra className="mt-auto pt-10 flex flex-wrap gap-x-6 gap-y-2 text-[12px]" style={{ color: "rgba(200,225,248,0.5)" }}>
+            <span>✓ Licensed &amp; $1M Insured</span>
+            <span>✓ 4.9★ Google · 230+ reviews</span>
+            <span>✓ Quotes in 4 hours</span>
+          </div>
+        </nav>
+      </div>
     </>
   );
 };
