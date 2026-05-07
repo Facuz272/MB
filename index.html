@@ -518,26 +518,78 @@ const StyleInjector = () => (
      * para evitar conflictos con el tween de GSAP Observer.
      */
     /*
-     * Estética "Miami neon" — navbar dark navy con borde rosa luminoso.
-     * Tres capas de box-shadow: ring rosa interior + glow exterior + sombra suave.
-     * Al scrollear, el glow se intensifica (data-scrolled="true").
+     * Floating capsule navbar — estética H2O Miami neon.
+     *
+     * Centrado sin transform: usamos left:0; right:0; margin-inline:auto con
+     * un width explícito — la propiedad transform queda 100% libre para que
+     * GSAP la use en el hide/show del Observer (translateY/yPercent).
+     *
+     * Doble borde neon (rosa exterior + cyan interior) con un gap de ~2px:
+     *   - border: 2px solid pink ocupa los primeros 2px del outer edge.
+     *   - ::before con inset:2px (relativo al padding box, ya dentro del
+     *     borde rosa) y border:1.5px solid cyan dibuja la línea cyan,
+     *     dejando 2px de fondo azul visible entre las dos líneas.
      */
     .navbar-header {
-      background: var(--dark);
-      border-bottom: 2px solid var(--pink);
+      position: fixed;
+      top: 14px;
+      left: 0;
+      right: 0;
+      margin-inline: auto;
+      width: min(94%, 1180px);
+
+      background: #0040D9;
+      border-radius: 9999px;
+      border: 2px solid var(--pink);
+
+      /* Glow exterior: cyan + pink + sombra suave */
       box-shadow:
-        0 0 0 1px rgba(199,90,159,0.18) inset,   /* ring rosa interior */
-        0 0 24px rgba(199,90,159,0.35),          /* glow rosa exterior */
-        0 4px 24px rgba(0,0,0,0.35);             /* sombra suave bajo navbar */
-      /* Solo transicionar propiedades visuales — nunca transform (GSAP lo controla) */
+        0 0 24px rgba(45, 212, 255, 0.35),
+        0 0 32px rgba(199, 90, 159, 0.40),
+        0 12px 36px rgba(0, 0, 0, 0.40);
+
       transition: box-shadow 0.45s ease;
       will-change: transform;
     }
     .navbar-header[data-scrolled="true"] {
       box-shadow:
-        0 0 0 1px rgba(199,90,159,0.35) inset,
-        0 0 36px rgba(199,90,159,0.55),          /* glow más intenso al scrollear */
-        0 6px 32px rgba(0,0,0,0.5);
+        0 0 32px rgba(45, 212, 255, 0.60),
+        0 0 40px rgba(199, 90, 159, 0.55),
+        0 14px 40px rgba(0, 0, 0, 0.55);
+    }
+    /* Línea cyan interior — paralela al borde rosa con 2px de gap */
+    .navbar-header::before {
+      content: '';
+      position: absolute;
+      inset: 2px;
+      border: 1.5px solid #2dd4ff;
+      border-radius: inherit;
+      pointer-events: none;
+      box-shadow: 0 0 8px rgba(45, 212, 255, 0.55);
+    }
+    /* Triángulo indicador upward arriba del link en hover */
+    .navlink-floating {
+      position: relative;
+    }
+    .navlink-floating::before {
+      content: '';
+      position: absolute;
+      top: -6px;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-bottom: 6px solid var(--pink);
+      transform: translateX(-50%) scale(0);
+      opacity: 0;
+      transition: opacity 0.18s ease, transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+      pointer-events: none;
+      filter: drop-shadow(0 0 4px rgba(199, 90, 159, 0.8));
+    }
+    .navlink-floating:hover::before {
+      opacity: 1;
+      transform: translateX(-50%) scale(1);
     }
 
     /* ---------- B/A slider ---------- */
@@ -1006,8 +1058,11 @@ const NavbarAnimaciones = {
    * @returns {gsap.core.Timeline} Timeline de entrada (para poder matarla en cleanup).
    */
   crearEntrada(headerEl, menuOpenRef, ease) {
-    // Estado inicial: fuera del viewport por arriba e invisible
-    gsap.set(headerEl, { yPercent: -110, autoAlpha: 0 });
+    // Estado inicial: fuera del viewport por arriba e invisible.
+    // Usamos -130% (en vez de -110%) para que el offset CSS de top:14px no
+    // deje un sliver visible durante la animación de entrada en pantallas con
+    // capsule chico.
+    gsap.set(headerEl, { yPercent: -130, autoAlpha: 0 });
 
     const tl = gsap.timeline({
       defaults: { ease },
@@ -1043,11 +1098,13 @@ const NavbarAnimaciones = {
       gsap.registerPlugin(Observer);
       let oculta = false;
 
-      /** @description Oculta la navbar deslizándola hacia arriba. */
+      /** @description Oculta la navbar deslizándola hacia arriba.
+       * yPercent:-130 (en vez de -100) para que el offset CSS top:14px del
+       * floating capsule no deje un edge visible al ocultarse. */
       const ocultar = () => {
         if (oculta) return;
         oculta = true;
-        gsap.to(headerEl, { yPercent: -100, duration: 0.38, ease: "power2.inOut", overwrite: true });
+        gsap.to(headerEl, { yPercent: -130, duration: 0.38, ease: "power2.inOut", overwrite: true });
       };
 
       /** @description Muestra la navbar deslizándola hacia su posición original. */
@@ -1142,27 +1199,28 @@ const Navbar = () => {
     <>
       <header
         ref={headerRef}
-        className="sticky top-0 z-50 w-full navbar-header"
+        className="z-50 navbar-header"
       >
         {/*
-          Layout 3 columnas: [1fr | auto | 1fr]
-          · Las dos columnas de los costados son 1fr cada una (anchos iguales),
-            por lo que el logo del centro queda PERFECTAMENTE centrado sin importar
-            si la izquierda y la derecha tienen distinto contenido.
-          · En mobile (< lg), las navs de los costados ocultas — solo se ve logo + hamburger.
+          Capsule flotante:
+          · `position: fixed; top: 14px` y centrado con margin-inline auto desde CSS
+            (NO desde transform, para no chocar con el GSAP entrance/Observer).
+          · Layout 3 columnas [1fr | auto | 1fr] mantiene el logo perfectamente
+            centrado independientemente del contenido de los costados.
+          · z-50 sobre el menú móvil (z-40) para que el hamburger quede siempre clickable.
         */}
-        <div className="max-w-[1400px] mx-auto px-4 md:px-6 lg:px-10 py-3 md:py-4">
+        <div className="px-3 md:px-5 lg:px-6 py-2 md:py-2.5 relative">
           <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 md:gap-4">
 
             {/* ── IZQUIERDA: Services · Results · Areas (lg+) ── */}
-            <nav className="hidden lg:flex items-center justify-end gap-1">
+            <nav className="hidden lg:flex items-center justify-end gap-0.5">
               {NAV_LINKS_LEFT.map(([label, href]) => (
                 <a
                   key={href}
                   href={href}
-                  className="px-3 xl:px-4 py-2 rounded-full font-bold uppercase tracking-wider text-[12px] xl:text-[13px] text-white transition-all"
-                  onMouseEnter={e => { e.currentTarget.style.color = "var(--pink)"; e.currentTarget.style.background = "rgba(199,90,159,0.14)"; }}
-                  onMouseLeave={e => { e.currentTarget.style.color = "#fff"; e.currentTarget.style.background = "transparent"; }}
+                  className="navlink-floating px-3 xl:px-4 py-1.5 rounded-full uppercase tracking-[0.14em] text-[11px] xl:text-[12px] font-medium text-white transition-colors"
+                  onMouseEnter={e => { e.currentTarget.style.color = "#ffd1ec"; }}
+                  onMouseLeave={e => { e.currentTarget.style.color = "#fff"; }}
                 >
                   {label}
                 </a>
@@ -1171,7 +1229,7 @@ const Navbar = () => {
             {/* Spacer en mobile — mantiene el logo centrado al ocupar 1fr aunque esté vacío */}
             <div className="lg:hidden" aria-hidden="true" />
 
-            {/* ── CENTRO: Logo MB Softwash (siempre visible, absolutamente centrado) ── */}
+            {/* ── CENTRO: Logo MB Softwash (más chico para encajar en la pill) ── */}
             <a
               href="#top"
               onClick={close}
@@ -1181,63 +1239,63 @@ const Navbar = () => {
               <img
                 src={`${IMG}/mb-logo.png`}
                 alt="MB Softwash Miami"
-                className="h-12 md:h-16 w-auto"
+                className="h-10 md:h-12 w-auto"
                 loading="eager"
                 decoding="async"
               />
             </a>
 
-            {/* ── DERECHA: FAQ · phone · Free Estimate (lg+) · hamburger (< lg) ── */}
-            <div className="flex items-center justify-end gap-2 md:gap-3">
-              <nav className="hidden lg:flex items-center gap-1">
+            {/* ── DERECHA: FAQ · phone · Free Estimate compacto · hamburger ── */}
+            <div className="flex items-center justify-end gap-1.5 md:gap-2.5">
+              <nav className="hidden lg:flex items-center gap-0.5">
                 {NAV_LINKS_RIGHT.map(([label, href]) => (
                   <a
                     key={href}
                     href={href}
-                    className="px-3 xl:px-4 py-2 rounded-full font-bold uppercase tracking-wider text-[12px] xl:text-[13px] text-white transition-all"
-                    onMouseEnter={e => { e.currentTarget.style.color = "var(--pink)"; e.currentTarget.style.background = "rgba(199,90,159,0.14)"; }}
-                    onMouseLeave={e => { e.currentTarget.style.color = "#fff"; e.currentTarget.style.background = "transparent"; }}
+                    className="navlink-floating px-3 xl:px-4 py-1.5 rounded-full uppercase tracking-[0.14em] text-[11px] xl:text-[12px] font-medium text-white transition-colors"
+                    onMouseEnter={e => { e.currentTarget.style.color = "#ffd1ec"; }}
+                    onMouseLeave={e => { e.currentTarget.style.color = "#fff"; }}
                   >
                     {label}
                   </a>
                 ))}
               </nav>
 
-              {/* Phone — visible solo lg+ (hover rosa neon) */}
+              {/* Phone — non-bold blanco, solo lg+ */}
               <a
                 href={PHONE_TEL}
-                className="hidden lg:inline-flex items-center gap-2 px-3 xl:px-4 py-2 rounded-full font-bold text-[12px] xl:text-[13px] text-white transition-all"
-                onMouseEnter={e => { e.currentTarget.style.color = "var(--pink)"; e.currentTarget.style.background = "rgba(199,90,159,0.14)"; }}
-                onMouseLeave={e => { e.currentTarget.style.color = "#fff"; e.currentTarget.style.background = "transparent"; }}
+                className="hidden lg:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[12px] font-medium text-white transition-colors"
+                onMouseEnter={e => { e.currentTarget.style.color = "#ffd1ec"; }}
+                onMouseLeave={e => { e.currentTarget.style.color = "#fff"; }}
               >
-                <PhoneIcon className="w-4 h-4" />
+                <PhoneIcon className="w-3.5 h-3.5" />
                 <span>{PHONE_DISPLAY}</span>
               </a>
 
-              {/* CTA Free Estimate — gradiente rosa con glow neon */}
+              {/* CTA compacto — versión chica del Free Estimate */}
               <a
                 href={QUOTE_HASH}
-                className="hidden lg:inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 font-bold uppercase tracking-wider text-white text-[12px] xl:text-[13px] transition-all hover:scale-[1.04] hover:-translate-y-0.5"
+                className="hidden md:inline-flex items-center justify-center gap-1.5 rounded-full px-4 py-1.5 uppercase tracking-[0.14em] text-white text-[10px] xl:text-[11px] font-semibold transition-all hover:scale-[1.05]"
                 style={{
                   background: "linear-gradient(135deg, var(--pink) 0%, var(--pink-soft) 100%)",
-                  boxShadow: "0 0 0 1px rgba(255,255,255,0.14) inset, 0 6px 22px -4px rgba(199,90,159,0.7), 0 0 18px rgba(199,90,159,0.35)",
+                  boxShadow: "0 0 0 1px rgba(255,255,255,0.18) inset, 0 4px 14px -2px rgba(199,90,159,0.7), 0 0 14px rgba(199,90,159,0.45)",
                 }}
               >
                 <span>Free Estimate</span>
                 <span aria-hidden="true">→</span>
               </a>
 
-              {/* Hamburger — solo mobile/tablet · barras BLANCAS sobre fondo dark */}
+              {/* Hamburger — solo mobile/tablet (lg-) · barras blancas */}
               <button
-                className="lg:hidden flex flex-col items-center justify-center w-10 h-10 rounded-xl gap-[5px] flex-shrink-0 transition-colors"
-                style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(199,90,159,0.3)" }}
+                className="lg:hidden flex flex-col items-center justify-center w-9 h-9 rounded-full gap-[4px] flex-shrink-0 transition-colors"
+                style={{ background: "rgba(255,255,255,0.10)", border: "1px solid rgba(45,212,255,0.35)" }}
                 onClick={() => setMenuOpen(v => !v)}
                 aria-label={menuOpen ? "Close menu" : "Open menu"}
                 aria-expanded={menuOpen}
               >
-                <span className="block h-[2px] w-5 rounded-full bg-white transition-all duration-300" style={{ transform: menuOpen ? "rotate(45deg) translate(0, 7px)" : "none" }} />
-                <span className="block h-[2px] w-5 rounded-full bg-white transition-all duration-300" style={{ opacity: menuOpen ? 0 : 1 }} />
-                <span className="block h-[2px] w-5 rounded-full bg-white transition-all duration-300" style={{ transform: menuOpen ? "rotate(-45deg) translate(0, -7px)" : "none" }} />
+                <span className="block h-[2px] w-4 rounded-full bg-white transition-all duration-300" style={{ transform: menuOpen ? "rotate(45deg) translate(0, 6px)" : "none" }} />
+                <span className="block h-[2px] w-4 rounded-full bg-white transition-all duration-300" style={{ opacity: menuOpen ? 0 : 1 }} />
+                <span className="block h-[2px] w-4 rounded-full bg-white transition-all duration-300" style={{ transform: menuOpen ? "rotate(-45deg) translate(0, -6px)" : "none" }} />
               </button>
             </div>
 
@@ -1253,7 +1311,8 @@ const Navbar = () => {
         aria-hidden={!menuOpen}
       >
         {/* Spacer para la altura del header */}
-        <div className="h-[60px] flex-shrink-0" />
+        {/* Spacer = altura del floating capsule (~58px) + top offset (14px) + 12px de aire */}
+        <div className="h-[84px] flex-shrink-0" />
 
         <nav className="flex flex-col px-6 pt-8 pb-6 flex-1 overflow-y-auto">
           {NAV_LINKS.map(([label, href]) => (
