@@ -10,9 +10,12 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
-  <!-- GSAP core + ScrollTrigger (cargado antes del bootstrap de React) -->
+  <!-- GSAP core + plugins (todos gratuitos desde adquisición de Webflow) -->
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/SplitText.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/CustomEase.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrambleTextPlugin.min.js"></script>
 
   <!-- Tailwind via Play CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -110,6 +113,12 @@
 const gsap = window.gsap;
 /** @type {typeof import("gsap/ScrollTrigger").ScrollTrigger} Plugin de scroll de GSAP. */
 const ScrollTrigger = window.ScrollTrigger;
+/** @type {typeof import("gsap/SplitText").SplitText|null} Plugin de división de texto de GSAP. */
+const SplitText = window.SplitText || null;
+/** @type {typeof import("gsap/CustomEase").CustomEase|null} Plugin de easing personalizado de GSAP. */
+const CustomEase = window.CustomEase || null;
+/** @type {typeof import("gsap/ScrambleTextPlugin").ScrambleTextPlugin|null} Plugin de texto scramble de GSAP. */
+const ScrambleTextPlugin = window.ScrambleTextPlugin || null;
 
 const IMG = "./images";
 const PHONE_DISPLAY = "(305) 834-2218";
@@ -333,6 +342,7 @@ const PrimaryCTA = ({ children, href = QUOTE_HASH, large = false, fullWidth = fa
   <a
     href={href}
     onClick={onClick}
+    data-magnetic
     className={`shine-on-hover inline-flex items-center justify-center gap-2.5 rounded-full font-semibold text-white transition-all duration-300 hover:scale-[1.03] hover:-translate-y-0.5 ${
       large ? "px-8 py-4 text-base md:text-lg" : "px-6 py-3 text-sm md:text-[15px]"
     } ${fullWidth ? "w-full" : ""}`}
@@ -573,52 +583,96 @@ const Navbar = () => {
 const HeroAnimaciones = {
 
   /**
-   * @description Registra el plugin ScrollTrigger en el core de GSAP.
+   * @description Registra todos los plugins GSAP necesarios para las animaciones del hero.
+   * Crea el CustomEase de firma de la marca si el plugin está disponible.
    */
   registrarPlugins() {
     gsap.registerPlugin(ScrollTrigger);
+    if (SplitText)         gsap.registerPlugin(SplitText);
+    if (CustomEase)        gsap.registerPlugin(CustomEase);
+    if (ScrambleTextPlugin) gsap.registerPlugin(ScrambleTextPlugin);
+    if (CustomEase && !CustomEase.get("mb.out")) {
+      CustomEase.create("mb.out", "0.16, 1, 0.3, 1");
+    }
   },
 
   /**
-   * @description Aplica el estado inicial invisible y desplazado a todos los
-   * elementos animables del hero antes de que comience la secuencia de entrada.
+   * @description Aplica el estado inicial invisible a todos los elementos animables
+   * del hero. El titular queda oculto solo si SplitText no está disponible.
    * @param {HeroRefs} refs - Mapa de referencias a los elementos del hero.
    */
   establecerEstadoInicial(refs) {
     gsap.set(refs.bgWrapper, { scale: 1.18 });
-    gsap.set(
-      [refs.eyebrow, refs.headline, refs.subhead, refs.ctaGroup, refs.trustRow],
-      { autoAlpha: 0, y: 36 }
-    );
-    if (refs.aside) gsap.set(refs.aside, { autoAlpha: 0, x: 44 });
+    gsap.set([refs.eyebrow, refs.subhead, refs.ctaGroup, refs.trustRow], { autoAlpha: 0, y: 40 });
+    if (!SplitText) gsap.set(refs.headline, { autoAlpha: 0, y: 40 });
+    if (refs.aside) gsap.set(refs.aside, { autoAlpha: 0, x: 48 });
+  },
+
+  /**
+   * @description Construye la animación cinética del titular principal: cada carácter
+   * parte desde una posición y rotación aleatoria en el espacio y converge en su lugar.
+   * Degradación elegante a fade-up si SplitText no cargó.
+   * @param {HTMLElement} headline - Elemento H1 del titular.
+   * @returns {gsap.core.Tween|gsap.core.Timeline} Animación resultante.
+   */
+  crearKineticTitular(headline) {
+    const ease = CustomEase ? "mb.out" : "power4.out";
+
+    if (!SplitText) {
+      return gsap.from(headline, { autoAlpha: 0, y: 40, duration: 1.0, ease });
+    }
+
+    const split = SplitText.create(headline, { type: "chars,words", smartWrap: true });
+
+    gsap.set(split.chars, {
+      x:        () => gsap.utils.random(-700, 700),
+      y:        () => gsap.utils.random(-450, 450),
+      rotation: () => gsap.utils.random(-180, 180),
+      scale:    () => gsap.utils.random(0.1, 2.4),
+      opacity: 0,
+    });
+
+    return gsap.to(split.chars, {
+      x: 0, y: 0, rotation: 0, scale: 1, opacity: 1,
+      duration: 1.5,
+      ease,
+      stagger: { amount: 1.1, from: "random" },
+    });
   },
 
   /**
    * @description Construye y reproduce la timeline de animación de entrada del hero.
-   * Cada elemento aparece con ligera demora escalonada para crear sensación de profundidad.
+   * El titular usa animación cinética de caracteres; el resto usa fade-up escalonado.
    * @param {HeroRefs} refs - Mapa de referencias a los elementos del hero.
    * @returns {gsap.core.Timeline} La timeline de entrada resultante.
    */
   crearTimelineEntrada(refs) {
-    const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+    const ease = CustomEase ? "mb.out" : "power3.out";
+    const tl = gsap.timeline({ defaults: { ease } });
 
-    tl.to(refs.bgWrapper,  { scale: 1.12, duration: 2.2, ease: "power2.out" }, 0)
-      .to(refs.eyebrow,    { autoAlpha: 1, y: 0, duration: 0.7 },  0.35)
-      .to(refs.headline,   { autoAlpha: 1, y: 0, duration: 1.0 },  0.52)
-      .to(refs.subhead,    { autoAlpha: 1, y: 0, duration: 0.85 }, 0.70)
-      .to(refs.ctaGroup,   { autoAlpha: 1, y: 0, duration: 0.8 },  0.84)
-      .to(refs.trustRow,   { autoAlpha: 1, y: 0, duration: 0.7 },  0.96);
+    tl.to(refs.bgWrapper, { scale: 1.12, duration: 2.4, ease: "power2.out" }, 0)
+      .to(refs.eyebrow,   { autoAlpha: 1, y: 0, duration: 0.7 }, 0.15)
+      .add(HeroAnimaciones.crearKineticTitular(refs.headline),   0.3)
+      .to(refs.subhead,   { autoAlpha: 1, y: 0, duration: 0.85 }, 0.75)
+      .to(refs.ctaGroup,  { autoAlpha: 1, y: 0, duration: 0.8 },  0.92)
+      .to(refs.trustRow,  { autoAlpha: 1, y: 0, duration: 0.7 },  1.06);
 
     if (refs.aside) {
-      tl.to(refs.aside, { autoAlpha: 1, x: 0, duration: 1.1, ease: "power2.out" }, 0.55);
+      tl.to(refs.aside, { autoAlpha: 1, x: 0, duration: 1.1, ease: "power2.out" }, 0.45);
+
+      if (refs.asideNumber && ScrambleTextPlugin) {
+        tl.to(refs.asideNumber, {
+          duration: 1.1,
+          scrambleText: { text: "4", chars: "0123456789", revealDelay: 0.35, speed: 0.6 },
+        }, 1.05);
+      }
     }
 
     return tl;
   },
 
   /**
-   * @description Configura el efecto parallax de la imagen de fondo vinculado
-   * al progreso de scroll. La imagen se desplaza más lento que la página.
+   * @description Configura el efecto parallax de la imagen de fondo vinculado al scroll.
    * @param {HTMLElement} bgWrapper - Contenedor de la imagen de fondo.
    * @param {HTMLElement} seccion   - Elemento raíz de la sección hero.
    */
@@ -626,66 +680,43 @@ const HeroAnimaciones = {
     gsap.to(bgWrapper, {
       yPercent: 22,
       ease: "none",
-      scrollTrigger: {
-        trigger: seccion,
-        start: "top top",
-        end: "bottom top",
-        scrub: true,
-      },
+      scrollTrigger: { trigger: seccion, start: "top top", end: "bottom top", scrub: true },
     });
   },
 
   /**
-   * @description Configura el desvanecimiento y desplazamiento vertical de la
-   * columna de texto al avanzar el scroll dentro del hero. Al retroceder, el
-   * efecto se revierte de forma fluida gracias al scrub.
+   * @description Configura el desvanecimiento de la columna de texto al scrollear.
    * @param {HTMLElement} textoColumna - Contenedor con el copy y CTAs del hero.
    * @param {HTMLElement} seccion      - Elemento raíz de la sección hero.
    */
   configurarScrollTexto(textoColumna, seccion) {
     gsap.to(textoColumna, {
-      y: -65,
-      autoAlpha: 0,
-      ease: "none",
-      scrollTrigger: {
-        trigger: seccion,
-        start: "18% top",
-        end: "58% top",
-        scrub: 1.2,
-      },
+      y: -65, autoAlpha: 0, ease: "none",
+      scrollTrigger: { trigger: seccion, start: "18% top", end: "58% top", scrub: 1.2 },
     });
   },
 
   /**
-   * @description Configura la reducción de escala del fondo conforme el hero
-   * abandona el viewport, produciendo un efecto de zoom-out al salir.
+   * @description Configura la reducción de escala del fondo al salir del viewport.
    * @param {HTMLElement} bgWrapper - Contenedor de la imagen de fondo.
    * @param {HTMLElement} seccion   - Elemento raíz de la sección hero.
    */
   configurarZoomSalida(bgWrapper, seccion) {
     gsap.to(bgWrapper, {
-      scale: 1.0,
-      ease: "none",
-      scrollTrigger: {
-        trigger: seccion,
-        start: "35% top",
-        end: "bottom top",
-        scrub: 1,
-      },
+      scale: 1.0, ease: "none",
+      scrollTrigger: { trigger: seccion, start: "35% top", end: "bottom top", scrub: 1 },
     });
   },
 
   /**
-   * @description Punto de entrada del módulo. Inicializa todas las animaciones
-   * del hero respetando la preferencia de movimiento reducido del sistema operativo.
-   * Cuando el usuario tiene activado "Reducir movimiento", los elementos se revelan
+   * @description Punto de entrada del módulo. Inicializa todas las animaciones del hero
+   * respetando prefers-reduced-motion. Con movimiento reducido, los elementos se revelan
    * instantáneamente sin transiciones.
    * @param {HeroRefs} refs - Mapa completo de referencias del hero.
    * @returns {gsap.MatchMedia} Instancia de matchMedia para revertir en desmontaje.
    */
   inicializar(refs) {
     HeroAnimaciones.registrarPlugins();
-
     const mm = gsap.matchMedia();
 
     mm.add(
@@ -695,15 +726,11 @@ const HeroAnimaciones = {
       },
       (ctx) => {
         if (ctx.conditions.sinMovimiento) {
-          gsap.set(
-            [refs.eyebrow, refs.headline, refs.subhead, refs.ctaGroup, refs.trustRow],
-            { autoAlpha: 1, y: 0 }
-          );
+          gsap.set([refs.eyebrow, refs.headline, refs.subhead, refs.ctaGroup, refs.trustRow], { autoAlpha: 1, y: 0 });
           if (refs.aside) gsap.set(refs.aside, { autoAlpha: 1, x: 0 });
           gsap.set(refs.bgWrapper, { scale: 1.12 });
           return;
         }
-
         HeroAnimaciones.establecerEstadoInicial(refs);
         HeroAnimaciones.crearTimelineEntrada(refs);
         HeroAnimaciones.configurarParallaxFondo(refs.bgWrapper, refs.seccion);
@@ -718,15 +745,16 @@ const HeroAnimaciones = {
 
 // ============ HERO — CINEMATIC FULL-BLEED ============
 const Hero = () => {
-  const seccionRef     = useRef(null);
-  const bgWrapperRef   = useRef(null);
+  const seccionRef      = useRef(null);
+  const bgWrapperRef    = useRef(null);
   const textoColumnaRef = useRef(null);
-  const eyebrowRef     = useRef(null);
-  const headlineRef    = useRef(null);
-  const subheadRef     = useRef(null);
-  const ctaGroupRef    = useRef(null);
-  const trustRowRef    = useRef(null);
-  const asideRef       = useRef(null);
+  const eyebrowRef      = useRef(null);
+  const headlineRef     = useRef(null);
+  const subheadRef      = useRef(null);
+  const ctaGroupRef     = useRef(null);
+  const trustRowRef     = useRef(null);
+  const asideRef        = useRef(null);
+  const asideNumberRef  = useRef(null);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -740,6 +768,7 @@ const Hero = () => {
         ctaGroup:     ctaGroupRef.current,
         trustRow:     trustRowRef.current,
         aside:        asideRef.current,
+        asideNumber:  asideNumberRef.current,
       });
     }, seccionRef);
 
@@ -910,7 +939,7 @@ const Hero = () => {
                 </div>
 
                 <div className="flex items-baseline gap-2 mb-2">
-                  <span className="font-display italic text-8xl leading-none text-white">4</span>
+                  <span ref={asideNumberRef} className="font-display italic text-8xl leading-none text-white">4</span>
                   <span className="font-display italic text-3xl" style={{ color: "var(--orange)" }}>hrs</span>
                 </div>
                 <p className="text-[14px] leading-relaxed mb-6" style={{ color: "rgba(200,225,248,0.7)" }}>
@@ -982,13 +1011,118 @@ const TrustStrip = () => {
   );
 };
 
+// ============ MÓDULO DE ANIMACIONES DE SECCIONES ============
+
+const SeccionesAnimaciones = {
+
+  /**
+   * @description Registra plugins adicionales y crea el CustomEase de marca si está disponible.
+   */
+  registrarPlugins() {
+    if (SplitText)  gsap.registerPlugin(SplitText);
+    if (CustomEase) {
+      gsap.registerPlugin(CustomEase);
+      if (!CustomEase.get("mb.out")) CustomEase.create("mb.out", "0.16, 1, 0.3, 1");
+    }
+  },
+
+  /**
+   * @description Anima cada titular de sección con SplitText y máscara de líneas.
+   * Las líneas suben desde detrás de un clip invisible al entrar en el viewport.
+   */
+  animarTitulares() {
+    if (!SplitText) return;
+    const ease = CustomEase ? "mb.out" : "power3.out";
+
+    document.querySelectorAll("[data-gsap-headline]").forEach(el => {
+      const split = SplitText.create(el, { type: "lines", mask: "lines" });
+      ScrollTrigger.create({
+        trigger: el,
+        start: "top 88%",
+        once: true,
+        onEnter: () => gsap.from(split.lines, {
+          yPercent: 110,
+          duration: 0.95,
+          ease,
+          stagger: 0.08,
+        }),
+      });
+    });
+  },
+
+  /**
+   * @description Crea entradas 3D escalonadas para todas las tarjetas del sitio.
+   * Agrupa los elementos que entran en el viewport en el mismo frame con ScrollTrigger.batch.
+   */
+  animarTarjetas() {
+    const ease = CustomEase ? "mb.out" : "power3.out";
+
+    ScrollTrigger.batch("[data-gsap-card]", {
+      onEnter: (batch) => gsap.from(batch, {
+        opacity: 0,
+        y: 72,
+        rotationX: 14,
+        scale: 0.95,
+        transformPerspective: 900,
+        transformOrigin: "top center",
+        duration: 0.9,
+        ease,
+        stagger: 0.09,
+        overwrite: true,
+      }),
+      start: "top 92%",
+      once: true,
+    });
+  },
+
+  /**
+   * @description Aplica efecto magnético a todos los botones CTA con data-magnetic.
+   * El botón sigue el cursor con suavizado y regresa con resorte elástico al salir.
+   */
+  activarMagneticCTAs() {
+    document.querySelectorAll("[data-magnetic]").forEach(btn => {
+      const onMove = (e) => {
+        const r = btn.getBoundingClientRect();
+        gsap.to(btn, {
+          x: (e.clientX - (r.left + r.width  / 2)) * 0.3,
+          y: (e.clientY - (r.top  + r.height / 2)) * 0.3,
+          duration: 0.4,
+          ease: "power2.out",
+          overwrite: "auto",
+        });
+      };
+      const onLeave = () => {
+        gsap.to(btn, {
+          x: 0, y: 0,
+          duration: 0.7,
+          ease: "elastic.out(1, 0.45)",
+        });
+      };
+      btn.addEventListener("mousemove", onMove);
+      btn.addEventListener("mouseleave", onLeave);
+    });
+  },
+
+  /**
+   * @description Punto de entrada del módulo. Inicializa todas las animaciones de secciones
+   * respetando prefers-reduced-motion del sistema operativo.
+   * @returns {gsap.MatchMedia} Instancia para revertir en desmontaje del componente raíz.
+   */
+  inicializar() {
+    SeccionesAnimaciones.registrarPlugins();
+    const mm = gsap.matchMedia();
+    mm.add("(prefers-reduced-motion: no-preference)", () => {
+      SeccionesAnimaciones.animarTitulares();
+      SeccionesAnimaciones.animarTarjetas();
+      SeccionesAnimaciones.activarMagneticCTAs();
+    });
+    return mm;
+  },
+};
+
 // ============ SECTION HEADER ============
 const SectionHeader = ({ eyebrow, headline, italicWord, subtext, align = "left" }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    whileInView={{ opacity: 1, y: 0 }}
-    viewport={{ once: true, margin: "-80px" }}
-    transition={{ duration: 0.7 }}
+  <div
     className={`mb-10 md:mb-14 ${align === "center" ? "text-center mx-auto" : ""} ${align === "center" ? "max-w-2xl" : "max-w-3xl"}`}
   >
     <div className="inline-flex items-center gap-2 rounded-full px-3 py-1 mb-4" style={{ background: "rgba(168,213,240,0.08)", border: "1px solid rgba(168,213,240,0.15)" }}>
@@ -997,7 +1131,11 @@ const SectionHeader = ({ eyebrow, headline, italicWord, subtext, align = "left" 
         {eyebrow}
       </span>
     </div>
-    <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold leading-[1.05] tracking-[-0.02em]" style={{ color: "var(--text)" }}>
+    <h2
+      data-gsap-headline
+      className="text-3xl md:text-4xl lg:text-5xl font-extrabold leading-[1.05] tracking-[-0.02em]"
+      style={{ color: "var(--text)" }}
+    >
       {headline.split(italicWord)[0]}
       <span className="font-display italic font-normal" style={{ color: "var(--pink)" }}>{italicWord}</span>
       {headline.split(italicWord)[1]}
@@ -1005,7 +1143,7 @@ const SectionHeader = ({ eyebrow, headline, italicWord, subtext, align = "left" 
     {subtext && (
       <p className="text-base md:text-lg mt-4 leading-relaxed" style={{ color: "var(--text-muted)" }}>{subtext}</p>
     )}
-  </motion.div>
+  </div>
 );
 
 // ============ FEATURED SERVICES ============
@@ -1058,12 +1196,9 @@ const FeaturedServices = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-12 gap-5 md:gap-6">
           {services.map((s, i) => (
-            <motion.div
+            <div
               key={s.title}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.7, delay: i * 0.08 }}
+              data-gsap-card
               className={`group relative rounded-3xl overflow-hidden ${s.span}`}
               style={{
                 minHeight: s.span === "md:col-span-7" ? "460px" : "400px",
@@ -1124,7 +1259,7 @@ const FeaturedServices = () => {
                   <SecondaryCTA href={PHONE_TEL}>Call</SecondaryCTA>
                 </div>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>
@@ -1171,11 +1306,8 @@ const ProcessSection = () => {
           {steps.map((s, i) => (
             <div key={s.num} className="flex flex-col md:flex-row">
               {/* Card */}
-              <motion.div
-                initial={{ opacity: 0, y: 32 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-60px" }}
-                transition={{ duration: 0.7, delay: i * 0.15 }}
+              <div
+                data-gsap-card
                 className="group relative rounded-3xl overflow-hidden flex-1"
                 style={{
                   background: "rgba(255,255,255,0.07)",
@@ -1239,7 +1371,7 @@ const ProcessSection = () => {
                     {s.desc}
                   </p>
                 </div>
-              </motion.div>
+              </div>
 
               {/* Connector arrow between steps (desktop only) */}
               {i < 2 && (
@@ -1524,12 +1656,9 @@ const RecentJobs = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
           {jobs.map((j, i) => (
-            <motion.div
+            <div
               key={i}
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.6, delay: i * 0.06 }}
+              data-gsap-card
               className="rounded-2xl overflow-hidden group hover:-translate-y-1 transition-transform duration-300"
               style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.1)", boxShadow: "0 8px 32px rgba(0,0,0,0.2)", backdropFilter: "blur(8px)" }}
             >
@@ -1553,7 +1682,7 @@ const RecentJobs = () => {
                 </p>
                 <h3 className="text-lg font-bold text-white">{j.service}</h3>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
 
@@ -1633,12 +1762,9 @@ const TestimonialsSection = () => {
         {/* Review grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
           {reviews.map((r, i) => (
-            <motion.div
+            <div
               key={r.name}
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-40px" }}
-              transition={{ duration: 0.6, delay: i * 0.07 }}
+              data-gsap-card
               className="rounded-2xl p-6 flex flex-col gap-4 hover:-translate-y-1 transition-transform duration-300"
               style={{
                 background: "var(--surface)",
@@ -1673,7 +1799,7 @@ const TestimonialsSection = () => {
                   <p className="text-[12px] leading-tight" style={{ color: "var(--text-muted)" }}>{r.area} · Google Review</p>
                 </div>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
 
@@ -1690,27 +1816,46 @@ const TestimonialsSection = () => {
 
 // ============ STATS ============
 const StatCounter = ({ value, suffix, decimals, label, sub, index }) => {
-  const [count, elRef] = useCountUp(value, 1800 + index * 200, decimals);
+  const [count, setCount] = useState(0);
+  const elRef = useRef(null);
+
+  useEffect(() => {
+    if (!elRef.current) return;
+    const proxy = { val: 0 };
+    let tween = null;
+    const st = ScrollTrigger.create({
+      trigger: elRef.current,
+      start: "top 82%",
+      onEnter: () => {
+        tween = gsap.to(proxy, {
+          val: value,
+          duration: 1.8 + index * 0.14,
+          ease: "power2.out",
+          onUpdate: () => setCount(
+            decimals > 0 ? parseFloat(proxy.val.toFixed(decimals)) : Math.floor(proxy.val)
+          ),
+          onComplete: () => setCount(value),
+        });
+      },
+      onLeaveBack: () => {
+        if (tween) tween.kill();
+        proxy.val = 0;
+        setCount(0);
+      },
+    });
+    return () => { st.kill(); if (tween) tween.kill(); };
+  }, [value, index, decimals]);
+
   const display = decimals > 0 ? count.toFixed(decimals) : count;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.6, delay: index * 0.1 }}
-      className="text-center md:text-left"
-    >
-      <div
-        ref={elRef}
-        className="font-display italic text-5xl md:text-6xl lg:text-7xl leading-none mb-2"
-        style={{ color: "var(--sun)" }}
-      >
+    <div ref={elRef} className="text-center md:text-left" data-gsap-card>
+      <div className="font-display italic text-5xl md:text-6xl lg:text-7xl leading-none mb-2" style={{ color: "var(--sun)" }}>
         {display}{suffix}
       </div>
       <div className="text-sm md:text-base font-bold uppercase tracking-[0.12em] text-white mb-1">{label}</div>
       <div className="text-[12px] md:text-[13px]" style={{ color: "var(--text-muted)" }}>{sub}</div>
-    </motion.div>
+    </div>
   );
 };
 
@@ -1763,13 +1908,10 @@ const ServiceAreas = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
           {areas.map((a, i) => (
-            <motion.a
+            <a
               key={a.name}
               href={QUOTE_HASH}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.5, delay: i * 0.04 }}
+              data-gsap-card
               className="group rounded-2xl p-5 md:p-6 hover:-translate-y-1 transition-all duration-300 cursor-pointer"
               style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "0 4px 20px rgba(0,0,0,0.2)" }}
             >
@@ -1788,7 +1930,7 @@ const ServiceAreas = () => {
                 {a.zips}
               </p>
               <p className="text-[13px] leading-relaxed" style={{ color: "var(--text-muted)" }}>{a.note}</p>
-            </motion.a>
+            </a>
           ))}
         </div>
 
@@ -1815,11 +1957,8 @@ const FAQItem = ({ q, a, isOpen, onToggle, index }) => {
   }, [isOpen, a]);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.5, delay: index * 0.04 }}
+    <div
+      data-gsap-card
       className="rounded-2xl overflow-hidden transition-all"
       style={{
         background: "rgba(255,255,255,0.06)",
@@ -1849,7 +1988,7 @@ const FAQItem = ({ q, a, isOpen, onToggle, index }) => {
           <p className="text-[14px] md:text-[15px] leading-relaxed" style={{ color: "var(--text-muted)" }}>{a}</p>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 };
 
@@ -2133,6 +2272,11 @@ const MobileStickyBottom = () => (
 
 // ============ APP ============
 function App() {
+  useEffect(() => {
+    const mm = SeccionesAnimaciones.inicializar();
+    return () => mm.revert();
+  }, []);
+
   return (
     <div className="min-h-screen pb-20 lg:pb-0">
       <StyleInjector />
