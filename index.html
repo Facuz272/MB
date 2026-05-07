@@ -411,6 +411,13 @@ const StyleInjector = () => (
       --text-muted:  rgba(200,225,248,0.65);
       --border:      rgba(255,255,255,0.07);
       --border-med:  rgba(255,255,255,0.12);
+
+      /* ----- Variables explícitas pedidas por el cliente ----- */
+      /* Aliases legibles para el dark blue y pink de marca, usados en la
+         cápsula blanca y en el copy del hero. Apuntan a las mismas tintas
+         de marca pero con nombres semánticos que reflejan el spec. */
+      --brand-dark-blue: var(--dark);
+      --brand-pink:      var(--pink);
     }
 
     body, html {
@@ -518,17 +525,14 @@ const StyleInjector = () => (
      * para evitar conflictos con el tween de GSAP Observer.
      */
     /*
-     * Floating capsule navbar — estética H2O Miami neon.
+     * Floating capsule navbar — fondo blanco con "pink interlining" prominente.
      *
      * Centrado sin transform: usamos left:0; right:0; margin-inline:auto con
      * un width explícito — la propiedad transform queda 100% libre para que
      * GSAP la use en el hide/show del Observer (translateY/yPercent).
      *
-     * Doble borde neon (rosa exterior + cyan interior) con un gap de ~2px:
-     *   - border: 2px solid pink ocupa los primeros 2px del outer edge.
-     *   - ::before con inset:2px (relativo al padding box, ya dentro del
-     *     borde rosa) y border:1.5px solid cyan dibuja la línea cyan,
-     *     dejando 2px de fondo azul visible entre las dos líneas.
+     * Borde único, sólido y notorio: 3px var(--brand-pink) en todo el perímetro.
+     * Las tres capas de box-shadow son sutiles para no competir con el borde.
      */
     .navbar-header {
       position: fixed;
@@ -538,15 +542,15 @@ const StyleInjector = () => (
       margin-inline: auto;
       width: min(94%, 1180px);
 
-      background: #0040D9;
+      background: #ffffff;
       border-radius: 9999px;
-      border: 2px solid var(--pink);
+      border: 3px solid var(--brand-pink);
 
-      /* Glow exterior: cyan + pink + sombra suave */
+      /* Sombra suave + halo rosa tenue (deja al borde pink ser el protagonista) */
       box-shadow:
-        0 0 24px rgba(45, 212, 255, 0.35),
-        0 0 32px rgba(199, 90, 159, 0.40),
-        0 12px 36px rgba(0, 0, 0, 0.40);
+        0 0 0 1px rgba(199, 90, 159, 0.16) inset,
+        0 8px 28px rgba(0, 0, 0, 0.10),
+        0 0 24px rgba(199, 90, 159, 0.20);
 
       /* Logo se sale por arriba/abajo de la pill — overflow visible obligatorio */
       overflow: visible;
@@ -556,19 +560,9 @@ const StyleInjector = () => (
     }
     .navbar-header[data-scrolled="true"] {
       box-shadow:
-        0 0 32px rgba(45, 212, 255, 0.60),
-        0 0 40px rgba(199, 90, 159, 0.55),
-        0 14px 40px rgba(0, 0, 0, 0.55);
-    }
-    /* Línea cyan interior — paralela al borde rosa con 2px de gap */
-    .navbar-header::before {
-      content: '';
-      position: absolute;
-      inset: 2px;
-      border: 1.5px solid #2dd4ff;
-      border-radius: inherit;
-      pointer-events: none;
-      box-shadow: 0 0 8px rgba(45, 212, 255, 0.55);
+        0 0 0 1px rgba(199, 90, 159, 0.32) inset,
+        0 12px 36px rgba(0, 0, 0, 0.18),
+        0 0 32px rgba(199, 90, 159, 0.30);
     }
     /* Triángulo indicador upward arriba del link en hover */
     .navlink-floating {
@@ -1225,9 +1219,10 @@ const Navbar = () => {
                 <a
                   key={href}
                   href={href}
-                  className="navlink-floating px-3 xl:px-4 py-1.5 rounded-full uppercase tracking-[0.14em] text-[11px] xl:text-[12px] font-medium text-white transition-colors"
-                  onMouseEnter={e => { e.currentTarget.style.color = "#ffd1ec"; }}
-                  onMouseLeave={e => { e.currentTarget.style.color = "#fff"; }}
+                  className="navlink-floating px-3 xl:px-4 py-1.5 rounded-full uppercase tracking-[0.14em] text-[11px] xl:text-[12px] font-medium transition-colors"
+                  style={{ color: "var(--brand-dark-blue)" }}
+                  onMouseEnter={e => { e.currentTarget.style.color = "var(--brand-pink)"; }}
+                  onMouseLeave={e => { e.currentTarget.style.color = "var(--brand-dark-blue)"; }}
                 >
                   {label}
                 </a>
@@ -1259,12 +1254,13 @@ const Navbar = () => {
                 ))}
               </nav>
 
-              {/* Phone — non-bold blanco, solo lg+ */}
+              {/* Phone — non-bold dark blue sobre cápsula blanca, solo lg+ */}
               <a
                 href={PHONE_TEL}
-                className="hidden lg:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[12px] font-medium text-white transition-colors"
-                onMouseEnter={e => { e.currentTarget.style.color = "#ffd1ec"; }}
-                onMouseLeave={e => { e.currentTarget.style.color = "#fff"; }}
+                className="hidden lg:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[12px] font-medium transition-colors"
+                style={{ color: "var(--brand-dark-blue)" }}
+                onMouseEnter={e => { e.currentTarget.style.color = "var(--brand-pink)"; }}
+                onMouseLeave={e => { e.currentTarget.style.color = "var(--brand-dark-blue)"; }}
               >
                 <PhoneIcon className="w-3.5 h-3.5" />
                 <span>{PHONE_DISPLAY}</span>
@@ -1283,17 +1279,17 @@ const Navbar = () => {
                 <span aria-hidden="true">→</span>
               </a>
 
-              {/* Hamburger — solo mobile/tablet (lg-) · barras blancas */}
+              {/* Hamburger — solo mobile/tablet (lg-) · barras dark blue sobre fondo blanco */}
               <button
                 className="lg:hidden flex flex-col items-center justify-center w-9 h-9 rounded-full gap-[4px] flex-shrink-0 transition-colors"
-                style={{ background: "rgba(255,255,255,0.10)", border: "1px solid rgba(45,212,255,0.35)" }}
+                style={{ background: "rgba(13,79,114,0.06)", border: "1.5px solid rgba(199,90,159,0.5)" }}
                 onClick={() => setMenuOpen(v => !v)}
                 aria-label={menuOpen ? "Close menu" : "Open menu"}
                 aria-expanded={menuOpen}
               >
-                <span className="block h-[2px] w-4 rounded-full bg-white transition-all duration-300" style={{ transform: menuOpen ? "rotate(45deg) translate(0, 6px)" : "none" }} />
-                <span className="block h-[2px] w-4 rounded-full bg-white transition-all duration-300" style={{ opacity: menuOpen ? 0 : 1 }} />
-                <span className="block h-[2px] w-4 rounded-full bg-white transition-all duration-300" style={{ transform: menuOpen ? "rotate(-45deg) translate(0, -6px)" : "none" }} />
+                <span className="block h-[2px] w-4 rounded-full transition-all duration-300" style={{ background: "var(--brand-dark-blue)", transform: menuOpen ? "rotate(45deg) translate(0, 6px)" : "none" }} />
+                <span className="block h-[2px] w-4 rounded-full transition-all duration-300" style={{ background: "var(--brand-dark-blue)", opacity: menuOpen ? 0 : 1 }} />
+                <span className="block h-[2px] w-4 rounded-full transition-all duration-300" style={{ background: "var(--brand-dark-blue)", transform: menuOpen ? "rotate(-45deg) translate(0, -6px)" : "none" }} />
               </button>
             </div>
 
@@ -1608,20 +1604,25 @@ const Hero = () => {
         />
       </div>
 
-      {/* Overlay gradiente principal */}
+      {/*
+        Overlay claro para que el copy en var(--brand-dark-blue) tenga contraste
+        legible sobre la imagen de fondo. El gradiente arranca con un tinte
+        casi-blanco arriba (donde vive el texto) y termina con var(--dark) abajo
+        para empalmar limpio con el body color.
+      */}
       <div
         className="absolute inset-0"
         style={{
           background:
-            "linear-gradient(to bottom, rgba(13,79,114,0.20) 0%, rgba(13,79,114,0.52) 45%, rgba(13,79,114,0.90) 80%, #0D4F72 100%)",
+            "linear-gradient(to bottom, rgba(232,242,250,0.78) 0%, rgba(232,242,250,0.62) 45%, rgba(13,79,114,0.55) 80%, var(--dark) 100%)",
         }}
       />
-      {/* Viñeta lateral */}
+      {/* Viñeta lateral suave (atenuada para no oscurecer el copy) */}
       <div
         className="absolute inset-0"
         style={{
           background:
-            "radial-gradient(ellipse at center, transparent 40%, rgba(13,79,114,0.55) 100%)",
+            "radial-gradient(ellipse at center, transparent 50%, rgba(13,79,114,0.18) 100%)",
         }}
       />
 
@@ -1629,31 +1630,33 @@ const Hero = () => {
       <div className="relative z-10 w-full max-w-[1100px] mx-auto px-4 sm:px-6 md:px-10 pt-6 md:pt-16 pb-20 md:pb-28 text-center">
         <div ref={textoColumnaRef} style={{ willChange: "transform, opacity" }}>
 
-          {/* Eyebrow — RESIDENTIAL & COMMERCIAL */}
+          {/* Eyebrow — RESIDENTIAL & COMMERCIAL · dark blue de marca */}
           <div
             ref={eyebrowRef}
             className="mb-4"
           >
             <span
-              className="text-[12px] md:text-[14px] font-bold uppercase tracking-[0.32em] text-white"
+              className="text-[12px] md:text-[14px] font-bold uppercase tracking-[0.32em]"
+              style={{ color: "var(--brand-dark-blue)" }}
             >
               Residential &amp; Commercial
             </span>
           </div>
 
-          {/* Titular principal — Roof Softwash & Exterior Cleaning */}
+          {/* Titular principal — bold prominent dark blue (mantiene size/weight) */}
           <h1
             ref={headlineRef}
-            className="text-[2.2rem] sm:text-[2.9rem] md:text-[4.4rem] lg:text-[5rem] font-extrabold leading-[1.05] tracking-[-0.02em] mb-6 text-white"
+            className="text-[2.2rem] sm:text-[2.9rem] md:text-[4.4rem] lg:text-[5rem] font-extrabold leading-[1.05] tracking-[-0.02em] mb-6"
+            style={{ color: "var(--brand-dark-blue)" }}
           >
             Roof Softwash &amp; Exterior Cleaning
           </h1>
 
-          {/* Subtítulo */}
+          {/* Subtítulo · mismo dark blue que el eyebrow para coherencia */}
           <p
             ref={subheadRef}
-            className="text-base md:text-[1.05rem] max-w-2xl mx-auto mb-10 leading-relaxed"
-            style={{ color: "rgba(200,225,248,0.9)" }}
+            className="text-base md:text-[1.05rem] max-w-2xl mx-auto mb-10 leading-relaxed font-medium"
+            style={{ color: "var(--brand-dark-blue)" }}
           >
             MB Softwash your go to company for roof softwash, pressure cleaning, and window cleaning in all Miami Dade and South Florida.
           </p>
@@ -1683,7 +1686,13 @@ const Hero = () => {
               className="inline-flex items-center justify-center gap-2.5 rounded-full px-8 py-4 text-base md:text-lg font-bold text-white uppercase tracking-wide transition-all duration-300 hover:scale-[1.03] hover:-translate-y-0.5"
               style={{
                 background: "var(--celeste)",
-                boxShadow: "0 10px 30px -8px rgba(26,122,154,0.55), 0 0 0 1px rgba(26,122,154,0.25) inset",
+                /* "Pink interlining": ring rosa de 2px (box-shadow con spread,
+                   no afecta el layout) + halo rosa que conversa con la cápsula */
+                boxShadow:
+                  "0 0 0 2px var(--brand-pink), " +
+                  "0 0 0 1px rgba(255,255,255,0.18) inset, " +
+                  "0 10px 30px -8px rgba(26,122,154,0.55), " +
+                  "0 0 22px rgba(199,90,159,0.45)",
               }}
             >
               <PhoneIcon className="w-4 h-4" />
