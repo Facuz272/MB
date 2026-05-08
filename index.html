@@ -573,12 +573,40 @@ const StyleInjector = () => (
     .rwlLocationLabel {
       font-size: 1.5rem !important;
     }
-    /* El carousel del plugin inyecta texto en gris/blanco que sobre nuestro
-       fondo blanco queda ilegible. Forzamos brand-dark-blue en todo el árbol
-       del carousel — selector universal + !important gana sobre los inline
-       styles que el plugin inyecta dinámicamente. */
+
+    /* Section bg ahora es dark blue: forzamos transparent en los wrappers
+       que el plugin inyecta para que el azul de la sección se vea de fondo
+       en lugar de un cuadrado blanco/gris adyacente al mapa. */
+    #rwl-map,
+    #rwl-review-carousel,
+    .rwlLocationLabel {
+      background-color: transparent !important;
+    }
+
+    /* Texto dentro del review carousel: negro sólido. Las cards interiores
+       que renderiza el plugin son BLANCAS (no se tocan), entonces el texto
+       negro tiene contraste pleno sobre la card. La regla anterior (force
+       brand-dark-blue) generaba texto azul oscuro sobre cards blancas y se
+       leía mal — black sobre white es más legible. */
     #rwl-review-carousel * {
-      color: var(--brand-dark-blue) !important;
+      color: #000000 !important;
+    }
+
+    /* FIX del clip de los nombres en el bottom de las review cards:
+       el plugin renderiza una card-wrapper con altura insuficiente y
+       overflow:hidden que recorta el username del autor. Forzamos:
+         - min-height 450px para garantizar espacio del autor
+         - padding-bottom para airear
+         - overflow: visible para que nada se clipee */
+    #rwl-review-carousel .rwl-review-card-wrapper {
+      min-height: 450px !important;
+      padding-bottom: 2rem !important;
+      overflow: visible !important;
+    }
+    /* Padding extra abajo del carousel para que la sombra y el último
+       elemento no choquen con el borde inferior de la sección. */
+    #rwl-review-carousel {
+      padding-bottom: 3rem !important;
     }
 
     /* ---------- Reduced motion ---------- */
@@ -2219,7 +2247,9 @@ const RecentProjectsReviews = () => {
     <section
       id="recent-projects"
       style={{
-        background: "#FFFFFF",
+        /* Bg dark blue para crear ritmo con el hero y que el mapa blanco
+           y las cards blancas del review carousel destaquen. */
+        background: "var(--brand-dark-blue)",
         padding: "80px 5%",
       }}
     >
@@ -2227,7 +2257,7 @@ const RecentProjectsReviews = () => {
 
         <h2
           className="text-center text-[2rem] md:text-[2.6rem] lg:text-[3rem] font-extrabold leading-[1.1] tracking-[-0.02em] mb-12"
-          style={{ color: "var(--brand-dark-blue)" }}
+          style={{ color: "#FFFFFF" }}
         >
           Check Out Our Recent Projects &amp; Reviews
         </h2>
