@@ -2368,60 +2368,67 @@ const OurServices = () => {
       id="services"
       className="relative"
       style={{
-        background: "#F5F7FA", /* light cool gray para que las cards blancas resalten */
+        /*
+          Sección 4 INVERTIDA: bg dark blue para que las cards blancas
+          con borde rosa resalten al máximo.
+          IMPORTANTE: esta sección es 100% ESTÁTICA — sin atributos
+          `data-gsap-*`, sin clases `transition-*`, sin hover transforms.
+          El usuario explícitamente pidió no animar nada para preservar
+          la sensación premium.
+        */
+        background: "var(--brand-dark-blue)",
         padding: "80px 5%",
       }}
     >
       <div className="max-w-[1280px] mx-auto">
 
-        {/* Section header */}
-        <div data-gsap-header className="mb-12 md:mb-14 text-center">
+        {/* Section header — sin data-gsap, sin animación */}
+        <div className="mb-12 md:mb-14 text-center">
           <span
-            data-gsap-eyebrow
             className="inline-block text-[12px] md:text-[13px] font-bold uppercase tracking-[0.32em] mb-3"
             style={{ color: "var(--brand-pink)" }}
           >
             Our Services
           </span>
           <h2
-            data-gsap-headline
             className="text-[2rem] md:text-[2.6rem] lg:text-[3rem] font-extrabold leading-[1.1] tracking-[-0.02em] mb-4"
-            style={{ color: "var(--brand-dark-blue)" }}
+            style={{ color: "#ffffff" }}
           >
             Everything we clean
           </h2>
           <p
-            data-gsap-subtext
             className="text-base md:text-lg max-w-2xl mx-auto leading-relaxed font-medium"
-            style={{ color: "var(--brand-dark-blue)", opacity: 0.85 }}
+            style={{ color: "rgba(255,255,255,0.85)" }}
           >
             Seven specialized services for residential and commercial properties across Miami-Dade and South Florida.
           </p>
         </div>
 
-        {/* Cards grid: 1 / 2 / 3 cols */}
+        {/* Cards grid: 1 / 2 / 3 cols — todas estáticas */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
           {services.map((s) => (
             <article
               key={s.title}
-              data-gsap-card
-              className="group relative bg-white rounded-2xl flex flex-col transition-transform duration-300 hover:-translate-y-1"
+              className="relative bg-white rounded-2xl flex flex-col"
               style={{
-                /* Double border: dark blue exterior gruesa + pink interior vía inset shadow */
-                border: "3px solid var(--brand-dark-blue)",
+                /*
+                  Card border per spec del cliente: pink solid 2px.
+                  Box-shadow: halo rosa exterior + ring rosa sutil interior
+                  para reforzar la "pink interlining" sin animación.
+                */
+                border: "2px solid var(--brand-pink)",
                 boxShadow:
-                  "0 0 0 2px var(--brand-pink) inset, " +
-                  "0 12px 32px -12px rgba(13,79,114,0.20)",
+                  "0 0 0 1px rgba(199,90,159,0.18) inset, " +
+                  "0 16px 40px -10px rgba(0,0,0,0.30), " +
+                  "0 0 24px rgba(199,90,159,0.18)",
               }}
             >
               {/*
-                Wrapper de la imagen — `position: relative` (default overflow visible)
-                para que el ícono pueda extenderse por debajo del border inferior
-                de la imagen sin ser recortado.
+                Wrapper de la imagen — overflow visible para permitir que
+                el icon overlapping sobresalga por debajo. Inner div clipea
+                la imagen a las esquinas superiores del card.
               */}
               <div className="relative">
-                {/* Inner div con overflow:hidden recorta la imagen a las
-                    esquinas redondeadas superiores del card. */}
                 <div
                   className="overflow-hidden"
                   style={{ borderRadius: "0.6rem 0.6rem 0 0" }}
@@ -2429,7 +2436,7 @@ const OurServices = () => {
                   <img
                     src="/api/placeholder/400/250"
                     alt={s.title}
-                    className="block w-full h-[200px] md:h-[220px] object-cover transition-transform duration-500 group-hover:scale-105"
+                    className="block w-full h-[200px] md:h-[220px] object-cover"
                     loading="lazy"
                     decoding="async"
                     onError={(e) => {
@@ -2441,21 +2448,19 @@ const OurServices = () => {
                 </div>
 
                 {/*
-                  Ícono circular OVERLAPPING:
-                  · `bottom: -28px / -32px` deja medio ícono dentro de la imagen
-                    y la otra mitad sobre el área blanca del contenido.
-                  · Triple ring (blanco + rosa + sombra) refuerza la sensación 3D
-                    consistente con el logo del header y el badge "Top Rated".
+                  Ícono circular OVERLAPPING (estático):
+                  · Bg blanco + border 2px rosa + drop shadow para depth
+                  · SVG en dark blue (currentColor) para legibilidad sobre el fondo blanco
+                  · Posicionado `-bottom-7/-8` para que la mitad superior esté
+                    sobre la imagen y la mitad inferior sobre el área de texto
                 */}
                 <div
                   className="absolute -bottom-7 md:-bottom-8 right-5 z-10 flex items-center justify-center w-14 h-14 md:w-16 md:h-16 rounded-full"
                   style={{
-                    background: "var(--brand-dark-blue)",
-                    boxShadow:
-                      "0 0 0 3px #ffffff, " +
-                      "0 0 0 5px var(--brand-pink), " +
-                      "0 8px 22px -4px rgba(13,79,114,0.45)",
-                    color: "#ffffff",
+                    background: "#ffffff",
+                    border: "2px solid var(--brand-pink)",
+                    boxShadow: "0 8px 20px -4px rgba(0,0,0,0.35)",
+                    color: "var(--brand-dark-blue)",
                   }}
                   aria-hidden="true"
                 >
