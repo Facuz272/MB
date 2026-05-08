@@ -456,18 +456,6 @@ const StyleInjector = () => (
     }
     .shine-on-hover:hover::after { transform: translateX(100%); }
 
-    /* ---------- Ken Burns hero ---------- */
-    @keyframes ken-burns {
-      0%   { transform: scale(1)    translate(0px, 0px); }
-      33%  { transform: scale(1.08) translate(-1%, 0.5%); }
-      66%  { transform: scale(1.05) translate(1%, -0.5%); }
-      100% { transform: scale(1)    translate(0px, 0px); }
-    }
-    .ken-burns {
-      animation: ken-burns 28s ease-in-out infinite;
-      will-change: transform;
-    }
-
     /* ---------- Marquee ---------- */
     @keyframes marquee {
       0%   { transform: translateX(0); }
@@ -498,10 +486,11 @@ const StyleInjector = () => (
 
     /* ---------- Reduced motion ---------- */
     @media (prefers-reduced-motion: reduce) {
-      .ken-burns  { animation: none !important; }
       .marquee-track { animation: none !important; white-space: normal; flex-wrap: wrap; justify-content: center; }
       .fab-pulse  { animation: none !important; box-shadow: 0 8px 24px rgba(255,107,31,0.4); }
       .animate-pulse-dot { animation: none !important; }
+      /* Pausar el video bg del hero para usuarios con reduced-motion */
+      #top video { display: none; }
     }
 
     /* ---------- Touch targets (mobile) ---------- */
@@ -1368,12 +1357,14 @@ const Navbar = () => {
 /**
  * @typedef {Object} HeroRefs
  * @property {HTMLElement} seccion      - Elemento raíz de la sección hero.
- * @property {HTMLElement} bgWrapper    - Contenedor de la imagen de fondo.
  * @property {HTMLElement} textoColumna - Contenedor centrado con copy y CTAs.
  * @property {HTMLElement} eyebrow      - Etiqueta eyebrow superior.
  * @property {HTMLElement} headline     - Titular principal H1.
  * @property {HTMLElement} subhead      - Párrafo subtítulo.
  * @property {HTMLElement} ctaGroup     - Contenedor de botones de acción.
+ *
+ * Nota: el bgWrapper/imagen de fondo fue removido en la integración del
+ * <video> autoplay — ya no hay refs de fondo ni animaciones GSAP sobre él.
  */
 
 const HeroAnimaciones = {
@@ -1398,7 +1389,8 @@ const HeroAnimaciones = {
    * @param {HeroRefs} refs - Mapa de referencias a los elementos del hero.
    */
   establecerEstadoInicial(refs) {
-    gsap.set(refs.bgWrapper, { scale: 1.18 });
+    /* El fondo ahora es un <video>, sin animación GSAP — solo seteamos
+       el estado inicial del contenido (texto/CTAs invisibles para fade-in). */
     gsap.set([refs.eyebrow, refs.subhead, refs.ctaGroup], { autoAlpha: 0, y: 40 });
     if (!SplitText) gsap.set(refs.headline, { autoAlpha: 0, y: 40 });
   },
@@ -1448,15 +1440,18 @@ const HeroAnimaciones = {
   /**
    * @description Construye y reproduce la timeline de animación de entrada del hero.
    *
-   * Secuencia coordinada con NavbarAnimaciones (que tarda ~0.73s en completar la entrada
-   * del chrome). Los elementos de contenido están desplazados +0.45s para que el primer
-   * elemento del hero (eyebrow) aparezca justo cuando la navbar termina de aterrizar:
+   * Secuencia coordinada con NavbarAnimaciones (que tarda ~0.73s en completar la
+   * entrada del chrome). El contenido empieza a aparecer cuando la navbar
+   * termina de aterrizar:
    *
-   *   t=0.00s  bgWrapper: zoom 1.18 → 1.12 (2.4s) — la página empieza a "respirar"
    *   t=0.60s  eyebrow "RESIDENTIAL & COMMERCIAL": fade-up
    *   t=0.78s  H1 cinético: caracteres convergen desde el espacio
    *   t=1.18s  subhead: fade-up
    *   t=1.35s  CTAs (centradas): fade-up
+   *
+   * NOTA: el fondo ya no se anima — desde la integración del video bg, todas
+   * las animaciones GSAP del bgWrapper (zoom inicial, parallax scroll, zoom
+   * salida) fueron removidas para no chocar con la reproducción del video.
    *
    * @param {HeroRefs} refs - Mapa de referencias a los elementos del hero.
    * @returns {gsap.core.Timeline}
@@ -1465,28 +1460,13 @@ const HeroAnimaciones = {
     const ease = CustomEase ? "mb.out" : "power3.out";
     const tl = gsap.timeline({ defaults: { ease } });
 
-    // Fondo empieza de inmediato — lento zoom que da "vida" mientras el chrome aterriza
-    tl.to(refs.bgWrapper, { scale: 1.12, duration: 2.4, ease: "power2.out" }, 0)
-    // Contenido espera ~0.45s para que la navbar llegue primero
-      .to(refs.eyebrow,  { autoAlpha: 1, y: 0, duration: 0.7  }, 0.60)
+    /* Contenido espera ~0.6s para que la navbar llegue primero */
+    tl.to(refs.eyebrow,  { autoAlpha: 1, y: 0, duration: 0.7  }, 0.60)
       .add(HeroAnimaciones.crearKineticTitular(refs.headline),    0.78)
       .to(refs.subhead,  { autoAlpha: 1, y: 0, duration: 0.85 }, 1.18)
       .to(refs.ctaGroup, { autoAlpha: 1, y: 0, duration: 0.8  }, 1.35);
 
     return tl;
-  },
-
-  /**
-   * @description Configura el efecto parallax de la imagen de fondo vinculado al scroll.
-   * @param {HTMLElement} bgWrapper - Contenedor de la imagen de fondo.
-   * @param {HTMLElement} seccion   - Elemento raíz de la sección hero.
-   */
-  configurarParallaxFondo(bgWrapper, seccion) {
-    gsap.to(bgWrapper, {
-      yPercent: 22,
-      ease: "none",
-      scrollTrigger: { trigger: seccion, start: "top top", end: "bottom top", scrub: true },
-    });
   },
 
   /**
@@ -1498,18 +1478,6 @@ const HeroAnimaciones = {
     gsap.to(textoColumna, {
       y: -65, autoAlpha: 0, ease: "none",
       scrollTrigger: { trigger: seccion, start: "18% top", end: "58% top", scrub: 1.2 },
-    });
-  },
-
-  /**
-   * @description Configura la reducción de escala del fondo al salir del viewport.
-   * @param {HTMLElement} bgWrapper - Contenedor de la imagen de fondo.
-   * @param {HTMLElement} seccion   - Elemento raíz de la sección hero.
-   */
-  configurarZoomSalida(bgWrapper, seccion) {
-    gsap.to(bgWrapper, {
-      scale: 1.0, ease: "none",
-      scrollTrigger: { trigger: seccion, start: "35% top", end: "bottom top", scrub: 1 },
     });
   },
 
@@ -1532,14 +1500,13 @@ const HeroAnimaciones = {
       (ctx) => {
         if (ctx.conditions.sinMovimiento) {
           gsap.set([refs.eyebrow, refs.headline, refs.subhead, refs.ctaGroup], { autoAlpha: 1, y: 0 });
-          gsap.set(refs.bgWrapper, { scale: 1.12 });
           return;
         }
         HeroAnimaciones.establecerEstadoInicial(refs);
         HeroAnimaciones.crearTimelineEntrada(refs);
-        HeroAnimaciones.configurarParallaxFondo(refs.bgWrapper, refs.seccion);
+        /* configurarParallaxFondo y configurarZoomSalida removidos —
+           el fondo ahora es un <video> autoplay, sin animación GSAP. */
         HeroAnimaciones.configurarScrollTexto(refs.textoColumna, refs.seccion);
-        HeroAnimaciones.configurarZoomSalida(refs.bgWrapper, refs.seccion);
       }
     );
 
@@ -1550,7 +1517,6 @@ const HeroAnimaciones = {
 // ============ HERO — CINEMATIC FULL-BLEED ============
 const Hero = () => {
   const seccionRef      = useRef(null);
-  const bgWrapperRef    = useRef(null);
   const textoColumnaRef = useRef(null);
   const eyebrowRef      = useRef(null);
   const headlineRef     = useRef(null);
@@ -1561,7 +1527,6 @@ const Hero = () => {
     const ctx = gsap.context(() => {
       HeroAnimaciones.inicializar({
         seccion:      seccionRef.current,
-        bgWrapper:    bgWrapperRef.current,
         textoColumna: textoColumnaRef.current,
         eyebrow:      eyebrowRef.current,
         headline:     headlineRef.current,
@@ -1580,83 +1545,82 @@ const Hero = () => {
       className="relative overflow-hidden"
       style={{ minHeight: "92vh", display: "flex", alignItems: "center" }}
     >
-      {/* Fondo: imagen con Ken Burns + parallax y zoom via GSAP */}
-      <div
-        ref={bgWrapperRef}
-        className="absolute inset-0 overflow-hidden"
-        style={{ willChange: "transform" }}
+      {/*
+        Background VIDEO — reemplaza la imagen estática con Ken Burns / parallax.
+        autoplay + muted + playsinline son obligatorios para que reproduzca en iOS.
+        z-index: -2 lo deja detrás del overlay (-1) y del contenido (z-10).
+        Source order: webm (1MB optimizado) primero, mp4 fallback para el preview
+        actual hasta que se suba el webm a /assets/.
+      */}
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        preload="auto"
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          zIndex: -2,
+        }}
       >
-        <img
-          src={`${IMG}/aerial-1.jpg`}
-          alt=""
-          className="ken-burns"
-          loading="eager"
-          fetchPriority="high"
-          decoding="async"
-          style={{
-            position: "absolute",
-            inset: 0,
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-            objectPosition: "center 40%",
-          }}
-        />
-      </div>
+        <source src="./assets/15999286-uhd_3840_2160_30fps.webm" type="video/webm" />
+        <source src="./assets/15999286-uhd_3840_2160_30fps.mp4"  type="video/mp4" />
+      </video>
 
       {/*
-        Overlay claro para que el copy en var(--brand-dark-blue) tenga contraste
-        legible sobre la imagen de fondo. El gradiente arranca con un tinte
-        casi-blanco arriba (donde vive el texto) y termina con var(--dark) abajo
-        para empalmar limpio con el body color.
+        Dark overlay encima del video, debajo del texto y del navbar (z-index:-1).
+        rgba(0,0,0,0.4) per spec del cliente — necesario para que las headings
+        en blanco resalten sobre el video brillante.
       */}
       <div
-        className="absolute inset-0"
         style={{
-          background:
-            "linear-gradient(to bottom, rgba(232,242,250,0.78) 0%, rgba(232,242,250,0.62) 45%, rgba(13,79,114,0.55) 80%, var(--dark) 100%)",
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          background: "rgba(0, 0, 0, 0.4)",
+          zIndex: -1,
         }}
-      />
-      {/* Viñeta lateral suave (atenuada para no oscurecer el copy) */}
-      <div
-        className="absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(ellipse at center, transparent 50%, rgba(13,79,114,0.18) 100%)",
-        }}
+        aria-hidden="true"
       />
 
       {/* Contenido principal — layout centrado 1-1 con la referencia */}
       <div className="relative z-10 w-full max-w-[1100px] mx-auto px-4 sm:px-6 md:px-10 pt-6 md:pt-16 pb-20 md:pb-28 text-center">
         <div ref={textoColumnaRef} style={{ willChange: "transform, opacity" }}>
 
-          {/* Eyebrow — RESIDENTIAL & COMMERCIAL · dark blue de marca */}
+          {/* Eyebrow — RESIDENTIAL & COMMERCIAL · blanco para contraste sobre el video oscuro */}
           <div
             ref={eyebrowRef}
             className="mb-4"
           >
             <span
-              className="text-[12px] md:text-[14px] font-bold uppercase tracking-[0.32em]"
-              style={{ color: "var(--brand-dark-blue)" }}
+              className="text-[12px] md:text-[14px] font-bold uppercase tracking-[0.32em] text-white"
             >
               Residential &amp; Commercial
             </span>
           </div>
 
-          {/* Titular principal — bold prominent dark blue (mantiene size/weight) */}
+          {/* Titular principal — blanco con drop-shadow sutil para legibilidad sobre el video */}
           <h1
             ref={headlineRef}
-            className="text-[2.2rem] sm:text-[2.9rem] md:text-[4.4rem] lg:text-[5rem] font-extrabold leading-[1.05] tracking-[-0.02em] mb-6"
-            style={{ color: "var(--brand-dark-blue)" }}
+            className="text-[2.2rem] sm:text-[2.9rem] md:text-[4.4rem] lg:text-[5rem] font-extrabold leading-[1.05] tracking-[-0.02em] mb-6 text-white"
+            style={{ textShadow: "0 4px 24px rgba(0,0,0,0.45)" }}
           >
             Roof Softwash &amp; Exterior Cleaning
           </h1>
 
-          {/* Subtítulo · mismo dark blue que el eyebrow para coherencia */}
+          {/* Subtítulo · blanco con leve transparencia */}
           <p
             ref={subheadRef}
             className="text-base md:text-[1.05rem] max-w-2xl mx-auto mb-10 leading-relaxed font-medium"
-            style={{ color: "var(--brand-dark-blue)" }}
+            style={{ color: "rgba(255,255,255,0.92)", textShadow: "0 2px 12px rgba(0,0,0,0.35)" }}
           >
             MB Softwash your go to company for roof softwash, pressure cleaning, and window cleaning in all Miami Dade and South Florida.
           </p>
