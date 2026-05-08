@@ -888,11 +888,11 @@ const PhoneIcon = ({ className = "w-5 h-5" }) => (
 );
 
 // ============ NAVBAR ============
-// Layout split: 3 links a la izquierda del logo, 1 a la derecha (más phone + CTA).
+// Layout split: 2 links a la izquierda del logo, 1 a la derecha (más phone + CTA).
+// "Areas" removido junto con la sección ServiceAreas.
 const NAV_LINKS_LEFT = [
   ["Services", "#services"],
   ["Results", "#results"],
-  ["Areas", "#service-areas"],
 ];
 const NAV_LINKS_RIGHT = [
   ["FAQ", "#faq"],
@@ -2858,71 +2858,6 @@ const Stats = () => {
   );
 };
 
-// ============ SERVICE AREAS ============
-const ServiceAreas = () => {
-  const areas = [
-    { name: "Coral Gables", zips: "33134 · 33143 · 33145 · 33146", note: "Mediterranean Revival stucco + barrel-tile under banyan canopy. Recurring contracts here." },
-    { name: "Pinecrest", zips: "33156 · 33158", note: "Acre-plus lots with mature oak. Tile roofs need softwash every 18 months." },
-    { name: "Key Biscayne", zips: "33149", note: "Saltwater spray + humidity. Coastal-grade rinse protocol." },
-    { name: "Coconut Grove", zips: "33133", note: "Historic homes near Biscayne Bay. Lowest-pressure softwash settings." },
-    { name: "Palmetto Bay", zips: "33157 · 33158", note: "Estate-scale paver driveways and screened pool enclosures." },
-    { name: "South Miami", zips: "33143 · 33155", note: "House wash + window cleaning combos most-requested." },
-    { name: "Cutler Bay", zips: "33157 · 33189 · 33190", note: "Post-Andrew construction with concrete tile roofs." },
-    { name: "Miami Beach", zips: "33139 · 33140 · 33141", note: "Art Deco buildings and waterfront condos." },
-  ];
-
-  return (
-    <section id="service-areas" className="py-16 md:py-24" style={{ background: "var(--dark-2)" }}>
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-10 lg:px-16">
-        <SectionHeader
-          eyebrow="Service Areas"
-          headline="Across Miami-Dade County"
-          italicWord="Miami-Dade"
-          subtext="Eight neighborhoods we know well. If yours isn't listed, call us — we quote luxury exterior projects across all of South Florida."
-          align="center"
-        />
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
-          {areas.map((a, i) => (
-            <a
-              key={a.name}
-              href={QUOTE_HASH}
-              data-gsap-card
-              className="group rounded-2xl p-5 md:p-6 hover:-translate-y-1 transition-all duration-300 cursor-pointer"
-              style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "0 4px 20px rgba(0,0,0,0.2)" }}
-            >
-              <div className="flex items-start justify-between mb-3">
-                <h3 className="text-xl font-bold text-white">{a.name}</h3>
-                <span
-                  className="inline-flex items-center justify-center w-7 h-7 rounded-full transition-transform group-hover:scale-110 group-hover:bg-orange-500/20"
-                  style={{ background: "rgba(168,213,240,0.08)" }}
-                >
-                  <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="var(--sky-accent)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M5 12h14M13 5l7 7-7 7"/>
-                  </svg>
-                </span>
-              </div>
-              <p className="text-[11px] font-bold tracking-[0.1em] tabular-nums mb-3" style={{ color: "var(--pink)" }}>
-                {a.zips}
-              </p>
-              <p className="text-[13px] leading-relaxed" style={{ color: "var(--text-muted)" }}>{a.note}</p>
-            </a>
-          ))}
-        </div>
-
-        <div className="text-center mt-10">
-          <p className="text-base mb-4" style={{ color: "var(--text-muted)" }}>
-            Outside this list?{" "}
-            <a href={PHONE_TEL} className="font-bold underline-offset-4 hover:underline" style={{ color: "var(--orange)" }}>
-              Call {PHONE_DISPLAY}
-            </a>
-          </p>
-        </div>
-      </div>
-    </section>
-  );
-};
-
 // ============ FAQ ============
 const FAQItem = ({ q, a, isOpen, onToggle, index }) => {
   const contentRef = useRef(null);
@@ -3136,8 +3071,9 @@ const Footer = () => (
           </div>
         </div>
 
-        {/* Links — 2-up on mobile, separate columns on desktop */}
-        <div className="md:col-span-2">
+        {/* Links — 2-up on mobile, separate columns on desktop.
+            Col-spans recalibrados al borrar el bloque Areas: 5 brand + 3 services + 4 contact = 12. */}
+        <div className="md:col-span-3">
           <h4 className="text-[12px] font-bold uppercase tracking-[0.18em] mb-4" style={{ color: "var(--sky-accent)" }}>Services</h4>
           <ul className="flex flex-col gap-2 text-[14px]">
             {["Roof Softwash", "Paver Sealing", "House Wash", "Fence Restoration"].map((s) => (
@@ -3148,18 +3084,7 @@ const Footer = () => (
           </ul>
         </div>
 
-        <div className="md:col-span-2">
-          <h4 className="text-[12px] font-bold uppercase tracking-[0.18em] mb-4" style={{ color: "var(--sky-accent)" }}>Areas</h4>
-          <ul className="flex flex-col gap-2 text-[14px]">
-            {["Coral Gables", "Pinecrest", "Key Biscayne", "Coconut Grove", "All Miami-Dade"].map((s) => (
-              <li key={s}>
-                <a href="#service-areas" className="transition-colors hover:text-white" style={{ color: "var(--text-muted)" }}>{s}</a>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <div className="col-span-2 md:col-span-3">
+        <div className="col-span-2 md:col-span-4">
           <h4 className="text-[12px] font-bold uppercase tracking-[0.18em] mb-4" style={{ color: "var(--sky-accent)" }}>Contact</h4>
           <ul className="flex flex-col gap-3 text-[14px]" style={{ color: "var(--text-muted)" }}>
             <li>
@@ -3282,7 +3207,6 @@ function App() {
         bottomColor="#1A7A9A"
       />
       <Stats />
-      <ServiceAreas />
       <InterrupterBanner
         headline="Don't see your area? We probably still cover it."
         italicWord="cover it."
