@@ -2676,120 +2676,6 @@ const ResultsSection = () => {
   );
 };
 
-// ============ TESTIMONIALS ============
-const GoogleIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 20 20" style={{ flexShrink: 0 }}>
-    <path d="M19.6 10.23c0-.68-.06-1.36-.18-2H10v3.79h5.4a4.63 4.63 0 0 1-2 3.04v2.52h3.24c1.9-1.75 3-4.32 3-7.35z" fill="#4285F4"/>
-    <path d="M10 20c2.7 0 4.97-.9 6.63-2.42l-3.24-2.52a5.97 5.97 0 0 1-8.9-3.14H1.17v2.6A10 10 0 0 0 10 20z" fill="#34A853"/>
-    <path d="M4.49 11.92A5.97 5.97 0 0 1 4.18 10c0-.67.12-1.32.31-1.92V5.48H1.17A10 10 0 0 0 0 10c0 1.61.39 3.14 1.17 4.52l3.32-2.6z" fill="#FBBC05"/>
-    <path d="M10 3.98a5.42 5.42 0 0 1 3.83 1.5l2.86-2.86A9.6 9.6 0 0 0 10 0 10 10 0 0 0 1.17 5.48l3.32 2.6A5.97 5.97 0 0 1 10 3.98z" fill="#EA4335"/>
-  </svg>
-);
-
-const StarRow = ({ count = 5 }) => (
-  <div className="flex gap-0.5">
-    {[...Array(count)].map((_, i) => (
-      <svg key={i} className="w-4 h-4" viewBox="0 0 24 24" fill="#FBBF24">
-        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-      </svg>
-    ))}
-  </div>
-);
-
-const TestimonialsSection = () => {
-  const reviews = [
-    { name: "Maria G.", area: "Coral Gables", initials: "MG", avatarBg: "#FF6B1F", rating: 5, text: "MB Softwash transformed our tile roof. The algae that had been building up for years was completely gone after one treatment. Quote arrived in under an hour — professional from start to finish." },
-    { name: "Carlos R.", area: "Pinecrest", initials: "CR", avatarBg: "#C75A9F", rating: 5, text: "Used them for our driveway and paver sealing. The result was better than expected — looks completely brand new. Already booked them for the house wash next month." },
-    { name: "Jennifer M.", area: "Key Biscayne", initials: "JM", avatarBg: "#3A95C8", rating: 5, text: "Skeptical at first about softwash vs. pressure washing, but the difference is real. No damage to our roof tiles and the result is still holding after 14 months. Worth every penny." },
-    { name: "David T.", area: "Coconut Grove", initials: "DT", avatarBg: "#E85100", rating: 5, text: "Fast, professional, and the most detailed quote we received from any company. Showed up exactly on time, which in Miami is rare. The fence restoration looks incredible." },
-    { name: "Ana P.", area: "Palmetto Bay", initials: "AP", avatarBg: "#C75A9F", rating: 5, text: "Our fence looked 10 years older than it was. After the restoration it genuinely looks brand new. The crew protected all our plants beforehand — nothing was rushed or damaged." },
-    { name: "Robert K.", area: "South Miami", initials: "RK", avatarBg: "#3A95C8", rating: 5, text: "Used MB Softwash for the whole property: roof, driveway, and house wash. Pricing was fair and transparent. Our neighbors have already asked us for their contact information." },
-  ];
-
-  return (
-    <section className="py-16 md:py-24" style={{ background: "var(--dark-2)" }}>
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-10 lg:px-16">
-        <SectionHeader
-          eyebrow="Google Reviews"
-          headline="What our clients say"
-          italicWord="clients say"
-          subtext="4.9 stars across 230+ verified Google reviews. Real Miami-Dade homeowners, real results."
-          align="center"
-        />
-
-        {/* Google aggregate badge */}
-        <div className="flex justify-center mb-12">
-          <div
-            className="inline-flex items-center gap-3 rounded-full px-5 py-3"
-            style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "0 4px 20px rgba(0,0,0,0.3)" }}
-          >
-            <svg width="22" height="22" viewBox="0 0 20 20">
-              <path d="M19.6 10.23c0-.68-.06-1.36-.18-2H10v3.79h5.4a4.63 4.63 0 0 1-2 3.04v2.52h3.24c1.9-1.75 3-4.32 3-7.35z" fill="#4285F4"/>
-              <path d="M10 20c2.7 0 4.97-.9 6.63-2.42l-3.24-2.52a5.97 5.97 0 0 1-8.9-3.14H1.17v2.6A10 10 0 0 0 10 20z" fill="#34A853"/>
-              <path d="M4.49 11.92A5.97 5.97 0 0 1 4.18 10c0-.67.12-1.32.31-1.92V5.48H1.17A10 10 0 0 0 0 10c0 1.61.39 3.14 1.17 4.52l3.32-2.6z" fill="#FBBC05"/>
-              <path d="M10 3.98a5.42 5.42 0 0 1 3.83 1.5l2.86-2.86A9.6 9.6 0 0 0 10 0 10 10 0 0 0 1.17 5.48l3.32 2.6A5.97 5.97 0 0 1 10 3.98z" fill="#EA4335"/>
-            </svg>
-            <span className="font-bold text-white text-[15px]">4.9</span>
-            <StarRow />
-            <span className="text-[13px]" style={{ color: "var(--text-muted)" }}>230+ Google reviews</span>
-          </div>
-        </div>
-
-        {/* Review grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
-          {reviews.map((r, i) => (
-            <div
-              key={r.name}
-              data-gsap-card
-              className="rounded-2xl p-6 flex flex-col gap-4 hover:-translate-y-1 transition-transform duration-300"
-              style={{
-                background: "var(--surface)",
-                border: "1px solid var(--border)",
-                boxShadow: "0 4px 24px rgba(0,0,0,0.25)",
-              }}
-            >
-              {/* Stars + Google icon */}
-              <div className="flex items-center justify-between">
-                <StarRow count={r.rating} />
-                <GoogleIcon />
-              </div>
-
-              {/* Quote text */}
-              <p className="text-[14px] leading-relaxed flex-1 italic" style={{ color: "rgba(200,225,248,0.78)" }}>
-                "{r.text}"
-              </p>
-
-              {/* Author row */}
-              <div
-                className="flex items-center gap-3 pt-4"
-                style={{ borderTop: "1px solid var(--border)" }}
-              >
-                <div
-                  className="w-10 h-10 rounded-full flex items-center justify-center text-[13px] font-bold text-white flex-shrink-0"
-                  style={{ background: `linear-gradient(135deg, ${r.avatarBg} 0%, ${r.avatarBg}99 100%)`, boxShadow: `0 4px 12px ${r.avatarBg}44` }}
-                >
-                  {r.initials}
-                </div>
-                <div>
-                  <p className="text-[14px] font-semibold text-white leading-tight">{r.name}</p>
-                  <p className="text-[12px] leading-tight" style={{ color: "var(--text-muted)" }}>{r.area} · Google Review</p>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="text-center mt-12">
-          <p className="text-[13px] mb-5" style={{ color: "var(--text-muted)" }}>
-            Join 230+ satisfied Miami-Dade homeowners
-          </p>
-          <PrimaryCTA href={QUOTE_HASH} large icon="→">Get your free quote</PrimaryCTA>
-        </div>
-      </div>
-    </section>
-  );
-};
-
 // ============ STATS ============
 const StatCounter = ({ value, suffix, decimals, label, sub, index }) => {
   const [count, setCount] = useState(0);
@@ -3197,7 +3083,6 @@ function App() {
         bottomColor="#0D4F72"
       />
       <ResultsSection />
-      <TestimonialsSection />
       <InterrupterBanner
         headline="Same-day quotes are available."
         italicWord="available."
