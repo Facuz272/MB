@@ -1549,8 +1549,8 @@ const Hero = () => {
         Background VIDEO — reemplaza la imagen estática con Ken Burns / parallax.
         autoplay + muted + playsinline son obligatorios para que reproduzca en iOS.
         z-index: -2 lo deja detrás del overlay (-1) y del contenido (z-10).
-        Source order: webm (1MB optimizado) primero, mp4 fallback para el preview
-        actual hasta que se suba el webm a /assets/.
+        Source: webm 1.5MB optimizado en ./images/ (consistente con el resto
+        de assets visuales del repo).
       */}
       <video
         autoPlay
@@ -1569,8 +1569,7 @@ const Hero = () => {
           zIndex: -2,
         }}
       >
-        <source src="./assets/15999286-uhd_3840_2160_30fps.webm" type="video/webm" />
-        <source src="./assets/15999286-uhd_3840_2160_30fps.mp4"  type="video/mp4" />
+        <source src={`${IMG}/15999286-uhd_3840_2160_30fps.webm`} type="video/webm" />
       </video>
 
       {/*
