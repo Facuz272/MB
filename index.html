@@ -2745,17 +2745,24 @@ const Stats = () => {
 };
 
 // ============ FAQ ============
+//
+// Sección 100% ESTÁTICA al scroll — sin GSAP, sin ScrollTrigger.
+// El acordeón se maneja con vanilla React state + transición CSS pura
+// sobre `height` (cubic-bezier 0.5s) — ver línea ~2783 abajo.
+//
+// `transition-all` en el wrapper anima únicamente cambios visuales suaves
+// (border-color y box-shadow al abrir/cerrar) — NO es una entrada animada.
 const FAQItem = ({ q, a, isOpen, onToggle, index }) => {
   const contentRef = useRef(null);
   const [height, setHeight] = useState(0);
 
+  // Mide el contenido y ajusta el alto del wrapper colapsable.
   useEffect(() => {
     if (contentRef.current) setHeight(isOpen ? contentRef.current.scrollHeight : 0);
   }, [isOpen, a]);
 
   return (
     <div
-      data-gsap-card
       className="rounded-2xl overflow-hidden transition-all"
       style={{
         background: "rgba(255,255,255,0.06)",
@@ -2804,13 +2811,36 @@ const FAQ = () => {
   return (
     <section id="faq" className="py-16 md:py-24" style={{ background: "var(--celeste)" }}>
       <div className="max-w-[900px] mx-auto px-4 sm:px-6 md:px-10 lg:px-16">
-        <SectionHeader
-          eyebrow="FAQ"
-          headline="Common questions"
-          italicWord="questions"
-          subtext="If yours isn't here, call or text us. We answer fast."
-          align="center"
-        />
+
+        {/*
+          Header INLINE (sin <SectionHeader> que tiene data-gsap-header /
+          -eyebrow / -headline / -subtext). Replica la misma estética visual
+          del componente original pero queda 100% estático al scroll.
+        */}
+        <div className="mb-10 md:mb-14 text-center mx-auto max-w-2xl">
+          <div
+            className="inline-flex items-center gap-2 rounded-full px-3 py-1 mb-4"
+            style={{ background: "rgba(168,213,240,0.08)", border: "1px solid rgba(168,213,240,0.15)" }}
+          >
+            <span className="w-1.5 h-1.5 rounded-full" style={{ background: "var(--orange)" }} />
+            <span className="text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: "var(--sky-accent)" }}>
+              FAQ
+            </span>
+          </div>
+          <h2
+            className="text-3xl md:text-4xl lg:text-5xl font-extrabold leading-[1.05] tracking-[-0.02em]"
+            style={{ color: "var(--text)" }}
+          >
+            Common{" "}
+            <span className="font-display italic font-normal" style={{ color: "var(--pink)" }}>questions</span>
+          </h2>
+          <p
+            className="text-base md:text-lg mt-4 leading-relaxed"
+            style={{ color: "var(--text-muted)" }}
+          >
+            If yours isn't here, call or text us. We answer fast.
+          </p>
+        </div>
 
         <div className="flex flex-col gap-3 md:gap-4">
           {faqs.map((faq, i) => (
