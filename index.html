@@ -573,6 +573,13 @@ const StyleInjector = () => (
     .rwlLocationLabel {
       font-size: 1.5rem !important;
     }
+    /* El carousel del plugin inyecta texto en gris/blanco que sobre nuestro
+       fondo blanco queda ilegible. Forzamos brand-dark-blue en todo el árbol
+       del carousel — selector universal + !important gana sobre los inline
+       styles que el plugin inyecta dinámicamente. */
+    #rwl-review-carousel * {
+      color: var(--brand-dark-blue) !important;
+    }
 
     /* ---------- Reduced motion ---------- */
     @media (prefers-reduced-motion: reduce) {
@@ -2241,8 +2248,31 @@ const RecentProjectsReviews = () => {
           <div id="rwl-review-carousel" />
         </div>
 
-        {/* Output del plugin (textos, labels) — estilado en StyleInjector */}
-        <div id="rwl-output" />
+        {/*
+          Output SEO del plugin — wall of text + imágenes que RealWork Labs
+          inyecta para SEO local. NO podemos borrarlo porque mata el SEO,
+          pero tampoco queremos exponer ese muro visualmente.
+          Solución: <details> nativo que lo deja COLAPSADO por defecto pero
+          100% crawlable por Googlebot (los crawlers ven todo el contenido
+          dentro del <details>, abierto o cerrado).
+        */}
+        <div className="seo-data-container" style={{ maxWidth: "1000px", margin: "2rem auto", padding: "0 1rem" }}>
+          <details style={{ background: "#f4f4f6", padding: "1rem", borderRadius: "8px", border: "1px solid #e5e7eb" }}>
+            <summary
+              style={{
+                fontWeight: 600,
+                color: "var(--brand-dark-blue)",
+                cursor: "pointer",
+                listStylePosition: "inside",
+              }}
+            >
+              View Detailed Job Locations &amp; Project Logs
+            </summary>
+            <div style={{ marginTop: "1.5rem", maxHeight: "500px", overflowY: "auto", paddingRight: "10px" }}>
+              <div id="rwl-output" />
+            </div>
+          </details>
+        </div>
 
       </div>
     </section>
