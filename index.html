@@ -1845,18 +1845,23 @@ const TrustGuarantee = () => {
         className="relative mx-auto"
         style={{
           maxWidth: "1200px",
-          /* Soft cool sky tint — lo bastante claro para que dark blue text
-             siga teniendo contraste WCAG AAA. */
-          background: "var(--brand-light-blue)",
+          /* Box bg blanco solid — los textos en var(--brand-dark-blue) y los
+             badges blancos siguen legibles. Drop shadow de abajo es clave
+             para definir el box contra el bg blanco de la sección. */
+          background: "#FFFFFF",
           borderRadius: "16px",
-          /* DOUBLE BORDER:
-             · Capa exterior: 4px solid var(--brand-dark-blue) (border real)
-             · Capa interior: inset 0 0 0 4px var(--brand-pink) (box-shadow)
-             Se dibujan adyacentes (sin gap) — como nested borders. */
-          border: "4px solid var(--brand-dark-blue)",
+          /* DOUBLE BORDER (color swap del round anterior):
+             · Outer: 4px solid var(--brand-pink) (border real)
+             · Gap:   4px de blanco (inset shadow #FFFFFF, se mezcla con el bg)
+             · Inner: 2px solid var(--brand-dark-blue) (extra 2px del 2do inset)
+             El truco del double border con gap se logra apilando dos inset
+             shadows: el blanco (4px) tapa los primeros 4px adentro, dejando
+             que el dark-blue (6px total) se vea solo entre 4–6px. */
+          border: "4px solid var(--brand-pink)",
           padding: "clamp(36px, 5vw, 60px)",
           boxShadow:
-            "inset 0 0 0 4px var(--brand-pink), " +              /* inner pink line */
+            "inset 0 0 0 4px #FFFFFF, " +                        /* gap blanco interior */
+            "inset 0 0 0 6px var(--brand-dark-blue), " +         /* línea dark blue 2px (4→6) */
             "0 30px 80px -28px rgba(13,79,114,0.22), " +         /* drop shadow para depth */
             "0 12px 32px -16px rgba(13,79,114,0.12)",
           overflow: "visible",
