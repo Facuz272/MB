@@ -416,8 +416,13 @@ const StyleInjector = () => (
       /* Aliases legibles para el dark blue y pink de marca, usados en la
          cápsula blanca y en el copy del hero. Apuntan a las mismas tintas
          de marca pero con nombres semánticos que reflejan el spec. */
-      --brand-dark-blue: var(--dark);
-      --brand-pink:      var(--pink);
+      --brand-dark-blue:  var(--dark);
+      --brand-pink:       var(--pink);
+      /* Soft sky tint para backgrounds de "trust sections" — light enough
+         para que el copy en var(--brand-dark-blue) tenga contraste pleno,
+         pero claramente azul (no off-white). Equivale a un wash de
+         var(--sky-accent) sobre blanco. */
+      --brand-light-blue: #D6EBFA;
     }
 
     body, html {
@@ -1812,7 +1817,9 @@ const TrustGuarantee = () => (
     data-gsap-section
     className="relative"
     style={{
-      background: "#ffffff",
+      // Light blue de marca — separa esta trust section del flow blanco
+      // y hace que las cards blancas de los badges resalten.
+      background: "var(--brand-light-blue)",
       // Padding generoso (80px vertical / 5% horizontal). Fallback px-4 en
       // pantallas micro para no chocar con los bordes.
       padding: "80px 5%",
