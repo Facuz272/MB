@@ -1543,14 +1543,19 @@ const Hero = () => {
       ref={seccionRef}
       id="top"
       className="relative overflow-hidden"
-      style={{ minHeight: "92vh", display: "flex", alignItems: "center" }}
+      style={{
+        minHeight: "92vh",
+        display: "flex",
+        alignItems: "center",
+        /* Transparent obligatorio: si la sección tuviera bg sólido taparía
+           el video (que está en z-index:0, encima del body var(--dark)). */
+        background: "transparent",
+      }}
     >
       {/*
-        Background VIDEO — reemplaza la imagen estática con Ken Burns / parallax.
-        autoplay + muted + playsinline son obligatorios para que reproduzca en iOS.
-        z-index: -2 lo deja detrás del overlay (-1) y del contenido (z-10).
-        Source: webm 1.5MB optimizado en ./images/ (consistente con el resto
-        de assets visuales del repo).
+        Background VIDEO — z-index POSITIVO (0) para que el navegador no lo
+        empuje detrás del body var(--dark). autoplay + muted + playsinline
+        son obligatorios para iOS. Source: webm 1.5MB optimizado en /images/.
       */}
       <video
         autoPlay
@@ -1566,14 +1571,14 @@ const Hero = () => {
           width: "100%",
           height: "100%",
           objectFit: "cover",
-          zIndex: -2,
+          zIndex: 0,
         }}
       >
         <source src={`${IMG}/15999286-uhd_3840_2160_30fps.webm`} type="video/webm" />
       </video>
 
       {/*
-        Dark overlay encima del video, debajo del texto y del navbar (z-index:-1).
+        Dark overlay sobre el video (z:1), debajo del contenido (z:2).
         rgba(0,0,0,0.4) per spec del cliente — necesario para que las headings
         en blanco resalten sobre el video brillante.
       */}
@@ -1585,13 +1590,21 @@ const Hero = () => {
           width: "100%",
           height: "100%",
           background: "rgba(0, 0, 0, 0.4)",
-          zIndex: -1,
+          zIndex: 1,
         }}
         aria-hidden="true"
       />
 
-      {/* Contenido principal — layout centrado 1-1 con la referencia */}
-      <div className="relative z-10 w-full max-w-[1100px] mx-auto px-4 sm:px-6 md:px-10 pt-6 md:pt-16 pb-20 md:pb-28 text-center">
+      {/*
+        Contenido principal — z-index:2 para quedar SOBRE el overlay (z:1) y
+        el video (z:0). Ya estaba en z-10 con Tailwind, pero hago el
+        position:relative + zIndex explícito para que el stacking quede
+        documentado y no dependa de utilities.
+      */}
+      <div
+        className="w-full max-w-[1100px] mx-auto px-4 sm:px-6 md:px-10 pt-6 md:pt-16 pb-20 md:pb-28 text-center"
+        style={{ position: "relative", zIndex: 2 }}
+      >
         <div ref={textoColumnaRef} style={{ willChange: "transform, opacity" }}>
 
           {/* Eyebrow — RESIDENTIAL & COMMERCIAL · blanco para contraste sobre el video oscuro */}
