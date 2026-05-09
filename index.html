@@ -649,6 +649,20 @@ const StyleInjector = () => (
     }
     .text-brand-pink { color: var(--brand-pink); }
 
+    /* ---------- ProcessSection — 100% estático (no GSAP) ----------
+       Defensa cross-cutting contra cualquier residuo de animación que
+       GSAP pudiera haber dejado (opacity:0, transform stale, visibility
+       hidden). El cliente pidió que esta sección sea inmediata visible
+       al scrollear. Aplica solo al pill heading + step card roots —
+       NO descendants, para no romper hover transforms legítimos del
+       photo (.group-hover:scale-105) ni de otros children. */
+    #process-section-heading,
+    .step-card {
+      opacity: 1 !important;
+      transform: none !important;
+      visibility: visible !important;
+    }
+
     /* ---------- Animated text highlight underline (Hero headline) ----------
        Pure-CSS underline que se "dibuja" de izquierda a derecha y, lo
        importante, HUGS EL TEXTO (sigue line breaks naturalmente al envolver
@@ -2285,7 +2299,7 @@ const ProcessSection = () => {
           sobre el dark blue de la sección.
         */}
         <div style={{ textAlign: "center", marginBottom: "2rem" }}>
-          <h2 className="section-pill-heading">
+          <h2 id="process-section-heading" className="section-pill-heading">
             Three steps to a <span className="text-brand-pink">clean home</span>
           </h2>
         </div>
@@ -2308,10 +2322,10 @@ const ProcessSection = () => {
                   trust box. La diferencia 5-3 = 2px de línea dark blue visible.
                 · overflow:hidden mantiene la foto top clipeada a las esquinas
                   redondeadas de la card.
+                · Sin data-gsap-card — sección 100% estática per spec del cliente.
               */}
               <div
-                data-gsap-card
-                className="group relative flex-1"
+                className="step-card group relative flex-1"
                 style={{
                   background: "#FFFFFF",
                   border: "3px solid var(--brand-pink)",
