@@ -1833,10 +1833,11 @@ const TrustGuarantee = () => {
       id="trust"
       className="relative"
       style={{
-        /* Section bg light blue para crear contraste con el box blanco interior.
-           Sin esto, el recuadro blanco se confunde con el bg blanco de la
-           sección y el efecto del double border + drop shadow se pierde. */
-        background: "var(--brand-light-blue)",
+        /* Section bg dark blue (brand strong) — máximo contraste con el box
+           blanco interior. El doble border (pink outer + dark-blue inner gap
+           con white) y el drop shadow del recuadro se ven al máximo de
+           prominencia sobre el navy. */
+        background: "var(--brand-dark-blue)",
         padding: "80px 5%",
       }}
     >
