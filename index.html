@@ -2979,74 +2979,6 @@ const ResultsSection = () => {
   );
 };
 
-// ============ STATS ============
-const StatCounter = ({ value, suffix, decimals, label, sub, index }) => {
-  const [count, setCount] = useState(0);
-  const elRef = useRef(null);
-
-  useEffect(() => {
-    if (!elRef.current) return;
-    const proxy = { val: 0 };
-    let tween = null;
-    const st = ScrollTrigger.create({
-      trigger: elRef.current,
-      start: "top 82%",
-      onEnter: () => {
-        tween = gsap.to(proxy, {
-          val: value,
-          duration: 1.8 + index * 0.14,
-          ease: "power2.out",
-          onUpdate: () => setCount(
-            decimals > 0 ? parseFloat(proxy.val.toFixed(decimals)) : Math.floor(proxy.val)
-          ),
-          onComplete: () => setCount(value),
-        });
-      },
-      onLeaveBack: () => {
-        if (tween) tween.kill();
-        proxy.val = 0;
-        setCount(0);
-      },
-    });
-    return () => { st.kill(); if (tween) tween.kill(); };
-  }, [value, index, decimals]);
-
-  const display = decimals > 0 ? count.toFixed(decimals) : count;
-
-  return (
-    <div ref={elRef} className="text-center md:text-left" data-gsap-card>
-      <div className="font-display italic text-5xl md:text-6xl lg:text-7xl leading-none mb-2" style={{ color: "var(--sun)" }}>
-        {display}{suffix}
-      </div>
-      <div className="text-sm md:text-base font-bold uppercase tracking-[0.12em] text-white mb-1">{label}</div>
-      <div className="text-[12px] md:text-[13px]" style={{ color: "var(--text-muted)" }}>{sub}</div>
-    </div>
-  );
-};
-
-const Stats = () => {
-  const stats = [
-    { value: 12,  suffix: "+",  decimals: 0, label: "Years in Miami",  sub: "Locally owned & operated" },
-    { value: 850, suffix: "+",  decimals: 0, label: "Homes Restored",  sub: "Across Miami-Dade county" },
-    { value: 4.9, suffix: "★",  decimals: 1, label: "Google Average",  sub: "230+ verified reviews" },
-    { value: 4,   suffix: "hr", decimals: 0, label: "Quote Response",  sub: "Or driveway wash free" },
-  ];
-  return (
-    <section className="relative overflow-hidden" style={{ background: "var(--celeste)", paddingTop: "5rem", paddingBottom: "5rem" }}>
-      <div className="absolute inset-0 overflow-hidden">
-        <img src={`${IMG}/aerial-2.jpg`} alt="" loading="lazy" decoding="async" className="w-full h-full object-cover" style={{ opacity: 0.08 }} />
-      </div>
-      <div className="relative z-10 max-w-[1400px] mx-auto px-4 sm:px-6 md:px-10 lg:px-16">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-10">
-          {stats.map((s, i) => (
-            <StatCounter key={s.label} {...s} index={i} />
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-};
-
 // ============ FAQ ============
 //
 // Sección 100% ESTÁTICA al scroll — sin GSAP, sin ScrollTrigger.
@@ -3427,15 +3359,6 @@ function App() {
         bottomColor="#0D4F72"
       />
       <ResultsSection />
-      <InterrupterBanner
-        headline="Same-day quotes are available."
-        italicWord="available."
-        subtext="Just need a phone call. We'll come measure, give you a price, and book the job same week."
-        variant="sky"
-        topColor="#0D4F72"
-        bottomColor="#1A7A9A"
-      />
-      <Stats />
       <InterrupterBanner
         headline="Don't see your area? We probably still cover it."
         italicWord="cover it."
