@@ -649,27 +649,25 @@ const StyleInjector = () => (
     }
     .text-brand-pink { color: var(--brand-pink); }
 
-    /* ---------- Animated underline (Hero headline) ----------
-       Pure-CSS underline que se "dibuja" de izquierda a derecha justo
-       después del page load. Se aplica a un span que envuelve la frase
-       a destacar. Trabaja independiente de la GSAP entrance del H1. */
-    .animated-underline {
-      position: relative;
-      display: inline-block;
+    /* ---------- Animated text highlight underline (Hero headline) ----------
+       Pure-CSS underline que se "dibuja" de izquierda a derecha y, lo
+       importante, HUGS EL TEXTO (sigue line breaks naturalmente al envolver
+       en múltiples líneas). El truco: display:inline + background-image
+       linear-gradient que reserva los últimos 8px del bg como pink. La
+       animación crece background-size de 0% a 100% width. */
+    .text-highlight-animate {
+      /* CRITICAL: inline (no inline-block) para que el bg se reparta línea a línea */
+      display: inline;
+      background-image: linear-gradient(transparent calc(100% - 8px), var(--brand-pink) 8px);
+      background-repeat: no-repeat;
+      background-position: left bottom;
+      background-size: 0% 100%;
+      animation: drawTextLine 1.5s ease-in-out 0.5s forwards;
     }
-    .animated-underline::after {
-      content: '';
-      position: absolute;
-      bottom: -4px;
-      left: 0;
-      width: 0%;
-      height: 8px;
-      background-color: var(--brand-pink);
-      border-radius: 4px;
-      animation: drawLine 1.2s ease-out 0.5s forwards;
-    }
-    @keyframes drawLine {
-      to { width: 100%; }
+    @keyframes drawTextLine {
+      to {
+        background-size: 100% 100%;
+      }
     }
 
     /* ---------- Reduced motion ---------- */
@@ -1597,14 +1595,15 @@ const Hero = () => {
           </div>
 
           {/* Titular principal — blanco con drop-shadow sutil para legibilidad sobre el video.
-              El span .animated-underline dibuja una línea rosa de izq→der via @keyframes
-              drawLine después del page load (delay 0.5s, duration 1.2s). */}
+              El span .text-highlight-animate aplica un underline pink que se dibuja
+              de izq→der y HUGS EL TEXTO (sigue line breaks naturalmente con
+              display:inline + linear-gradient + animación de background-size). */}
           <h1
             ref={headlineRef}
             className="text-[2.2rem] sm:text-[2.9rem] md:text-[4.4rem] lg:text-[5rem] font-extrabold leading-[1.05] tracking-[-0.02em] mb-6 text-white"
             style={{ textShadow: "0 4px 24px rgba(0,0,0,0.45)" }}
           >
-            <span className="animated-underline">Roof Softwash &amp; Exterior Cleaning</span>
+            <span className="text-highlight-animate">Roof Softwash &amp; Exterior Cleaning</span>
           </h1>
 
           {/* Subtítulo · blanco con leve transparencia */}
