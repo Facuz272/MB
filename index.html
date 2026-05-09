@@ -2719,6 +2719,15 @@ const InterrupterBanner = ({ headline, italicWord, subtext, variant = "orange", 
       btnFill: "var(--orange)", btnText: "#fff",
       callBg: "rgba(255,255,255,0.12)", callBorder: "rgba(255,255,255,0.35)",
     },
+    /* "white" variant — bg solid blanco, headline pink, subtext dark-blue.
+       Diseñado para CTAs estilo "card" en el flow del sitio (vs los gradient
+       loud variants). Usado en el banner "Don't wait. Get your free estimate". */
+    white: {
+      bg: "#FFFFFF",
+      text: "var(--brand-pink)", sub: "var(--brand-dark-blue)",
+      btnFill: "var(--brand-pink)", btnText: "#fff",
+      callBg: "rgba(13,79,114,0.06)", callBorder: "rgba(13,79,114,0.2)",
+    },
   };
   const p = palettes[variant];
   const D = 52; // diagonal height in px
@@ -3375,8 +3384,8 @@ function App() {
         headline="Don't wait. Get your free estimate today."
         italicWord="today."
         subtext="Most quotes are returned in under 4 hours during business hours."
-        variant="orange"
-        topColor="#1A7A9A"
+        variant="white"
+        topColor="var(--brand-pink)"
         bottomColor="#0D4F72"
       />
       <ResultsSection />
