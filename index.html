@@ -418,6 +418,9 @@ const StyleInjector = () => (
          de marca pero con nombres semánticos que reflejan el spec. */
       --brand-dark-blue:  var(--dark);
       --brand-pink:       var(--pink);
+      --brand-orange:     var(--orange);  /* #FF6B1F — alias semántico */
+      --brand-orange-dim: #E55A0F;        /* hover/active state de orange */
+      --brand-pink-dim:   #B14B89;        /* hover/active state de pink */
       /* Soft sky tint para backgrounds de "trust sections" — light enough
          para que el copy en var(--brand-dark-blue) tenga contraste pleno,
          pero claramente azul (no off-white). Equivale a un wash de
@@ -766,17 +769,30 @@ const StyleInjector = () => (
 );
 
 // ============ REUSABLE BUTTONS ============
+//
+// SISTEMA GLOBAL DE CTAs (color coding establecido por el cliente):
+//
+//   · PrimaryCTA   = "Quote / Estimate / Add my home / Send us a message"
+//                    Background: var(--brand-pink), texto blanco.
+//
+//   · SecondaryCTA = "Call / Phone / click-to-call"
+//                    Background: var(--brand-orange), texto blanco.
+//
+// Hover: ambos comparten transition-all + hover scale + ligera elevación
+// (-translate-y-0.5) + filter:brightness(0.92) para oscurecer el bg.
+// El prop `ghost` de SecondaryCTA fue removido — todos los call buttons
+// son ahora orange solid (la regla del cliente es estricta).
 const PrimaryCTA = ({ children, href = QUOTE_HASH, large = false, fullWidth = false, icon = "↗", onClick }) => (
   <a
     href={href}
     onClick={onClick}
     data-magnetic
-    className={`shine-on-hover inline-flex items-center justify-center gap-2.5 rounded-full font-semibold text-white transition-all duration-300 hover:scale-[1.03] hover:-translate-y-0.5 ${
+    className={`shine-on-hover inline-flex items-center justify-center gap-2.5 rounded-full font-semibold text-white transition-all duration-300 hover:scale-[1.03] hover:-translate-y-0.5 hover:brightness-[0.92] ${
       large ? "px-8 py-4 text-base md:text-lg" : "px-6 py-3 text-sm md:text-[15px]"
     } ${fullWidth ? "w-full" : ""}`}
     style={{
-      background: "var(--orange)",
-      boxShadow: "0 10px 30px -8px rgba(255,107,31,0.55), 0 0 0 1px rgba(255,107,31,0.25) inset",
+      background: "var(--brand-pink)",
+      boxShadow: "0 10px 30px -8px rgba(199,90,159,0.55), 0 0 0 1px rgba(199,90,159,0.20) inset",
     }}
   >
     <span>{children}</span>
@@ -784,28 +800,17 @@ const PrimaryCTA = ({ children, href = QUOTE_HASH, large = false, fullWidth = fa
   </a>
 );
 
-const SecondaryCTA = ({ children, href = PHONE_TEL, large = false, ghost = false, fullWidth = false, onClick }) => (
+const SecondaryCTA = ({ children, href = PHONE_TEL, large = false, fullWidth = false, onClick }) => (
   <a
     href={href}
     onClick={onClick}
-    className={`inline-flex items-center justify-center gap-2.5 rounded-full font-semibold transition-all duration-300 hover:scale-[1.03] ${
+    className={`inline-flex items-center justify-center gap-2.5 rounded-full font-semibold text-white transition-all duration-300 hover:scale-[1.03] hover:-translate-y-0.5 hover:brightness-[0.92] ${
       large ? "px-8 py-4 text-base md:text-lg" : "px-6 py-3 text-sm md:text-[15px]"
     } ${fullWidth ? "w-full" : ""}`}
-    style={
-      ghost
-        ? {
-            background: "rgba(255,255,255,0.1)",
-            color: "#fff",
-            border: "1.5px solid rgba(255,255,255,0.25)",
-            backdropFilter: "blur(8px)",
-          }
-        : {
-            background: "rgba(255,255,255,0.06)",
-            color: "var(--text)",
-            border: "1.5px solid var(--border-med)",
-            backdropFilter: "blur(8px)",
-          }
-    }
+    style={{
+      background: "var(--brand-orange)",
+      boxShadow: "0 10px 30px -8px rgba(255,107,31,0.55), 0 0 0 1px rgba(255,107,31,0.25) inset",
+    }}
   >
     <PhoneIcon className="w-4 h-4" />
     <span>{children}</span>
@@ -1159,25 +1164,26 @@ const Navbar = () => {
                 ))}
               </nav>
 
-              {/* Phone — non-bold dark blue sobre cápsula blanca, solo lg+ */}
+              {/* Phone CTA compacto — solid orange según el sistema global */}
               <a
                 href={PHONE_TEL}
-                className="hidden lg:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[12px] font-medium transition-colors"
-                style={{ color: "var(--brand-dark-blue)" }}
-                onMouseEnter={e => { e.currentTarget.style.color = "var(--brand-pink)"; }}
-                onMouseLeave={e => { e.currentTarget.style.color = "var(--brand-dark-blue)"; }}
+                className="hidden lg:inline-flex items-center justify-center gap-1.5 rounded-full px-3 py-1.5 uppercase tracking-[0.14em] text-white text-[10px] xl:text-[11px] font-semibold transition-all hover:scale-[1.05] hover:brightness-[0.92]"
+                style={{
+                  background: "var(--brand-orange)",
+                  boxShadow: "0 0 0 1px rgba(255,255,255,0.18) inset, 0 4px 14px -2px rgba(255,107,31,0.55)",
+                }}
               >
                 <PhoneIcon className="w-3.5 h-3.5" />
                 <span>{PHONE_DISPLAY}</span>
               </a>
 
-              {/* CTA compacto — versión chica del Free Estimate */}
+              {/* Quote CTA compacto — solid pink según el sistema global */}
               <a
                 href={QUOTE_HASH}
-                className="hidden md:inline-flex items-center justify-center gap-1.5 rounded-full px-4 py-1.5 uppercase tracking-[0.14em] text-white text-[10px] xl:text-[11px] font-semibold transition-all hover:scale-[1.05]"
+                className="hidden md:inline-flex items-center justify-center gap-1.5 rounded-full px-4 py-1.5 uppercase tracking-[0.14em] text-white text-[10px] xl:text-[11px] font-semibold transition-all hover:scale-[1.05] hover:brightness-[0.92]"
                 style={{
-                  background: "linear-gradient(135deg, var(--pink) 0%, var(--pink-soft) 100%)",
-                  boxShadow: "0 0 0 1px rgba(255,255,255,0.18) inset, 0 4px 14px -2px rgba(199,90,159,0.7), 0 0 14px rgba(199,90,159,0.45)",
+                  background: "var(--brand-pink)",
+                  boxShadow: "0 0 0 1px rgba(255,255,255,0.18) inset, 0 4px 14px -2px rgba(199,90,159,0.55)",
                 }}
               >
                 <span>Free Estimate</span>
@@ -1254,7 +1260,7 @@ const Navbar = () => {
 
           <div data-menu-extra className="mt-10 flex flex-col gap-3">
             <PrimaryCTA href={QUOTE_HASH} fullWidth large icon="→" onClick={close}>Get my free quote</PrimaryCTA>
-            <SecondaryCTA href={PHONE_TEL} fullWidth large ghost onClick={close}>{PHONE_DISPLAY}</SecondaryCTA>
+            <SecondaryCTA href={PHONE_TEL} fullWidth large onClick={close}>{PHONE_DISPLAY}</SecondaryCTA>
           </div>
 
           <div data-menu-extra className="mt-auto pt-10 flex flex-wrap gap-x-6 gap-y-2 text-[12px]" style={{ color: "rgba(200,225,248,0.5)" }}>
@@ -1553,10 +1559,9 @@ const Hero = () => {
             MB Softwash your go to company for roof softwash, pressure cleaning, and window cleaning in all Miami Dade and South Florida.
           </p>
 
-          {/* Botones de acción — centrados, replican la referencia 1-1:
-              · Primario rosa con flecha (REQUEST A FREE QUOTE)
-              · Secundario celeste con teléfono (CALL US ___)
-              Custom inline para no impactar PrimaryCTA/SecondaryCTA del resto del sitio. */}
+          {/* Botones de acción — siguen el sistema global de color coding:
+              · Quote button → bg var(--brand-pink) (Quote / Estimate)
+              · Call button  → bg var(--brand-orange) (Call / Phone) */}
           <div
             ref={ctaGroupRef}
             className="flex flex-wrap items-center justify-center gap-3"
@@ -1564,9 +1569,9 @@ const Hero = () => {
             <a
               href={QUOTE_HASH}
               data-magnetic
-              className="shine-on-hover inline-flex items-center justify-center gap-2.5 rounded-full px-8 py-4 text-base md:text-lg font-bold text-white uppercase tracking-wide transition-all duration-300 hover:scale-[1.03] hover:-translate-y-0.5"
+              className="shine-on-hover inline-flex items-center justify-center gap-2.5 rounded-full px-8 py-4 text-base md:text-lg font-bold text-white uppercase tracking-wide transition-all duration-300 hover:scale-[1.03] hover:-translate-y-0.5 hover:brightness-[0.92]"
               style={{
-                background: "var(--pink)",
+                background: "var(--brand-pink)",
                 boxShadow: "0 10px 30px -8px rgba(199,90,159,0.55), 0 0 0 1px rgba(199,90,159,0.25) inset",
               }}
             >
@@ -1575,16 +1580,12 @@ const Hero = () => {
             </a>
             <a
               href={PHONE_TEL}
-              className="inline-flex items-center justify-center gap-2.5 rounded-full px-8 py-4 text-base md:text-lg font-bold text-white uppercase tracking-wide transition-all duration-300 hover:scale-[1.03] hover:-translate-y-0.5"
+              className="inline-flex items-center justify-center gap-2.5 rounded-full px-8 py-4 text-base md:text-lg font-bold text-white uppercase tracking-wide transition-all duration-300 hover:scale-[1.03] hover:-translate-y-0.5 hover:brightness-[0.92]"
               style={{
-                background: "var(--celeste)",
-                /* "Pink interlining": ring rosa de 2px (box-shadow con spread,
-                   no afecta el layout) + halo rosa que conversa con la cápsula */
+                background: "var(--brand-orange)",
                 boxShadow:
-                  "0 0 0 2px var(--brand-pink), " +
                   "0 0 0 1px rgba(255,255,255,0.18) inset, " +
-                  "0 10px 30px -8px rgba(26,122,154,0.55), " +
-                  "0 0 22px rgba(199,90,159,0.45)",
+                  "0 10px 30px -8px rgba(255,107,31,0.55)",
               }}
             >
               <PhoneIcon className="w-4 h-4" />
@@ -2682,17 +2683,29 @@ const InterrupterBanner = ({ headline, italicWord, subtext, variant = "orange", 
             {subtext && <p className="text-base md:text-lg" style={{ color: p.sub }}>{subtext}</p>}
           </div>
           <div className="flex flex-col sm:flex-row items-center gap-3 flex-shrink-0">
+            {/*
+              Quote button → SIEMPRE pink solid + white text (sistema global).
+              Quote button → SIEMPRE orange solid + white text.
+              Halo blanco 2px (rgba(255,255,255,0.22)) garantiza visibilidad
+              sobre cualquier variant del banner (orange/sky/pink gradients).
+            */}
             <a
               href={QUOTE_HASH}
-              className="shine-on-hover inline-flex items-center justify-center gap-2.5 rounded-full px-7 py-3.5 text-[15px] font-bold transition-all hover:scale-[1.04] hover:-translate-y-0.5 whitespace-nowrap"
-              style={{ background: p.btnFill, color: p.btnText, boxShadow: "0 12px 30px rgba(0,0,0,0.25)" }}
+              className="shine-on-hover inline-flex items-center justify-center gap-2.5 rounded-full px-7 py-3.5 text-[15px] font-bold text-white transition-all hover:scale-[1.04] hover:-translate-y-0.5 hover:brightness-[0.92] whitespace-nowrap"
+              style={{
+                background: "var(--brand-pink)",
+                boxShadow: "0 0 0 2px rgba(255,255,255,0.22), 0 12px 30px rgba(0,0,0,0.25)",
+              }}
             >
               Get free quote <span className="text-[12px]">→</span>
             </a>
             <a
               href={PHONE_TEL}
-              className="inline-flex items-center justify-center gap-2.5 rounded-full px-6 py-3.5 text-[15px] font-bold transition-all hover:scale-[1.04] whitespace-nowrap"
-              style={{ background: p.callBg, color: p.text, border: `1.5px solid ${p.callBorder}`, backdropFilter: "blur(8px)" }}
+              className="inline-flex items-center justify-center gap-2.5 rounded-full px-6 py-3.5 text-[15px] font-bold text-white transition-all hover:scale-[1.04] hover:-translate-y-0.5 hover:brightness-[0.92] whitespace-nowrap"
+              style={{
+                background: "var(--brand-orange)",
+                boxShadow: "0 0 0 2px rgba(255,255,255,0.22), 0 12px 30px rgba(0,0,0,0.25)",
+              }}
             >
               <PhoneIcon className="w-4 h-4" />
               {PHONE_DISPLAY}
@@ -3157,7 +3170,7 @@ const Footer = () => (
           </p>
           <div className="flex flex-wrap gap-3">
             <PrimaryCTA href={QUOTE_HASH} icon="→">Free Quote</PrimaryCTA>
-            <SecondaryCTA href={PHONE_TEL} ghost>{PHONE_DISPLAY}</SecondaryCTA>
+            <SecondaryCTA href={PHONE_TEL}>{PHONE_DISPLAY}</SecondaryCTA>
           </div>
         </div>
 
@@ -3229,8 +3242,11 @@ const Footer = () => (
 const MobileFAB = () => (
   <a
     href={PHONE_TEL}
-    className="lg:hidden fixed bottom-24 right-4 z-50 w-14 h-14 rounded-full text-white flex items-center justify-center fab-pulse"
-    style={{ background: "var(--orange)" }}
+    className="lg:hidden fixed bottom-24 right-4 z-50 w-14 h-14 rounded-full text-white flex items-center justify-center fab-pulse transition-transform hover:scale-105 hover:brightness-[0.92]"
+    style={{
+      background: "var(--brand-orange)",
+      boxShadow: "0 8px 24px -4px rgba(255,107,31,0.55), 0 0 0 1px rgba(255,255,255,0.18) inset",
+    }}
     aria-label="Call MB Softwash"
   >
     <PhoneIcon className="w-6 h-6" />
@@ -3243,18 +3259,26 @@ const MobileStickyBottom = () => (
     className="lg:hidden fixed bottom-0 left-0 right-0 z-40 grid grid-cols-2 gap-2 p-3 border-t"
     style={{ background: "rgba(13,79,114,0.96)", borderColor: "rgba(255,255,255,0.08)", backdropFilter: "blur(20px)", boxShadow: "0 -8px 32px rgba(0,0,0,0.4)" }}
   >
+    {/* Call button → solid orange + white (sistema global) */}
     <a
       href={PHONE_TEL}
-      className="inline-flex items-center justify-center gap-2 rounded-full px-4 py-3 font-bold text-[14px] border"
-      style={{ borderColor: "rgba(168,213,240,0.3)", color: "var(--sky-accent)" }}
+      className="inline-flex items-center justify-center gap-2 rounded-full px-4 py-3 font-bold text-[14px] text-white transition-all hover:brightness-[0.92]"
+      style={{
+        background: "var(--brand-orange)",
+        boxShadow: "0 0 0 1px rgba(255,255,255,0.18) inset, 0 4px 12px rgba(255,107,31,0.35)",
+      }}
     >
       <PhoneIcon className="w-4 h-4" />
       Call
     </a>
+    {/* Quote button → solid pink + white (sistema global) */}
     <a
       href={QUOTE_HASH}
-      className="inline-flex items-center justify-center gap-2 rounded-full px-4 py-3 font-bold text-[14px] text-white"
-      style={{ background: "var(--orange)", boxShadow: "0 8px 20px rgba(255,107,31,0.4)" }}
+      className="inline-flex items-center justify-center gap-2 rounded-full px-4 py-3 font-bold text-[14px] text-white transition-all hover:brightness-[0.92]"
+      style={{
+        background: "var(--brand-pink)",
+        boxShadow: "0 0 0 1px rgba(255,255,255,0.18) inset, 0 4px 12px rgba(199,90,159,0.35)",
+      }}
     >
       Free Quote →
     </a>
