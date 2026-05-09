@@ -649,6 +649,29 @@ const StyleInjector = () => (
     }
     .text-brand-pink { color: var(--brand-pink); }
 
+    /* ---------- Animated underline (Hero headline) ----------
+       Pure-CSS underline que se "dibuja" de izquierda a derecha justo
+       después del page load. Se aplica a un span que envuelve la frase
+       a destacar. Trabaja independiente de la GSAP entrance del H1. */
+    .animated-underline {
+      position: relative;
+      display: inline-block;
+    }
+    .animated-underline::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 0%;
+      height: 8px;
+      background-color: var(--brand-pink);
+      border-radius: 4px;
+      animation: drawLine 1.2s ease-out 0.5s forwards;
+    }
+    @keyframes drawLine {
+      to { width: 100%; }
+    }
+
     /* ---------- Reduced motion ---------- */
     @media (prefers-reduced-motion: reduce) {
       .marquee-track { animation: none !important; white-space: normal; flex-wrap: wrap; justify-content: center; }
@@ -1573,13 +1596,15 @@ const Hero = () => {
             </span>
           </div>
 
-          {/* Titular principal — blanco con drop-shadow sutil para legibilidad sobre el video */}
+          {/* Titular principal — blanco con drop-shadow sutil para legibilidad sobre el video.
+              El span .animated-underline dibuja una línea rosa de izq→der via @keyframes
+              drawLine después del page load (delay 0.5s, duration 1.2s). */}
           <h1
             ref={headlineRef}
             className="text-[2.2rem] sm:text-[2.9rem] md:text-[4.4rem] lg:text-[5rem] font-extrabold leading-[1.05] tracking-[-0.02em] mb-6 text-white"
             style={{ textShadow: "0 4px 24px rgba(0,0,0,0.45)" }}
           >
-            Roof Softwash &amp; Exterior Cleaning
+            <span className="animated-underline">Roof Softwash &amp; Exterior Cleaning</span>
           </h1>
 
           {/* Subtítulo · blanco con leve transparencia */}
