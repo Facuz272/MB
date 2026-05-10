@@ -684,6 +684,80 @@ const StyleInjector = () => (
       }
     }
 
+    /* ---------- B&A Tabbed Gallery (ResultsSection) ----------
+       Tab pills filterables (pink/dark-blue double border en inactivos,
+       solid pink en active) + ba-card wrapper (mismo doble border que las
+       step cards) + fade animation cuando cambia el tab. */
+
+    /* Wrapper de la fila de tabs — scroll horizontal en mobile, centrado en
+       desktop. Hide scrollbar cross-browser. */
+    .filter-tabs-scroller {
+      display: flex;
+      gap: 0.55rem;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      scroll-behavior: smooth;
+      padding: 0.5rem 0.5rem;
+      margin-bottom: 2.25rem;
+    }
+    .filter-tabs-scroller::-webkit-scrollbar { display: none; }
+    @media (min-width: 768px) {
+      .filter-tabs-scroller {
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+    }
+
+    /* Tab pill — inactive state */
+    .filter-tab-pill {
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      padding: 0.7rem 1.4rem;
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      white-space: nowrap;
+      background: #FFFFFF;
+      color: var(--brand-dark-blue);
+      border: 2px solid var(--brand-pink);
+      box-shadow:
+        inset 0 0 0 2px #FFFFFF,
+        inset 0 0 0 3px var(--brand-dark-blue),
+        0 4px 12px -4px rgba(0, 0, 0, 0.20);
+      cursor: pointer;
+      transition: transform 0.20s ease, box-shadow 0.25s ease,
+                  background 0.25s ease, color 0.20s ease;
+    }
+    .filter-tab-pill:hover { transform: translateY(-1px); }
+
+    /* Tab pill — active state: solid pink + white text */
+    .filter-tab-pill[data-active="true"] {
+      background: var(--brand-pink);
+      color: #FFFFFF;
+      border-color: var(--brand-pink);
+      box-shadow:
+        0 0 0 2px rgba(255, 255, 255, 0.18) inset,
+        0 10px 24px -6px rgba(199, 90, 159, 0.55);
+      transform: translateY(-1px);
+    }
+
+    /* B&A card — white wrapper con double border (mismo patrón que step cards).
+       overflow:hidden clipea el slider y la sombra del slider al contorno
+       redondeado de la card, dando un look unificado. */
+    .ba-card {
+      background: #FFFFFF;
+      border: 3px solid var(--brand-pink);
+      border-radius: 16px;
+      box-shadow:
+        inset 0 0 0 3px #FFFFFF,
+        inset 0 0 0 5px var(--brand-dark-blue),
+        0 14px 36px -10px rgba(0, 0, 0, 0.40);
+      overflow: hidden;
+    }
+
     /* ---------- Reduced motion ---------- */
     @media (prefers-reduced-motion: reduce) {
       .marquee-track { animation: none !important; white-space: normal; flex-wrap: wrap; justify-content: center; }
@@ -2923,61 +2997,128 @@ const BeforeAfterSlider = ({ before, after }) => {
   );
 };
 
-// ============ RESULTS SECTION ============
+// ============ RESULTS SECTION (Tabbed B&A Gallery) ============
+//
+// Tabs categorías-sync con OurServices: el usuario selecciona el servicio
+// y la galería abajo filtra solo los B/A de esa categoría. AnimatePresence
+// hace fade-out + fade-in cuando cambia el tab activo.
+//
+// Estructura de datos:
+//   tabs[]   — definición de las 6 categorías (id + label)
+//   cases[]  — array plano de B/A pairs con `tabId` que matchea el tab.
+//              Cada categoría puede tener N cases (acá es 1 cada una como
+//              placeholder, fácil de extender).
+//
+// Para SWAP de placeholder a real assets: cada `case` tiene `before` + `after`
+// que apuntan a /images/. Reemplazá esas rutas con los assets nuevos cuando
+// lleguen las fotos del cliente para cada categoría.
 const ResultsSection = () => {
-  const cases = [
-    { id: "roof", title: "Tile roof restoration", subtitle: "Pinecrest, FL", before: `${IMG}/roof-tile-before.jpg`, after: `${IMG}/roof-tile-after.jpg` },
-    { id: "wall", title: "Shingle wall & stucco", subtitle: "Coral Gables, FL", before: `${IMG}/exterior-wall-before.jpg`, after: `${IMG}/exterior-wall-after.jpg` },
-    { id: "fence", title: "Cedar privacy fence", subtitle: "Coconut Grove, FL", before: `${IMG}/fence-before.jpg`, after: `${IMG}/fence-after.jpg` },
-    { id: "driveway", title: "Paver driveway, sealed", subtitle: "Key Biscayne, FL", before: `${IMG}/driveway-before.jpg`, after: `${IMG}/driveway-after.jpg` },
+  const tabs = [
+    { id: "roof-softwash",     label: "Roof Softwash" },
+    { id: "pressure-cleaning", label: "Pressure Cleaning" },
+    { id: "exterior-window",   label: "Exterior Window Cleaning" },
+    { id: "solar-panels",      label: "Solar Panel Cleaning" },
+    { id: "paver-sealing",     label: "Paver/Concrete Sealing" },
+    { id: "gutter-cleaning",   label: "Gutter Clean Out" },
   ];
-  const [activeIdx, setActiveIdx] = useState(0);
-  const active = cases[activeIdx];
+
+  /* PLACEHOLDERS — todas las categorías reusan imágenes existentes en /images/.
+     Cuando lleguen fotos reales de cada servicio, swap `before` + `after` aquí. */
+  const cases = [
+    { tabId: "roof-softwash",     title: "Tile roof restoration",   subtitle: "Pinecrest, FL",     before: `${IMG}/roof-tile-before.jpg`,     after: `${IMG}/roof-tile-after.jpg` },
+    { tabId: "pressure-cleaning", title: "Driveway pressure clean", subtitle: "Coral Gables, FL",  before: `${IMG}/driveway-before.jpg`,      after: `${IMG}/driveway-after.jpg` },
+    { tabId: "exterior-window",   title: "Exterior facade wash",    subtitle: "Coconut Grove, FL", before: `${IMG}/exterior-wall-before.jpg`, after: `${IMG}/exterior-wall-after.jpg` },
+    { tabId: "solar-panels",      title: "Roof-mounted panels",     subtitle: "Pinecrest, FL",     before: `${IMG}/roof-tile-before.jpg`,     after: `${IMG}/roof-tile-after.jpg` },
+    { tabId: "paver-sealing",     title: "Paver driveway sealed",   subtitle: "Key Biscayne, FL",  before: `${IMG}/driveway-before.jpg`,      after: `${IMG}/driveway-after.jpg` },
+    { tabId: "gutter-cleaning",   title: "Cedar fence reset",       subtitle: "Coconut Grove, FL", before: `${IMG}/fence-before.jpg`,         after: `${IMG}/fence-after.jpg` },
+  ];
+
+  const [activeTabId, setActiveTabId] = useState(tabs[0].id);
+  const filteredCases = cases.filter((c) => c.tabId === activeTabId);
 
   return (
-    <section id="results" className="py-16 md:py-24" style={{ background: "var(--dark-2)" }}>
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-10 lg:px-16">
-        <SectionHeader
-          eyebrow="Before & After"
-          headline="See the transformation"
-          italicWord="transformation"
-          subtext="Real Miami homes. Drag the slider on each case to see the result. Hundreds more on Instagram."
-          align="center"
-        />
+    <section id="results" className="py-16 md:py-24" style={{ background: "var(--brand-dark-blue)" }}>
+      <div className="max-w-[1280px] mx-auto px-4 sm:px-6 md:px-10 lg:px-16">
 
-        {/* Tabs */}
-        <div className="flex flex-wrap gap-2 justify-center mb-8">
-          {cases.map((c, i) => (
+        {/* Pill heading standardized */}
+        <div style={{ textAlign: "center", marginBottom: "1.25rem" }}>
+          <h2 className="section-pill-heading">
+            See the <span className="text-brand-pink">Transformation</span>
+          </h2>
+        </div>
+        <p
+          className="text-base md:text-lg text-center max-w-2xl mx-auto leading-relaxed font-medium mb-8 md:mb-10"
+          style={{ color: "#FFFFFF" }}
+        >
+          Real Miami homes. Pick a service to filter the gallery, then drag any slider to compare before and after.
+        </p>
+
+        {/* Filter tabs — scrollable horizontal en mobile, centered/wrapped en desktop */}
+        <div className="filter-tabs-scroller" role="tablist" aria-label="Filter B&A gallery by service">
+          {tabs.map((t) => (
             <button
-              key={c.id}
-              onClick={() => setActiveIdx(i)}
-              className="text-[13px] md:text-sm rounded-full px-5 py-2.5 font-semibold transition-all"
-              style={
-                activeIdx === i
-                  ? { background: "var(--orange)", color: "#fff", boxShadow: "0 8px 24px rgba(255,107,31,0.35)" }
-                  : { background: "var(--surface)", color: "var(--text-muted)", border: "1px solid var(--border)" }
-              }
+              key={t.id}
+              type="button"
+              role="tab"
+              aria-selected={activeTabId === t.id}
+              data-active={activeTabId === t.id}
+              onClick={() => setActiveTabId(t.id)}
+              className="filter-tab-pill"
             >
-              {c.title}
+              {t.label}
             </button>
           ))}
         </div>
 
-        <motion.div key={active.id} initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5 }}>
-          <BeforeAfterSlider before={active.before} after={active.after} />
-        </motion.div>
+        {/* Filtered B&A gallery — AnimatePresence hace fade out → in cuando cambia el tab */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTabId}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.30, ease: "easeOut" }}
+          >
+            {filteredCases.length === 0 ? (
+              <p className="text-center py-12 opacity-70" style={{ color: "#FFFFFF" }}>
+                No projects yet for this category. Check back soon.
+              </p>
+            ) : (
+              <div
+                className={
+                  filteredCases.length === 1
+                    ? "max-w-[900px] mx-auto"
+                    : "grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8"
+                }
+              >
+                {filteredCases.map((c, i) => (
+                  <article key={c.tabId + "-" + i} className="ba-card flex flex-col">
+                    <BeforeAfterSlider before={c.before} after={c.after} />
+                    <div className="px-5 py-4 md:px-6 md:py-5">
+                      <p
+                        className="text-[11px] font-extrabold uppercase tracking-[0.18em] mb-1"
+                        style={{ color: "var(--brand-pink)" }}
+                      >
+                        {c.subtitle}
+                      </p>
+                      <h3
+                        className="text-lg md:text-xl font-bold leading-tight"
+                        style={{ color: "var(--brand-dark-blue)" }}
+                      >
+                        {c.title}
+                      </h3>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )}
+          </motion.div>
+        </AnimatePresence>
 
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-8">
-          <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.2em] mb-1" style={{ color: "var(--orange)" }}>
-              {active.subtitle}
-            </p>
-            <h3 className="text-xl md:text-2xl font-bold text-white">{active.title}</h3>
-          </div>
-          <div className="flex gap-3">
-            <SecondaryCTA href={PHONE_TEL}>Call about results</SecondaryCTA>
-            <PrimaryCTA href={QUOTE_HASH} icon="→">Quote my home</PrimaryCTA>
-          </div>
+        {/* Bottom CTAs — sistema global de color coding (orange call / pink quote) */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-10 md:mt-12">
+          <SecondaryCTA href={PHONE_TEL}>Call about results</SecondaryCTA>
+          <PrimaryCTA href={QUOTE_HASH} icon="→">Quote my home</PrimaryCTA>
         </div>
       </div>
     </section>
