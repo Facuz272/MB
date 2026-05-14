@@ -3381,6 +3381,12 @@ const ResultsSection = () => {
                         className="ba-carousel-slide"
                         aria-hidden={i !== slideIndex}
                       >
+                        {/* Card minimalista: solo el slider B/A.
+                            El text box inferior (subtitle + title) fue
+                            removido por pedido del cliente para un look
+                            más limpio. Los campos `title` / `subtitle`
+                            siguen en cases[] como metadata y se usan
+                            para generar el alt text de las imágenes. */}
                         <article className="ba-card flex flex-col">
                           <BeforeAfterSlider
                             before={c.before}
@@ -3388,20 +3394,6 @@ const ResultsSection = () => {
                             beforeAlt={`${c.title} — before`}
                             afterAlt={`${c.title} — after`}
                           />
-                          <div className="px-5 py-4 md:px-6 md:py-5">
-                            <p
-                              className="text-[11px] font-extrabold uppercase tracking-[0.18em] mb-1"
-                              style={{ color: "var(--brand-pink)" }}
-                            >
-                              {c.subtitle}
-                            </p>
-                            <h3
-                              className="text-lg md:text-xl font-bold leading-tight"
-                              style={{ color: "var(--brand-dark-blue)" }}
-                            >
-                              {c.title}
-                            </h3>
-                          </div>
                         </article>
                       </div>
                     ))}
