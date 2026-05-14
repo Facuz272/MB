@@ -3132,21 +3132,47 @@ const ResultsSection = () => {
     { id: "gutter-cleaning",   label: "Gutter Clean Out" },
   ];
 
-  /* PLACEHOLDERS — cada categoría puede tener N cases (slides del carousel
-     interno). Roof Softwash arranca con 3 placeholders para demostrar la
-     navegación; las demás con 1 cada una hasta que lleguen fotos reales.
-     Para añadir más slides a un tab: agregar otro objeto con el mismo tabId. */
+  /* PLACEHOLDERS — cada categoría tiene N cases (slides del carousel interno).
+     Cada tab arranca con 2+ slides usando los assets locales disponibles para
+     demostrar la navegación. Cuando lleguen fotos reales del cliente para
+     una categoría, reemplazar las rutas before/after de esos cases.
+
+     SCALABILITY NOTE:
+     El carousel YA es escalable sin tocar JS. La estructura React monta UN
+     solo carousel a la vez (el del tab activo), y `filteredCases` se calcula
+     dinámicamente con `cases.filter(c => c.tabId === activeTabId)`. Las
+     arrows, el counter y el slideIndex viven en ResultsSection y se resetean
+     en cada cambio de tab via useEffect. NO hace falta `.forEach()` sobre
+     varias instancias porque solo existe una a la vez.
+
+     Para añadir más slides a cualquier tab: agregar un objeto más con el
+     mismo `tabId`. El carousel detecta `totalSlides > 1` y muestra arrows +
+     counter automáticamente. */
   const cases = [
-    /* Roof Softwash — 3 slides para demostrar el carousel */
-    { tabId: "roof-softwash",     title: "Tile roof restoration",      subtitle: "Pinecrest, FL",     before: `${IMG}/roof-tile-before.jpg`,  after: `${IMG}/roof-tile-after.jpg` },
-    { tabId: "roof-softwash",     title: "Mossy tile recovery",        subtitle: "Coral Gables, FL",  before: `${IMG}/roof-mossy.jpg`,        after: `${IMG}/roof-red-clean.jpg` },
-    { tabId: "roof-softwash",     title: "Brown stained tile reset",   subtitle: "Coconut Grove, FL", before: `${IMG}/roof-brown-dirty.jpg`,  after: `${IMG}/roof-red-skyview.jpg` },
-    /* Otros tabs con 1 placeholder cada uno por ahora */
-    { tabId: "pressure-cleaning", title: "Driveway pressure clean",    subtitle: "Coral Gables, FL",  before: `${IMG}/driveway-before.jpg`,      after: `${IMG}/driveway-after.jpg` },
-    { tabId: "exterior-window",   title: "Exterior facade wash",       subtitle: "Coconut Grove, FL", before: `${IMG}/exterior-wall-before.jpg`, after: `${IMG}/exterior-wall-after.jpg` },
-    { tabId: "solar-panels",      title: "Roof-mounted panels",        subtitle: "Pinecrest, FL",     before: `${IMG}/roof-tile-before.jpg`,     after: `${IMG}/roof-tile-after.jpg` },
-    { tabId: "paver-sealing",     title: "Paver driveway sealed",      subtitle: "Key Biscayne, FL",  before: `${IMG}/driveway-before.jpg`,      after: `${IMG}/driveway-after.jpg` },
-    { tabId: "gutter-cleaning",   title: "Cedar fence reset",          subtitle: "Coconut Grove, FL", before: `${IMG}/fence-before.jpg`,         after: `${IMG}/fence-after.jpg` },
+    /* ---------- Roof Softwash (3 slides) ---------- */
+    { tabId: "roof-softwash",     title: "Tile roof restoration",      subtitle: "Pinecrest, FL",     before: `${IMG}/roof-tile-before.jpg`,           after: `${IMG}/roof-tile-after.jpg` },
+    { tabId: "roof-softwash",     title: "Mossy tile recovery",        subtitle: "Coral Gables, FL",  before: `${IMG}/roof-mossy.jpg`,                 after: `${IMG}/roof-red-clean.jpg` },
+    { tabId: "roof-softwash",     title: "Brown stained tile reset",   subtitle: "Coconut Grove, FL", before: `${IMG}/roof-brown-dirty.jpg`,           after: `${IMG}/roof-red-skyview.jpg` },
+
+    /* ---------- Pressure Cleaning (2 slides) ---------- */
+    { tabId: "pressure-cleaning", title: "Driveway pressure clean",    subtitle: "Coral Gables, FL",  before: `${IMG}/driveway-before.jpg`,            after: `${IMG}/driveway-after.jpg` },
+    { tabId: "pressure-cleaning", title: "Driveway revival",           subtitle: "Pinecrest, FL",     before: `${IMG}/pressure-cleaning-driveway.jpg`, after: `${IMG}/driveway-after.jpg` },
+
+    /* ---------- Exterior Window Cleaning (2 slides) ---------- */
+    { tabId: "exterior-window",   title: "Exterior facade wash",       subtitle: "Coconut Grove, FL", before: `${IMG}/exterior-wall-before.jpg`,       after: `${IMG}/exterior-wall-after.jpg` },
+    { tabId: "exterior-window",   title: "Window panel deep clean",    subtitle: "Key Biscayne, FL",  before: `${IMG}/exterior-window-cleaning.jpeg`,  after: `${IMG}/exterior-wall-after.jpg` },
+
+    /* ---------- Solar Panel Cleaning (2 slides) ---------- */
+    { tabId: "solar-panels",      title: "Roof-mounted panels",        subtitle: "Pinecrest, FL",     before: `${IMG}/roof-tile-before.jpg`,           after: `${IMG}/roof-tile-after.jpg` },
+    { tabId: "solar-panels",      title: "Solar array refresh",        subtitle: "Palmetto Bay, FL",  before: `${IMG}/solar-panel-cleaning.jpeg`,      after: `${IMG}/roof-tile-after.jpg` },
+
+    /* ---------- Paver/Concrete Sealing (2 slides) ---------- */
+    { tabId: "paver-sealing",     title: "Paver driveway sealed",      subtitle: "Key Biscayne, FL",  before: `${IMG}/driveway-before.jpg`,            after: `${IMG}/driveway-after.jpg` },
+    { tabId: "paver-sealing",     title: "Patio paver restoration",    subtitle: "Coral Gables, FL",  before: `${IMG}/paver-concrete-sealing.jpeg`,    after: `${IMG}/driveway-after.jpg` },
+
+    /* ---------- Gutter Clean Out (2 slides) ---------- */
+    { tabId: "gutter-cleaning",   title: "Cedar fence reset",          subtitle: "Coconut Grove, FL", before: `${IMG}/fence-before.jpg`,               after: `${IMG}/fence-after.jpg` },
+    { tabId: "gutter-cleaning",   title: "Gutter line clear-out",      subtitle: "South Miami, FL",   before: `${IMG}/gutter-clean-out.jpg`,           after: `${IMG}/fence-after.jpg` },
   ];
 
   const [activeTabId, setActiveTabId] = useState(tabs[0].id);
