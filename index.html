@@ -3172,9 +3172,14 @@ const ResultsSection = () => {
     { tabId: "solar-panels",      title: "Roof-mounted panels",        subtitle: "Pinecrest, FL",     before: `${IMG}/roof-tile-before.jpg`,           after: `${IMG}/roof-tile-after.jpg` },
     { tabId: "solar-panels",      title: "Solar array refresh",        subtitle: "Palmetto Bay, FL",  before: `${IMG}/solar-panel-cleaning.jpeg`,      after: `${IMG}/roof-tile-after.jpg` },
 
-    /* ---------- Paver/Concrete Sealing (2 slides) ---------- */
-    { tabId: "paver-sealing",     title: "Paver driveway sealed",      subtitle: "Key Biscayne, FL",  before: `${IMG}/driveway-before.jpg`,            after: `${IMG}/driveway-after.jpg` },
-    { tabId: "paver-sealing",     title: "Patio paver restoration",    subtitle: "Coral Gables, FL",  before: `${IMG}/paver-concrete-sealing.jpeg`,    after: `${IMG}/driveway-after.jpg` },
+    /* ---------- Paver/Concrete Sealing (3 slides — fotos reales del cliente) ----------
+       Assets en ./images/paver/. Los nombres con un espacio antes de .jpeg
+       (ej. "paver antes 1 .jpeg") se conservan tal cual el cliente los subió
+       — el browser URL-encodea los espacios al hacer fetch. Slide 2's "after"
+       es el único sin space (paver despues 2.jpeg). */
+    { tabId: "paver-sealing",     title: "Paver driveway sealing",          subtitle: "Before / After", before: `${IMG}/paver/paver antes 1 .jpeg`, after: `${IMG}/paver/paver despues 1 .jpeg` },
+    { tabId: "paver-sealing",     title: "Pool deck paver restoration",     subtitle: "Before / After", before: `${IMG}/paver/paver antes 2 .jpeg`, after: `${IMG}/paver/paver despues 2.jpeg` },
+    { tabId: "paver-sealing",     title: "Backyard patio weed removal & seal", subtitle: "Before / After", before: `${IMG}/paver/paver antes 3 .jpeg`, after: `${IMG}/paver/paver despues 3 .jpeg` },
 
     /* ---------- Gutter Clean Out (2 slides) ---------- */
     { tabId: "gutter-cleaning",   title: "Cedar fence reset",          subtitle: "Coconut Grove, FL", before: `${IMG}/fence-before.jpg`,               after: `${IMG}/fence-after.jpg` },
