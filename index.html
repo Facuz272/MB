@@ -229,9 +229,16 @@
   }
   </script>
 
-  <!-- Preconnect for font CDN — reduces render-blocking latency -->
+  <!-- Preconnect for font + script CDNs — reduces render-blocking latency -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://esm.sh" crossorigin />
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+
+  <!-- Preload above-the-fold assets:
+       - mb-logo.png is the only image painted before paint of the hero text.
+       - Hero background video preloaded automatically via <video preload="auto">. -->
+  <link rel="preload" as="image" href="./images/mb-logo.png" fetchpriority="high" />
 
   <!-- GSAP core + plugins (todos gratuitos desde adquisición de Webflow) -->
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
@@ -259,14 +266,16 @@
   <!-- Babel standalone for JSX in browser -->
   <script src="https://unpkg.com/@babel/standalone@7.25.6/babel.min.js"></script>
 
-  <!-- ESM import map: lets us use bare specifiers like 'react' and 'framer-motion' -->
+  <!-- ESM import map: only React + ReactDOM needed at runtime.
+       Note: framer-motion was removed (AnimatePresence + motion.div fade
+       was replaced by a CSS keyframe `baTabFadeIn` on key={activeTabId}).
+       Removing it saves ~50KB of JS + parse time. -->
   <script type="importmap">
   {
     "imports": {
       "react": "https://esm.sh/react@18.3.1",
       "react-dom": "https://esm.sh/react-dom@18.3.1",
-      "react-dom/client": "https://esm.sh/react-dom@18.3.1/client",
-      "framer-motion": "https://esm.sh/framer-motion@11.18.2?deps=react@18.3.1"
+      "react-dom/client": "https://esm.sh/react-dom@18.3.1/client"
     }
   }
   </script>
@@ -289,19 +298,18 @@
   <script type="module">
     import React from 'react';
     import { createRoot } from 'react-dom/client';
-    import * as FramerMotion from 'framer-motion';
 
-    // Expose globals so compiled JSX can find them
+    // Expose React global so compiled JSX can find it.
+    // framer-motion was removed — all animations are now CSS keyframes
+    // or GSAP, which keeps the JS payload lean.
     window.React = React;
-    window.FramerMotion = FramerMotion;
 
     // Get JSX source
     const jsxSource = document.getElementById('app-source').textContent;
 
-    // Preamble destructures globals into local scope for the compiled code
+    // Preamble destructures the React hooks into local scope.
     const preamble = `
       const { useState, useEffect, useRef, useCallback } = React;
-      const { motion, AnimatePresence } = FramerMotion; // AnimatePresence reservado para futuros usos; motion usado en ResultsSection
     `;
 
     try {
@@ -714,6 +722,8 @@ const StyleInjector = () => (
       flex-shrink: 0;
       display: inline-flex;
       align-items: center;
+      /* min-height 44px = WCAG 2.5.5 target size minimum; hit-area útil mobile */
+      min-height: 44px;
       padding: 0.7rem 1.4rem;
       border-radius: 9999px;
       font-size: 0.85rem;
@@ -732,6 +742,15 @@ const StyleInjector = () => (
                   background 0.25s ease, color 0.20s ease;
     }
     .filter-tab-pill:hover { transform: translateY(-1px); }
+    /* Focus visible: ring tactile cuando se navega con teclado */
+    .filter-tab-pill:focus-visible {
+      outline: none;
+      box-shadow:
+        inset 0 0 0 2px #FFFFFF,
+        inset 0 0 0 3px var(--brand-dark-blue),
+        0 0 0 3px var(--brand-orange),
+        0 4px 12px -4px rgba(0, 0, 0, 0.20);
+    }
 
     /* Tab pill — active state: solid pink + white text */
     .filter-tab-pill[data-active="true"] {
@@ -812,6 +831,13 @@ const StyleInjector = () => (
     .ba-carousel-arrow:active {
       transform: translateY(-50%) scale(0.96);
     }
+    .ba-carousel-arrow:focus-visible {
+      outline: none;
+      box-shadow:
+        0 0 0 3px var(--brand-orange),
+        0 10px 28px -6px rgba(0, 0, 0, 0.40),
+        0 4px 12px -4px rgba(0, 0, 0, 0.20);
+    }
     .ba-carousel-arrow:disabled {
       opacity: 0.32;
       cursor: not-allowed;
@@ -819,6 +845,15 @@ const StyleInjector = () => (
     }
     .ba-carousel-arrow--prev { left: -24px; }
     .ba-carousel-arrow--next { right: -24px; }
+
+    /* B/A slider keyboard focus state: ring naranja sobre el contenedor.
+       Solo se muestra cuando el usuario navega con teclado (no con mouse). */
+    .ba-slider:focus-visible {
+      outline: none;
+      box-shadow:
+        0 0 0 3px var(--brand-orange),
+        0 20px 60px rgba(0,0,0,0.5);
+    }
 
     /* Mobile — arrows hacia adentro del viewport para mejor thumb reach */
     @media (max-width: 767px) {
@@ -1465,10 +1500,13 @@ const Navbar = () => {
             <img
               src={`${IMG}/mb-logo.png`}
               alt="MB Softwash Miami"
+              width="240"
+              height="120"
               className="block h-[100px] md:h-[120px] w-auto"
               style={{ filter: "drop-shadow(0 6px 20px rgba(0,0,0,0.45)) drop-shadow(0 0 16px rgba(45,212,255,0.25))" }}
               loading="eager"
               decoding="async"
+              fetchpriority="high"
             />
           </a>
         </div>
@@ -2287,6 +2325,8 @@ const TrustGuarantee = () => {
               <img
                 src={`${IMG}/process-2.jpg`}
                 alt="MB Softwash technician (placeholder)"
+                width="800"
+                height="1000"
                 data-placeholder="true"
                 loading="lazy"
                 decoding="async"
@@ -2518,6 +2558,8 @@ const ProcessSection = () => {
                   <img
                     src={s.img}
                     alt={s.title}
+                    width="800"
+                    height="600"
                     loading="lazy"
                     decoding="async"
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
@@ -2843,6 +2885,8 @@ const OurServices = () => {
                   <img
                     src="/api/placeholder/400/250"
                     alt={s.alt || s.title}
+                    width="400"
+                    height="220"
                     className="block w-full h-[200px] md:h-[220px] object-cover"
                     loading="lazy"
                     decoding="async"
@@ -3014,10 +3058,10 @@ const InterrupterBanner = ({ headline, italicWord, subtext, variant = "orange", 
 };
 
 // ============ BEFORE / AFTER SLIDER ============
-const BeforeAfterSlider = ({ before, after }) => {
+const BeforeAfterSlider = ({ before, after, beforeAlt, afterAlt }) => {
   const containerRef = useRef(null);
   const [position, setPosition] = useState(50);
-  const dragging = useRef(false);
+  const draggingRef = useRef(false);
 
   const updatePosition = useCallback((clientX) => {
     const el = containerRef.current;
@@ -3027,36 +3071,66 @@ const BeforeAfterSlider = ({ before, after }) => {
     setPosition(pct);
   }, []);
 
-  useEffect(() => {
-    const onMove = (e) => {
-      if (!dragging.current) return;
-      const x = e.touches ? e.touches[0].clientX : e.clientX;
-      updatePosition(x);
-    };
-    const onUp = () => { dragging.current = false; };
-    window.addEventListener("mousemove", onMove);
-    window.addEventListener("mouseup", onUp);
-    window.addEventListener("touchmove", onMove, { passive: true });
-    window.addEventListener("touchend", onUp);
-    return () => {
-      window.removeEventListener("mousemove", onMove);
-      window.removeEventListener("mouseup", onUp);
-      window.removeEventListener("touchmove", onMove);
-      window.removeEventListener("touchend", onUp);
-    };
-  }, [updatePosition]);
+  /* PERF: registramos los listeners de window SOLO mientras se arrastra.
+     Antes corrían siempre que el componente estuviera montado y filtraban
+     con dragging.current → costo bajo pero acumulable con varias instancias.
+     Ahora: mousedown/touchstart attach, mouseup/touchend detach.
+     passive:true en touchmove para no bloquear scroll vertical. */
+  const stopDrag = useCallback(() => {
+    draggingRef.current = false;
+    window.removeEventListener("mousemove", onMove);
+    window.removeEventListener("touchmove", onMove);
+    window.removeEventListener("mouseup", stopDrag);
+    window.removeEventListener("touchend", stopDrag);
+    window.removeEventListener("touchcancel", stopDrag);
+  }, []);
 
-  const startDrag = (e) => {
-    dragging.current = true;
+  // onMove definido fuera del effect para que stopDrag pueda removerlo.
+  const onMove = useCallback((e) => {
+    if (!draggingRef.current) return;
     const x = e.touches ? e.touches[0].clientX : e.clientX;
     updatePosition(x);
-  };
+  }, [updatePosition]);
+
+  const startDrag = useCallback((e) => {
+    draggingRef.current = true;
+    const x = e.touches ? e.touches[0].clientX : e.clientX;
+    updatePosition(x);
+    window.addEventListener("mousemove", onMove, { passive: true });
+    window.addEventListener("touchmove", onMove, { passive: true });
+    window.addEventListener("mouseup", stopDrag, { passive: true });
+    window.addEventListener("touchend", stopDrag, { passive: true });
+    window.addEventListener("touchcancel", stopDrag, { passive: true });
+  }, [onMove, stopDrag, updatePosition]);
+
+  // Cleanup defensivo si el componente se desmonta a mitad de drag.
+  useEffect(() => stopDrag, [stopDrag]);
+
+  // A11y: keyboard controls — flechas mueven el divider 5% por tick,
+  // Home/End saltan a 0/100%. Hace el slider operable sin mouse.
+  const onKeyDown = useCallback((e) => {
+    switch (e.key) {
+      case "ArrowLeft":  setPosition(p => Math.max(0,   p - 5)); e.preventDefault(); break;
+      case "ArrowRight": setPosition(p => Math.min(100, p + 5)); e.preventDefault(); break;
+      case "Home":       setPosition(0);   e.preventDefault(); break;
+      case "End":        setPosition(100); e.preventDefault(); break;
+      default: break;
+    }
+  }, []);
 
   return (
     <div
       ref={containerRef}
       onMouseDown={startDrag}
       onTouchStart={startDrag}
+      onKeyDown={onKeyDown}
+      role="slider"
+      tabIndex={0}
+      aria-label="Before and after comparison slider. Drag horizontally, or use arrow keys, to compare the cleaning result."
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuenow={Math.round(position)}
+      aria-valuetext={`${Math.round(position)}% before, ${Math.round(100 - position)}% after`}
       className="ba-slider relative w-full aspect-[4/3] md:aspect-[16/10] rounded-3xl overflow-hidden cursor-ew-resize select-none"
       /* touchAction: "pan-y" → el browser maneja scroll vertical normalmente,
          pero el drag horizontal queda capturado por nuestro handler. Esto evita
@@ -3069,19 +3143,19 @@ const BeforeAfterSlider = ({ before, after }) => {
         touchAction: "pan-y",
       }}
     >
-      <img src={after} alt="After" loading="lazy" decoding="async" className="absolute inset-0 w-full h-full object-cover" draggable={false} />
+      <img src={after}  alt={afterAlt  || "After cleaning result"}  width="1600" height="1000" loading="lazy" decoding="async" className="absolute inset-0 w-full h-full object-cover" draggable={false} />
       <div className="absolute inset-0 overflow-hidden" style={{ clipPath: `inset(0 ${100 - position}% 0 0)` }}>
-        <img src={before} alt="Before" loading="lazy" decoding="async" className="absolute inset-0 w-full h-full object-cover" draggable={false} />
+        <img src={before} alt={beforeAlt || "Before cleaning"} width="1600" height="1000" loading="lazy" decoding="async" className="absolute inset-0 w-full h-full object-cover" draggable={false} />
       </div>
 
       <div className="absolute top-4 left-4 z-20">
         <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.15em] text-white px-3 py-1.5 rounded-full shadow-lg" style={{ background: "rgba(13,79,114,0.75)", border: "1px solid rgba(255,255,255,0.15)", backdropFilter: "blur(8px)" }}>
-          <span className="w-1.5 h-1.5 rounded-full bg-red-400" />Before
+          <span className="w-1.5 h-1.5 rounded-full bg-red-400" aria-hidden="true" />Before
         </span>
       </div>
       <div className="absolute top-4 right-4 z-20">
         <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.15em] text-white px-3 py-1.5 rounded-full shadow-lg" style={{ background: "var(--orange)", boxShadow: "0 4px 12px rgba(255,107,31,0.4)" }}>
-          <span className="w-1.5 h-1.5 rounded-full bg-white" />After
+          <span className="w-1.5 h-1.5 rounded-full bg-white" aria-hidden="true" />After
         </span>
       </div>
 
@@ -3090,6 +3164,7 @@ const BeforeAfterSlider = ({ before, after }) => {
         <div
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-14 h-14 rounded-full flex items-center justify-center pointer-events-auto cursor-ew-resize shadow-2xl"
           style={{ background: "rgba(13,79,114,0.85)", border: "2px solid var(--orange)", backdropFilter: "blur(8px)" }}
+          aria-hidden="true"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="var(--orange)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="9 18 3 12 9 6" />
@@ -3279,7 +3354,12 @@ const ResultsSection = () => {
                         aria-hidden={i !== slideIndex}
                       >
                         <article className="ba-card flex flex-col">
-                          <BeforeAfterSlider before={c.before} after={c.after} />
+                          <BeforeAfterSlider
+                            before={c.before}
+                            after={c.after}
+                            beforeAlt={`${c.title} — before`}
+                            afterAlt={`${c.title} — after`}
+                          />
                           <div className="px-5 py-4 md:px-6 md:py-5">
                             <p
                               className="text-[11px] font-extrabold uppercase tracking-[0.18em] mb-1"
@@ -3509,7 +3589,7 @@ const QuoteForm = () => {
     <section id="quote" className="py-16 md:py-24 relative overflow-hidden" style={{ background: "var(--dark-2)" }}>
       {/* Subtle bg photo */}
       <div className="absolute inset-0 overflow-hidden">
-        <img src={`${IMG}/roof-tile-cinematic.jpg`} alt="" loading="lazy" decoding="async" className="w-full h-full object-cover" style={{ opacity: 0.04 }} />
+        <img src={`${IMG}/roof-tile-cinematic.jpg`} alt="" aria-hidden="true" width="1920" height="1080" loading="lazy" decoding="async" className="w-full h-full object-cover" style={{ opacity: 0.04 }} />
       </div>
 
       <div className="relative z-10 max-w-[1400px] mx-auto px-4 sm:px-6 md:px-10 lg:px-16">
@@ -3595,7 +3675,7 @@ const Footer = () => (
       <div className="grid grid-cols-2 md:grid-cols-12 gap-8 md:gap-8 mb-12">
         {/* Brand */}
         <div className="col-span-2 md:col-span-5">
-          <img src={`${IMG}/mb-logo.png`} alt="MB Softwash Miami" loading="lazy" className="h-16 w-auto mb-4" />
+          <img src={`${IMG}/mb-logo.png`} alt="MB Softwash Miami" width="128" height="64" loading="lazy" decoding="async" className="h-16 w-auto mb-4" />
           <p className="text-[14px] mb-6 max-w-sm leading-relaxed" style={{ color: "var(--text-muted)" }}>
             Miami-Dade's softwash specialists. Roof, paver, and exterior cleaning for luxury homes — paint-safe, plant-safe, no high-pressure damage.
           </p>
