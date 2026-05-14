@@ -2730,6 +2730,15 @@ const ServiceIcons = {
       <rect x="8" y="19" width="8" height="2" />
     </svg>
   ),
+  /* "Much More" — sparkles icon: estrella grande + 2 chicas, sugiere
+     "servicios adicionales / specialty". Misma stroke-width que las
+     demás para no romper la grilla visual de la sección. */
+  much: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 md:w-7 md:h-7">
+      <path d="M11 3l1.8 4.2L17 9l-4.2 1.8L11 15l-1.8-4.2L5 9l4.2-1.8z" />
+      <path d="M18 14l0.9 2.1L21 17l-2.1 0.9L18 20l-0.9-2.1L15 17l2.1-0.9z" />
+    </svg>
+  ),
 };
 
 const OurServices = () => {
@@ -2780,6 +2789,17 @@ const OurServices = () => {
       icon: ServiceIcons.paver,
       img: `${IMG}/paver-concrete-sealing.jpeg`,
       alt: "Professional paver and concrete sealing by MB Softwash",
+    },
+    /* "Much More" — card final del carousel/grid. Cubre los servicios
+       especializados que no encajan en una categoría principal: rust
+       removal, dumpster pad sanitation, deck restoration, holiday
+       lighting, etc. Es la red de seguridad para "todo lo demás". */
+    {
+      title: "Much More",
+      copy: "From specialized rust removal and dumpster pad sanitation to deck restoration and holiday lighting. If it's outside and needs care, we have the specialized equipment and expertise to handle it. No project is too unique for our team.",
+      icon: ServiceIcons.much,
+      img: `${IMG}/Much More.jpeg`,
+      alt: "MB Softwash additional specialized cleaning services.",
     },
   ];
 
@@ -2836,7 +2856,7 @@ const OurServices = () => {
             className="text-base md:text-lg max-w-2xl mx-auto leading-relaxed font-medium"
             style={{ color: "rgba(255,255,255,0.85)" }}
           >
-            Seven specialized services for residential and commercial properties across Miami-Dade and South Florida.
+            Eight specialized services for residential and commercial properties across Miami-Dade and South Florida.
           </p>
         </div>
 
