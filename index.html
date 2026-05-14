@@ -281,7 +281,10 @@
   </script>
 
   <style>
-    html, body { background: #0D4F72; margin: 0; padding: 0; }
+    html, body { background: #0D4F72; margin: 0; padding: 0; overflow-x: hidden; }
+    /* Texto base 16px ya viene del browser default — previene auto-zoom
+       de iOS al tappear inputs (cualquier <input> < 16px dispara el zoom). */
+    body { font-size: 16px; }
     #loading-fallback {
       position: fixed; inset: 0; background: #0D4F72; color: #aad;
       display: flex; align-items: center; justify-content: center;
@@ -906,6 +909,37 @@ const StyleInjector = () => (
     /* ---------- Touch targets (mobile) ---------- */
     @media (max-width: 1023px) {
       a, button { min-height: 44px; }
+    }
+
+    /* ---------- Tactile feedback for touch ---------- */
+    /* Mobile CTAs: scale-down + brightness drop on press para sensación
+       tangible que reemplaza el hover (que no existe en touch). */
+    .mobile-cta {
+      transition: transform 0.12s cubic-bezier(0.4, 0, 0.2, 1),
+                  filter 0.15s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .mobile-cta:hover { filter: brightness(0.94); }
+    .mobile-cta:active {
+      transform: scale(0.96);
+      filter: brightness(0.88);
+    }
+
+    /* Filter pills + carousel arrows: tactile press feedback */
+    .filter-tab-pill:active { transform: scale(0.97); }
+    .ba-carousel-arrow:active { transform: translateY(-50%) scale(0.92); }
+
+    /* Body-level tap highlight: remove default blue/grey flash en links */
+    a, button { -webkit-tap-highlight-color: transparent; }
+
+    /* ---------- Filter pills scroll affordance ----------
+       Gradient fade en el borde derecho para hint visual de que el
+       contenedor scrollea horizontalmente. Solo en mobile (< md). */
+    @media (max-width: 767px) {
+      .filter-tabs-scroller {
+        -webkit-mask-image: linear-gradient(to right, black 0%, black 90%, transparent 100%);
+        mask-image: linear-gradient(to right, black 0%, black 90%, transparent 100%);
+      }
     }
 
     /* ---------- Selection ---------- */
@@ -1827,7 +1861,7 @@ const Hero = () => {
               display:inline + linear-gradient + animación de background-size). */}
           <h1
             ref={headlineRef}
-            className="text-[2.2rem] sm:text-[2.9rem] md:text-[4.4rem] lg:text-[5rem] font-extrabold leading-[1.05] tracking-[-0.02em] mb-6 text-white"
+            className="text-[2.2rem] sm:text-[2.9rem] md:text-[4.4rem] lg:text-[5rem] font-extrabold leading-[1.15] sm:leading-[1.05] tracking-[-0.02em] mb-6 text-white"
             style={{ textShadow: "0 4px 24px rgba(0,0,0,0.45)" }}
           >
             <span className="text-highlight-animate">Roof Softwash &amp; Exterior Cleaning</span>
@@ -3765,28 +3799,45 @@ const MobileFAB = () => (
 );
 
 // ============ STICKY MOBILE BOTTOM ============
+// Barra inferior fija siempre-visible en mobile + tablet. Dos CTAs:
+// - Call (orange, tel: link) — primario, ya que el cliente promete
+//   "respuesta en <4h" y la llamada cierra mejor que el form.
+// - Free Quote (pink, anchor a #quote) — secundario.
+// padding-bottom: env(safe-area-inset-bottom) respeta el home indicator
+// del iPhone para que los botones no queden debajo de la barra del SO.
 const MobileStickyBottom = () => (
   <div
-    className="lg:hidden fixed bottom-0 left-0 right-0 z-40 grid grid-cols-2 gap-2 p-3 border-t"
-    style={{ background: "rgba(13,79,114,0.96)", borderColor: "rgba(255,255,255,0.08)", backdropFilter: "blur(20px)", boxShadow: "0 -8px 32px rgba(0,0,0,0.4)" }}
+    className="mobile-sticky-cta lg:hidden fixed bottom-0 left-0 right-0 z-40 grid grid-cols-2 gap-2 px-3 pt-3 border-t"
+    style={{
+      background: "rgba(13,79,114,0.96)",
+      borderColor: "rgba(255,255,255,0.08)",
+      backdropFilter: "blur(20px)",
+      WebkitBackdropFilter: "blur(20px)",
+      boxShadow: "0 -8px 32px rgba(0,0,0,0.4)",
+      paddingBottom: "calc(0.75rem + env(safe-area-inset-bottom, 0px))",
+    }}
   >
     {/* Call button → solid orange + white (sistema global) */}
     <a
       href={PHONE_TEL}
-      className="inline-flex items-center justify-center gap-2 rounded-full px-4 py-3 font-bold text-[14px] text-white transition-all hover:brightness-[0.92]"
+      aria-label="Call MB Softwash now"
+      className="mobile-cta inline-flex items-center justify-center gap-2 rounded-full px-4 py-3 font-bold text-[15px] text-white"
       style={{
+        minHeight: "48px",
         background: "var(--brand-orange)",
         boxShadow: "0 0 0 1px rgba(255,255,255,0.18) inset, 0 4px 12px rgba(255,107,31,0.35)",
       }}
     >
-      <PhoneIcon className="w-4 h-4" />
+      <PhoneIcon className="w-4 h-4" aria-hidden="true" />
       Call
     </a>
     {/* Quote button → solid pink + white (sistema global) */}
     <a
       href={QUOTE_HASH}
-      className="inline-flex items-center justify-center gap-2 rounded-full px-4 py-3 font-bold text-[14px] text-white transition-all hover:brightness-[0.92]"
+      aria-label="Get a free quote"
+      className="mobile-cta inline-flex items-center justify-center gap-2 rounded-full px-4 py-3 font-bold text-[15px] text-white"
       style={{
+        minHeight: "48px",
         background: "var(--brand-pink)",
         boxShadow: "0 0 0 1px rgba(255,255,255,0.18) inset, 0 4px 12px rgba(199,90,159,0.35)",
       }}
@@ -3803,8 +3854,11 @@ function App() {
     return () => mm.revert();
   }, []);
 
+  // pb-28 (112px) en mobile reserva espacio para la MobileStickyBottom
+  // (~70px) + safe-area-inset-bottom del iPhone home indicator (~34px).
+  // En lg: la barra sticky desaparece y no necesitamos padding extra.
   return (
-    <div className="min-h-screen pb-20 lg:pb-0">
+    <div className="min-h-screen pb-28 lg:pb-0">
       <StyleInjector />
       <Navbar />
       <Hero />
@@ -3833,7 +3887,10 @@ function App() {
       <FAQ />
       <QuoteForm />
       <Footer />
-      <MobileFAB />
+      {/* MobileFAB removido: era redundante con MobileStickyBottom
+          (ambos llamaban al mismo número y sólo se mostraban < lg).
+          La barra inferior siempre-visible con Call + Free Quote
+          convierte mejor que un FAB suelto. */}
       <MobileStickyBottom />
     </div>
   );
