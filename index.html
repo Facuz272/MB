@@ -41,15 +41,17 @@
   <meta property="og:url"         content="https://mbsoftwashmiami.com/" />
   <meta property="og:title"       content="Softwash &amp; Exterior Cleaning Miami | MB Softwash" />
   <meta property="og:description" content="Licensed &amp; insured softwash for Miami-Dade homes. Roof softwash, paver sealing, house wash &amp; fence restoration. Free quote in under 4 hours." />
-  <meta property="og:image"       content="[INSERT_OG_IMAGE_URL_HERE]" />
+  <meta property="og:image"       content="https://mbsoftwashmiami.com/images/CamionetaMB.jpeg" />
+  <meta property="og:image:alt"   content="MB Softwash professional branded white work truck with softwash equipment in Miami-Dade." />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
 
-  <!-- Twitter Card -->
+  <!-- Twitter Card — mirrors OG so WhatsApp / SMS / X / LinkedIn previews all render the same hero image -->
   <meta name="twitter:card"        content="summary_large_image" />
   <meta name="twitter:title"       content="Softwash &amp; Exterior Cleaning Miami | MB Softwash" />
   <meta name="twitter:description" content="Licensed &amp; insured softwash for Miami-Dade homes. Roof softwash, paver sealing, house wash &amp; fence restoration. Free quote in under 4 hours." />
-  <meta name="twitter:image"       content="[INSERT_OG_IMAGE_URL_HERE]" />
+  <meta name="twitter:image"       content="https://mbsoftwashmiami.com/images/CamionetaMB.jpeg" />
+  <meta name="twitter:image:alt"   content="MB Softwash professional branded white work truck with softwash equipment in Miami-Dade." />
 
   <!--
     OPTIONAL SCHEMA FIELDS — paste back into the LocalBusiness node when you have real data.
@@ -91,6 +93,8 @@
         "@id": "https://mbsoftwashmiami.com/#business",
         "name": "MB Softwash Miami",
         "description": "Licensed and insured exterior cleaning company serving Miami-Dade County. Specializing in roof softwash, paver sealing, house washing, and fence restoration.",
+        "image": "https://mbsoftwashmiami.com/images/CamionetaMB.jpeg",
+        "priceRange": "$$",
         "telephone": "+13058342218",
         "email": "hello@mbsoftwashmiami.com",
         "url": "https://mbsoftwashmiami.com",
@@ -1865,6 +1869,13 @@ const Hero = () => {
             style={{ textShadow: "0 4px 24px rgba(0,0,0,0.45)" }}
           >
             <span className="text-highlight-animate">Roof Softwash &amp; Exterior Cleaning</span>
+            {/* sr-only: location signal para Google + screen readers sin
+                cambiar la copy visible. Empareja el primary keyword
+                ("Roof Softwash & Exterior Cleaning") con la geo ("Miami,
+                Florida") dentro de un único H1 — patrón aceptado de
+                local SEO (no cloaking porque sr-only es visible al
+                screen reader y conserva el mismo texto semántico). */}
+            <span className="sr-only"> in Miami, Florida</span>
           </h1>
 
           {/* Subtítulo · blanco con leve transparencia */}
@@ -3847,31 +3858,38 @@ function App() {
     <div className="min-h-screen pb-28 lg:pb-0">
       <StyleInjector />
       <Navbar />
-      <Hero />
-      <TrustStrip />
-      <TrustGuarantee />
-      <RecentProjectsReviews />
-      <ProcessSection />
-      <OurServices />
-      <InterrupterBanner
-        headline="Don't wait. Get your free estimate today."
-        italicWord="today."
-        subtext="Most quotes are returned in under 4 hours during business hours."
-        variant="white"
-        topColor="var(--brand-pink)"
-        bottomColor="#0D4F72"
-      />
-      <ResultsSection />
-      <InterrupterBanner
-        headline="Don't see your area? We probably still cover it."
-        italicWord="cover it."
-        subtext="Call us — we quote luxury exterior projects across all of South Florida."
-        variant="pink"
-        topColor="#0D4F72"
-        bottomColor="#1A7A9A"
-      />
-      <FAQ />
-      <QuoteForm />
+      {/* <main>: landmark semántico que envuelve el contenido principal
+          de la página (entre <header> de la Navbar y <footer> del Footer).
+          Mejora SEO y accesibilidad — los screen readers saltan al main
+          via "skip to content" y Google identifica este bloque como el
+          contenido primario del documento. */}
+      <main>
+        <Hero />
+        <TrustStrip />
+        <TrustGuarantee />
+        <RecentProjectsReviews />
+        <ProcessSection />
+        <OurServices />
+        <InterrupterBanner
+          headline="Don't wait. Get your free estimate today."
+          italicWord="today."
+          subtext="Most quotes are returned in under 4 hours during business hours."
+          variant="white"
+          topColor="var(--brand-pink)"
+          bottomColor="#0D4F72"
+        />
+        <ResultsSection />
+        <InterrupterBanner
+          headline="Don't see your area? We probably still cover it."
+          italicWord="cover it."
+          subtext="Call us — we quote luxury exterior projects across all of South Florida."
+          variant="pink"
+          topColor="#0D4F72"
+          bottomColor="#1A7A9A"
+        />
+        <FAQ />
+        <QuoteForm />
+      </main>
       <Footer />
       {/* MobileFAB removido: era redundante con MobileStickyBottom
           (ambos llamaban al mismo número y sólo se mostraban < lg).
