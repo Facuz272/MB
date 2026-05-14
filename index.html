@@ -2307,84 +2307,58 @@ const TrustGuarantee = () => {
           </div>
 
           {/*
-            ── COLUMNA DERECHA — "shape pop-out" 3D ──
-            El shape container es un blob asimétrico con gradiente sutil que
-            sirve de marco bespoke para el técnico. En lg+ está positioned
-            absolute con top + right negativos, sobresaliendo del border
-            superior y derecho del recuadro blanco.
-          */}
-          <div className="relative w-full" style={{ minHeight: "1px" }}>
+            ── COLUMNA DERECHA — FOTO CAMIONETA BRANDED ──
+            Reemplaza el blob orgánico + clip-path del técnico placeholder.
+            Ahora muestra la camioneta MB en un marco rectangular con la
+            misma estética que la text card de la izquierda: double border
+            pink outer + white gap + dark-blue inner. Sin clip-path: la
+            foto se muestra completa (object-fit: cover dentro del frame).
 
-            <div
-              className="tech-image-container relative mx-auto w-full max-w-[400px] aspect-square
-                         lg:absolute lg:top-[-110px] lg:right-[-100px] lg:left-auto lg:max-w-[440px]"
+            Layout: in-flow (no más absolute pop-out). Aspect-ratio 4/3
+            mantiene proporción consistente en todos los breakpoints sin
+            recortar contenido importante. max-width 520px en lg para
+            balancear visualmente con la columna de texto.
+          */}
+          <div className="w-full">
+            <figure
+              className="ba-truck-frame relative mx-auto w-full max-w-[420px] lg:max-w-[520px]"
               style={{
-                /* Blob orgánico asimétrico — sensación de "pieza diseñada", no
-                   un cuadrado/circulo genérico. Border-radius en formato 8-valor
-                   da una forma curva con personalidad pero no sobrecargada. */
-                borderRadius: "60% 40% 45% 55% / 50% 50% 50% 50%",
-                /* Gradiente sutil light blue → pink — backdrop premium para el
-                   técnico, refuerza la paleta sin competir con la imagen. */
-                background:
-                  "linear-gradient(135deg, " +
-                    "rgba(214, 235, 250, 0.95) 0%, " +
-                    "rgba(255, 255, 255, 0.85) 45%, " +
-                    "rgba(199, 90, 159, 0.20) 100%)",
-                /* Drop shadow direccional — cae hacia abajo-izquierda. La
-                   blob sobresale top+right del box, así que la sombra se
-                   proyecta principalmente sobre el bg light-blue de la
-                   sección (visible) y mínimamente sobre el blanco interior. */
-                filter:
-                  "drop-shadow(-14px 18px 28px rgba(13,79,114,0.25)) " +
-                  "drop-shadow(-4px 8px 12px rgba(0,0,0,0.10))",
-                overflow: "visible",
-                display: "flex",
-                alignItems: "flex-end",
-                justifyContent: "center",
+                /* aspect-ratio reserva espacio antes de que cargue el JPG
+                   → cero layout shift incluso con red lenta. */
+                aspectRatio: "4 / 3",
+                background: "#FFFFFF",
+                borderRadius: "14px",
+                /* Mismo sistema de double border que el text box izquierdo,
+                   escalado un poco más fino para que se sienta como pareja
+                   y no compita: 3px pink real + 3px white gap inset +
+                   5px dark-blue total inset (línea azul de 2px entre 3–5). */
+                border: "3px solid var(--brand-pink)",
+                boxShadow:
+                  "inset 0 0 0 3px #FFFFFF, " +                       /* gap blanco */
+                  "inset 0 0 0 5px var(--brand-dark-blue), " +        /* línea dark-blue 2px */
+                  "0 24px 60px -20px rgba(13,79,114,0.30), " +        /* drop shadow profundo */
+                  "0 10px 24px -12px rgba(0,0,0,0.18)",               /* sombra cercana */
+                overflow: "hidden",
+                padding: "10px", /* respiración entre la imagen y el doble borde */
               }}
             >
-              {/*
-                ⚠️  PLACEHOLDER IMAGE — REPLACE WITH OFFICIAL TRANSPARENT PNG/WEBP
-                ─────────────────────────────────────────────────────────────────
-                Currently using process-2.jpg (team photo) clipped to the blob
-                shape via border-radius:inherit. When the official transparent
-                cutout of the MB Softwash technician arrives:
-                  1. Swap the `src` to the new asset path (e.g. /images/tech-cutout.png)
-                  2. Remove `border-radius: inherit` — the PNG transparency
-                     handles silhouette naturally, no clip needed
-                  3. Remove the `data-placeholder` attribute below
-                  4. Adjust `width`/`height` % if the cutout aspect ratio differs
-                     (e.g. tall vertical PNG might want height:100% width:auto)
-              */}
               <img
-                src={`${IMG}/process-2.jpg`}
-                alt="MB Softwash technician (placeholder)"
-                width="800"
-                height="1000"
-                data-placeholder="true"
+                src={`${IMG}/CamionetaMB.jpeg`}
+                alt="MB Softwash professional branded white work truck with softwash equipment."
+                width="1600"
+                height="1200"
                 loading="lazy"
                 decoding="async"
+                fetchpriority="high"
+                className="block w-full h-full object-cover"
                 style={{
-                  width: "85%",
-                  height: "85%",
-                  /* object-fit: contain → si el PNG final tiene aspect ratio
-                     distinto, no se deforma — se centra y respeta proporciones. */
-                  objectFit: "contain",
-                  objectPosition: "center bottom",
-                  /* Hereda el blob shape para que el JPG placeholder no se
-                     vea como un rectángulo dentro del blob. Con el PNG
-                     transparente final esta línea es removible. */
-                  borderRadius: "inherit",
+                  /* Radio interno ligeramente menor que el frame externo
+                     para que la imagen "respire" dentro del marco sin
+                     tocar las líneas del double border. */
+                  borderRadius: "6px",
                 }}
               />
-            </div>
-
-            {/*
-              Spacer en lg+ — la blob es absolute en desktop, así que el
-              wrapper no tiene altura intrínseca. Este spacer da ~400px de
-              altura mínima a la columna derecha para alinear el grid.
-            */}
-            <div className="hidden lg:block" style={{ height: "400px" }} aria-hidden="true" />
+            </figure>
           </div>
 
         </div>
