@@ -1795,7 +1795,8 @@ const Hero = () => {
       {/*
         Background VIDEO — z-index POSITIVO (0) para que el navegador no lo
         empuje detrás del body var(--dark). autoplay + muted + playsinline
-        son obligatorios para iOS. Source: webm 1.5MB optimizado en /images/.
+        son obligatorios para iOS. Source: nuevo MP4 optimizado del cliente
+        en /images/video nuevo.mp4 (5.8MB, el browser URL-encodea el espacio).
       */}
       <video
         autoPlay
@@ -1814,7 +1815,7 @@ const Hero = () => {
           zIndex: 0,
         }}
       >
-        <source src={`${IMG}/15999286-uhd_3840_2160_30fps.webm`} type="video/webm" />
+        <source src={`${IMG}/video nuevo.mp4`} type="video/mp4" />
       </video>
 
       {/*
