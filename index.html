@@ -240,9 +240,11 @@
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
 
   <!-- Preload above-the-fold assets:
-       - mb-logo.png is the only image painted before paint of the hero text.
-       - Hero background video preloaded automatically via <video preload="auto">. -->
+       - mb-logo.png — first paint, top-left of the header.
+       - roof-tile-cinematic.jpg — <video poster>, paints instantly behind
+         the hero text while the MP4 buffers (cinematic still backdrop). -->
   <link rel="preload" as="image" href="./images/mb-logo.png" fetchpriority="high" />
+  <link rel="preload" as="image" href="./images/roof-tile-cinematic.jpg" fetchpriority="high" />
 
   <!-- GSAP core + plugins (todos gratuitos desde adquisición de Webflow) -->
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
@@ -935,6 +937,21 @@ const StyleInjector = () => (
 
     /* Body-level tap highlight: remove default blue/grey flash en links */
     a, button { -webkit-tap-highlight-color: transparent; }
+
+    /* Global keyboard focus ring: cualquier <a> o <button> que no tenga
+       un :focus-visible específico (PrimaryCTA, SecondaryCTA, header
+       links, footer links, menu hamburger) hereda un ring naranja
+       brand. Solo se muestra cuando navegan con teclado — :focus-visible
+       NO se activa por click/tap, así que touch users no ven cambio. */
+    a:focus-visible,
+    button:focus-visible {
+      outline: 2px solid var(--brand-orange);
+      outline-offset: 3px;
+      border-radius: 9999px;
+    }
+    /* Para elementos rectangulares (no rounded-full), el outline-offset
+       respeta su propio border-radius via outline-style. Override por
+       clase específica cuando aplique. */
 
     /* ---------- Filter pills scroll affordance ----------
        Gradient fade en el borde derecho para hint visual de que el
@@ -1804,6 +1821,10 @@ const Hero = () => {
         muted
         playsInline
         preload="auto"
+        /* poster: still cinematic frame que se pinta INSTANTÁNEAMENTE
+           mientras el MP4 (5.8MB) buffea. Mejora LCP en conexiones
+           lentas y evita el "flash negro" del 1er paint. */
+        poster={`${IMG}/roof-tile-cinematic.jpg`}
         aria-hidden="true"
         style={{
           position: "absolute",
@@ -2931,19 +2952,18 @@ const OurServices = () => {
                   className="overflow-hidden"
                   style={{ borderRadius: "0.6rem 0.6rem 0 0" }}
                 >
+                  {/* Foto del servicio. Antes usábamos /api/placeholder/400/250
+                      como src inicial + onError swap a s.img — eso disparaba 8
+                      requests 404 al cargar (uno por card) y un breve FOUC.
+                      Ahora cargamos s.img directamente: 0 errores, 0 flash. */}
                   <img
-                    src="/api/placeholder/400/250"
+                    src={s.img}
                     alt={s.alt || s.title}
                     width="400"
                     height="220"
                     className="block w-full h-[200px] md:h-[220px] object-cover"
                     loading="lazy"
                     decoding="async"
-                    onError={(e) => {
-                      /* Fallback si /api/placeholder no resuelve en static hosting. */
-                      e.currentTarget.onerror = null;
-                      e.currentTarget.src = s.img;
-                    }}
                   />
                 </div>
 
