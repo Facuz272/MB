@@ -2503,24 +2503,33 @@ const RecentProjectsReviews = () => {
 
 // ============ PROCESS SECTION ============
 const ProcessSection = () => {
+  /* PHOTOS: fotos reales del cliente en ./images/three steps to clean a home/.
+     Los nombres en disk son los originales que subió el cliente — incluye
+     espacios y mayúsculas/minúsculas heterogéneas; el browser los URL-encodea
+     al fetch.
+     ALT TEXT: descripciones SEO-friendly específicas por paso (no genéricas
+     usando el title) para mejor accesibilidad y crawl context. */
   const steps = [
     {
       num: "01",
       title: "Request your quote",
       desc: "Fill out the form or call us. We send you an itemized written quote in under 4 hours — or your driveway wash is free.",
-      img: `${IMG}/process-1.jpg`,
+      img: `${IMG}/three steps to clean a home/request your quote.jpeg`,
+      alt: "MB Softwash professional technician providing a free quote on a tablet.",
     },
     {
       num: "02",
       title: "We schedule the job",
       desc: "Pick a day that works for you. We confirm 24h before, show up on time, and prep the area carefully before starting.",
-      img: `${IMG}/process-2.jpg`,
+      img: `${IMG}/three steps to clean a home/We schedule the job .jpeg`,
+      alt: "A happy customer scheduling softwash service on their phone.",
     },
     {
       num: "03",
       title: "You enjoy the result",
       desc: "Low-pressure, plant-safe, paint-safe. Our team handles everything. You come back to a property that looks brand new.",
-      img: `${IMG}/process-3.jpg`,
+      img: `${IMG}/three steps to clean a home/You enjoy the result .jpeg`,
+      alt: "A satisfied homeowner admiring their newly cleaned house and driveway.",
     },
   ];
 
@@ -2576,7 +2585,7 @@ const ProcessSection = () => {
                 <div className="relative overflow-hidden" style={{ aspectRatio: "4/3" }}>
                   <img
                     src={s.img}
-                    alt={s.title}
+                    alt={s.alt || s.title}
                     width="800"
                     height="600"
                     loading="lazy"
