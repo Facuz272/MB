@@ -3278,9 +3278,15 @@ const ResultsSection = () => {
     { tabId: "pressure-cleaning", title: "Concrete patio restoration",      subtitle: "Before / After", before: `${IMG}/Pressure cleaning/pressure antes 2.jpeg`, after: `${IMG}/Pressure cleaning/pressure despues 2.jpeg` },
     { tabId: "pressure-cleaning", title: "Walkway dirt & grime removal",    subtitle: "Before / After", before: `${IMG}/Pressure cleaning/pressure antes 3.jpeg`, after: `${IMG}/Pressure cleaning/pressure despues 3.jpeg` },
 
-    /* ---------- Exterior Window Cleaning (2 slides) ---------- */
-    { tabId: "exterior-window",   title: "Exterior facade wash",       subtitle: "Coconut Grove, FL", before: `${IMG}/exterior-wall-before.jpg`,       after: `${IMG}/exterior-wall-after.jpg` },
-    { tabId: "exterior-window",   title: "Window panel deep clean",    subtitle: "Key Biscayne, FL",  before: `${IMG}/exterior-window-cleaning.jpeg`,  after: `${IMG}/exterior-wall-after.jpg` },
+    /* ---------- Exterior Window Cleaning (3 slides — fotos reales del cliente) ----------
+       Assets en ./images/exterior window cleaning/. Slides 1 + 4 (antes/despues 1)
+       tienen un espacio antes de .jpeg en disk — se conservan tal cual los
+       subió el cliente. El browser URL-encodea los espacios al fetch.
+       Cada case lleva un `alt` específico (SEO-friendly, sin keyword stuffing)
+       que el carousel usa en ambas imágenes via el patrón "${alt} — before/after". */
+    { tabId: "exterior-window",   title: "Exterior window cleaning before and after streak-free wash", subtitle: "Before / After", alt: "Exterior window cleaning before and after streak-free wash", before: `${IMG}/exterior window cleaning/exterior antes 1 .jpeg`, after: `${IMG}/exterior window cleaning/exterior despues 1 .jpeg` },
+    { tabId: "exterior-window",   title: "Hard water stain removal on exterior home windows",         subtitle: "Before / After", alt: "Hard water stain removal on exterior home windows",         before: `${IMG}/exterior window cleaning/exterior antes 2.jpeg`,  after: `${IMG}/exterior window cleaning/exterior despues 2.jpeg` },
+    { tabId: "exterior-window",   title: "Second-story exterior glass restoration before and after",  subtitle: "Before / After", alt: "Second-story exterior glass restoration before and after",  before: `${IMG}/exterior window cleaning/exterior antes 3.jpeg`,  after: `${IMG}/exterior window cleaning/exterior despues 3.jpeg` },
 
     /* ---------- Solar Panel Cleaning (2 slides) ---------- */
     { tabId: "solar-panels",      title: "Roof-mounted panels",        subtitle: "Pinecrest, FL",     before: `${IMG}/roof-tile-before.jpg`,           after: `${IMG}/roof-tile-after.jpg` },
@@ -3399,11 +3405,15 @@ const ResultsSection = () => {
                             siguen en cases[] como metadata y se usan
                             para generar el alt text de las imágenes. */}
                         <article className="ba-card flex flex-col">
+                          {/* Alt-text source: si el case tiene un campo `alt`
+                              específico (más descriptivo / SEO-targeted) lo
+                              usamos; si no, caemos al patrón title-based para
+                              backward-compat con los demás tabs. */}
                           <BeforeAfterSlider
                             before={c.before}
                             after={c.after}
-                            beforeAlt={`${c.title} — before`}
-                            afterAlt={`${c.title} — after`}
+                            beforeAlt={`${c.alt || c.title} — before`}
+                            afterAlt={`${c.alt || c.title} — after`}
                           />
                         </article>
                       </div>
